@@ -116,6 +116,8 @@ export interface Booking {
   modality: Modality;
   status: BookingStatus;
   notes: string | null;
+  video_link: string | null;
+  calendar_invite_sent: boolean;
   canceled_at: string | null;
   canceled_by: string | null;
   cancel_reason: string | null;
