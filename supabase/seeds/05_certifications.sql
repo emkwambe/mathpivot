@@ -302,7 +302,7 @@ INSERT INTO certification_programs (
   cert_type, level, category,
   badge_color, estimated_hours, difficulty_rating,
   target_audience, validity_months,
-  is_free, is_featured, display_order
+  is_free, price_cents, is_featured, display_order
 ) VALUES
 (
   'c0000000-0000-0000-0030-000000000001', 'TUTOR-BASIC', 'MathPivot Certified Tutor',
@@ -311,7 +311,7 @@ INSERT INTO certification_programs (
   'tutor_qualification', 'bronze', 'tutor',
   '#6366F1', 10, 2,
   'tutor', 12,
-  true, false, 80
+  true, 0, false, 80
 ),
 (
   'c0000000-0000-0000-0030-000000000002', 'TUTOR-ELEM', 'Elementary Math Specialist',
@@ -320,7 +320,7 @@ INSERT INTO certification_programs (
   'tutor_qualification', 'silver', 'tutor',
   '#6366F1', 20, 3,
   'tutor', 24,
-  true, false, 81
+  true, 0, false, 81
 ),
 (
   'c0000000-0000-0000-0030-000000000003', 'TUTOR-MIDDLE', 'Middle School Math Specialist',
@@ -329,7 +329,7 @@ INSERT INTO certification_programs (
   'tutor_qualification', 'silver', 'tutor',
   '#6366F1', 20, 3,
   'tutor', 24,
-  true, false, 82
+  true, 0, false, 82
 ),
 (
   'c0000000-0000-0000-0030-000000000004', 'TUTOR-HIGH', 'High School Math Specialist',
@@ -338,7 +338,7 @@ INSERT INTO certification_programs (
   'tutor_qualification', 'gold', 'tutor',
   '#6366F1', 30, 4,
   'tutor', 24,
-  true, false, 83
+  true, 0, false, 83
 ),
 (
   'c0000000-0000-0000-0030-000000000005', 'TUTOR-COMP', 'Competition Math Coach',
