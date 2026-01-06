@@ -4,13 +4,13 @@
 
 -- Question bank categories
 INSERT INTO question_bank_categories (id, name, slug, description, display_order) VALUES
-  ('cat-arithmetic', 'Arithmetic', 'arithmetic', 'Basic arithmetic operations', 1),
-  ('cat-algebra', 'Algebra', 'algebra', 'Algebraic concepts and equations', 2),
-  ('cat-geometry', 'Geometry', 'geometry', 'Shapes, angles, and spatial reasoning', 3),
-  ('cat-statistics', 'Statistics', 'statistics', 'Data analysis and probability', 4),
-  ('cat-calculus', 'Calculus', 'calculus', 'Limits, derivatives, and integrals', 5),
-  ('cat-actuarial', 'Actuarial', 'actuarial', 'Actuarial exam preparation', 6),
-  ('cat-data-science', 'Data Science', 'data-science', 'Statistical modeling and ML', 7)
+  ('a0000000-0000-0000-0000-000000000001', 'Arithmetic', 'arithmetic', 'Basic arithmetic operations', 1),
+  ('a0000000-0000-0000-0000-000000000002', 'Algebra', 'algebra', 'Algebraic concepts and equations', 2),
+  ('a0000000-0000-0000-0000-000000000003', 'Geometry', 'geometry', 'Shapes, angles, and spatial reasoning', 3),
+  ('a0000000-0000-0000-0000-000000000004', 'Statistics', 'statistics', 'Data analysis and probability', 4),
+  ('a0000000-0000-0000-0000-000000000005', 'Calculus', 'calculus', 'Limits, derivatives, and integrals', 5),
+  ('a0000000-0000-0000-0000-000000000006', 'Actuarial', 'actuarial', 'Actuarial exam preparation', 6),
+  ('a0000000-0000-0000-0000-000000000007', 'Data Science', 'data-science', 'Statistical modeling and ML', 7)
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================================================
@@ -26,7 +26,7 @@ INSERT INTO certification_programs (
 ) VALUES
 -- Algebra Track
 (
-  'cert-alg1-bronze', 'ALG1-BRONZE', 'Algebra I Foundations',
+  'c0000000-0000-0000-0001-000000000001', 'ALG1-BRONZE', 'Algebra I Foundations',
   'Demonstrates fundamental understanding of algebraic concepts including variables, expressions, and basic equations.',
   'Master the basics of algebra',
   'skill_mastery', 'bronze', 'algebra',
@@ -35,7 +35,7 @@ INSERT INTO certification_programs (
   true, true, 1
 ),
 (
-  'cert-alg1-silver', 'ALG1-SILVER', 'Algebra I Proficient',
+  'c0000000-0000-0000-0001-000000000002', 'ALG1-SILVER', 'Algebra I Proficient',
   'Shows proficiency in solving linear equations, working with inequalities, and understanding functions.',
   'Proficient in Algebra I concepts',
   'skill_mastery', 'silver', 'algebra',
@@ -44,7 +44,7 @@ INSERT INTO certification_programs (
   true, false, 2
 ),
 (
-  'cert-alg1-gold', 'ALG1-GOLD', 'Algebra I Mastery',
+  'c0000000-0000-0000-0001-000000000003', 'ALG1-GOLD', 'Algebra I Mastery',
   'Demonstrates mastery of all Algebra I topics including systems of equations and quadratic expressions.',
   'Complete mastery of Algebra I',
   'skill_mastery', 'gold', 'algebra',
@@ -55,7 +55,7 @@ INSERT INTO certification_programs (
 
 -- Geometry Track
 (
-  'cert-geo-bronze', 'GEO-BRONZE', 'Geometry Foundations',
+  'c0000000-0000-0000-0002-000000000001', 'GEO-BRONZE', 'Geometry Foundations',
   'Understanding of basic geometric shapes, angles, and spatial relationships.',
   'Master geometry basics',
   'skill_mastery', 'bronze', 'geometry',
@@ -64,7 +64,7 @@ INSERT INTO certification_programs (
   true, false, 4
 ),
 (
-  'cert-geo-gold', 'GEO-GOLD', 'Geometry Mastery',
+  'c0000000-0000-0000-0002-000000000002', 'GEO-GOLD', 'Geometry Mastery',
   'Complete mastery of geometry including proofs, trigonometry, and coordinate geometry.',
   'Complete geometry mastery',
   'skill_mastery', 'gold', 'geometry',
@@ -75,7 +75,7 @@ INSERT INTO certification_programs (
 
 -- Statistics Track
 (
-  'cert-stat-silver', 'STAT-SILVER', 'Statistics Proficient',
+  'c0000000-0000-0000-0003-000000000001', 'STAT-SILVER', 'Statistics Proficient',
   'Proficiency in data analysis, probability, and statistical reasoning.',
   'Proficient in statistics',
   'skill_mastery', 'silver', 'statistics',
@@ -86,7 +86,7 @@ INSERT INTO certification_programs (
 
 -- Calculus Track
 (
-  'cert-calc-bronze', 'CALC-BRONZE', 'Pre-Calculus Ready',
+  'c0000000-0000-0000-0004-000000000001', 'CALC-BRONZE', 'Pre-Calculus Ready',
   'Prepared for calculus with strong foundation in functions, limits concepts, and analytical thinking.',
   'Ready for calculus',
   'skill_mastery', 'bronze', 'calculus',
@@ -95,7 +95,7 @@ INSERT INTO certification_programs (
   true, false, 7
 ),
 (
-  'cert-calc-gold', 'CALC-GOLD', 'Calculus Mastery',
+  'c0000000-0000-0000-0004-000000000002', 'CALC-GOLD', 'Calculus Mastery',
   'Complete mastery of differential and integral calculus.',
   'Master calculus',
   'skill_mastery', 'gold', 'calculus',
@@ -118,7 +118,7 @@ INSERT INTO certification_programs (
 ) VALUES
 -- Actuarial Science
 (
-  'cert-act-found', 'ACT-FOUND', 'Actuarial Foundations',
+  'c0000000-0000-0000-0010-000000000001', 'ACT-FOUND', 'Actuarial Foundations',
   'Introduction to actuarial concepts including probability, financial mathematics, and risk assessment fundamentals.',
   'Start your actuarial journey',
   'career_pathway', 'foundation', 'actuarial',
@@ -127,7 +127,7 @@ INSERT INTO certification_programs (
   true, 0, true, 20
 ),
 (
-  'cert-act-p-prep', 'ACT-P-PREP', 'Exam P Preparation',
+  'c0000000-0000-0000-0010-000000000002', 'ACT-P-PREP', 'Exam P Preparation',
   'Comprehensive preparation for SOA Exam P covering probability theory, random variables, and distributions.',
   'Prepare for SOA Exam P',
   'career_pathway', 'silver', 'actuarial',
@@ -136,7 +136,7 @@ INSERT INTO certification_programs (
   false, 4999, true, 21
 ),
 (
-  'cert-act-fm-prep', 'ACT-FM-PREP', 'Exam FM Preparation',
+  'c0000000-0000-0000-0010-000000000003', 'ACT-FM-PREP', 'Exam FM Preparation',
   'Financial mathematics preparation covering interest theory, annuities, and bonds.',
   'Prepare for SOA Exam FM',
   'career_pathway', 'silver', 'actuarial',
@@ -147,7 +147,7 @@ INSERT INTO certification_programs (
 
 -- Data Science
 (
-  'cert-ds-found', 'DS-FOUND', 'Data Science Foundations',
+  'c0000000-0000-0000-0011-000000000001', 'DS-FOUND', 'Data Science Foundations',
   'Introduction to data science covering statistics, data visualization, and basic programming concepts.',
   'Begin your data science journey',
   'career_pathway', 'foundation', 'data-science',
@@ -156,7 +156,7 @@ INSERT INTO certification_programs (
   true, 0, true, 30
 ),
 (
-  'cert-ds-stats', 'DS-STATS', 'Statistical Modeling',
+  'c0000000-0000-0000-0011-000000000002', 'DS-STATS', 'Statistical Modeling',
   'Advanced statistical concepts including regression, hypothesis testing, and predictive modeling.',
   'Master statistical modeling',
   'career_pathway', 'silver', 'data-science',
@@ -165,7 +165,7 @@ INSERT INTO certification_programs (
   false, 3999, false, 31
 ),
 (
-  'cert-ds-ml', 'DS-ML', 'Machine Learning Fundamentals',
+  'c0000000-0000-0000-0011-000000000003', 'DS-ML', 'Machine Learning Fundamentals',
   'Introduction to machine learning algorithms, model evaluation, and practical applications.',
   'Learn machine learning',
   'career_pathway', 'gold', 'data-science',
@@ -176,7 +176,7 @@ INSERT INTO certification_programs (
 
 -- Epidemiology
 (
-  'cert-epi-found', 'EPI-FOUND', 'Epidemiological Modeling Foundations',
+  'c0000000-0000-0000-0012-000000000001', 'EPI-FOUND', 'Epidemiological Modeling Foundations',
   'Introduction to disease modeling, SIR models, and population health mathematics.',
   'Learn epidemic modeling',
   'career_pathway', 'foundation', 'epidemiology',
@@ -185,7 +185,7 @@ INSERT INTO certification_programs (
   true, 0, false, 40
 ),
 (
-  'cert-epi-adv', 'EPI-ADV', 'Advanced Epidemiological Modeling',
+  'c0000000-0000-0000-0012-000000000002', 'EPI-ADV', 'Advanced Epidemiological Modeling',
   'Complex disease models, parameter estimation, and real-world public health applications.',
   'Advanced epidemic modeling',
   'career_pathway', 'gold', 'epidemiology',
@@ -196,7 +196,7 @@ INSERT INTO certification_programs (
 
 -- Robotics
 (
-  'cert-robo-found', 'ROBO-FOUND', 'Robotics Mathematics Foundations',
+  'c0000000-0000-0000-0013-000000000001', 'ROBO-FOUND', 'Robotics Mathematics Foundations',
   'Mathematical foundations for robotics including vectors, matrices, and basic control theory.',
   'Math for robotics',
   'career_pathway', 'foundation', 'robotics',
@@ -205,7 +205,7 @@ INSERT INTO certification_programs (
   true, 0, true, 50
 ),
 (
-  'cert-robo-arduino', 'ROBO-ARDUINO', 'Arduino Programming',
+  'c0000000-0000-0000-0013-000000000002', 'ROBO-ARDUINO', 'Arduino Programming',
   'Hands-on Arduino programming with emphasis on mathematical concepts in sensor reading and motor control.',
   'Program Arduino robots',
   'career_pathway', 'bronze', 'robotics',
@@ -214,7 +214,7 @@ INSERT INTO certification_programs (
   false, 2999, true, 51
 ),
 (
-  'cert-robo-motion', 'ROBO-MOTION', 'Motion Planning',
+  'c0000000-0000-0000-0013-000000000003', 'ROBO-MOTION', 'Motion Planning',
   'Advanced robotics covering kinematics, path planning, and control systems mathematics.',
   'Master robot motion planning',
   'career_pathway', 'gold', 'robotics',
@@ -225,7 +225,7 @@ INSERT INTO certification_programs (
 
 -- Financial Mathematics
 (
-  'cert-fin-found', 'FIN-FOUND', 'Financial Mathematics Foundations',
+  'c0000000-0000-0000-0014-000000000001', 'FIN-FOUND', 'Financial Mathematics Foundations',
   'Introduction to quantitative finance including time value of money, interest rates, and basic derivatives.',
   'Learn financial math',
   'career_pathway', 'foundation', 'financial-math',
@@ -234,7 +234,7 @@ INSERT INTO certification_programs (
   true, 0, false, 60
 ),
 (
-  'cert-fin-quant', 'FIN-QUANT', 'Quantitative Finance',
+  'c0000000-0000-0000-0014-000000000002', 'FIN-QUANT', 'Quantitative Finance',
   'Advanced financial mathematics including options pricing, portfolio theory, and risk management.',
   'Master quantitative finance',
   'career_pathway', 'gold', 'financial-math',
@@ -256,7 +256,7 @@ INSERT INTO certification_programs (
   is_free, is_featured, display_order
 ) VALUES
 (
-  'cert-amc8-ready', 'AMC8-READY', 'AMC 8 Ready',
+  'c0000000-0000-0000-0020-000000000001', 'AMC8-READY', 'AMC 8 Ready',
   'Prepared for the AMC 8 competition with strong problem-solving skills in arithmetic, algebra, and geometry.',
   'Ready for AMC 8',
   'competition_prep', 'bronze', 'competition',
@@ -265,7 +265,7 @@ INSERT INTO certification_programs (
   true, true, 70
 ),
 (
-  'cert-amc10-ready', 'AMC10-READY', 'AMC 10 Ready',
+  'c0000000-0000-0000-0020-000000000002', 'AMC10-READY', 'AMC 10 Ready',
   'Prepared for AMC 10 with advanced problem-solving skills including number theory and combinatorics.',
   'Ready for AMC 10',
   'competition_prep', 'silver', 'competition',
@@ -274,7 +274,7 @@ INSERT INTO certification_programs (
   true, true, 71
 ),
 (
-  'cert-amc12-ready', 'AMC12-READY', 'AMC 12 Ready',
+  'c0000000-0000-0000-0020-000000000003', 'AMC12-READY', 'AMC 12 Ready',
   'Prepared for AMC 12 with comprehensive problem-solving including complex numbers and advanced geometry.',
   'Ready for AMC 12',
   'competition_prep', 'gold', 'competition',
@@ -283,7 +283,7 @@ INSERT INTO certification_programs (
   true, false, 72
 ),
 (
-  'cert-mathcounts', 'MATHCOUNTS-READY', 'MATHCOUNTS Ready',
+  'c0000000-0000-0000-0020-000000000004', 'MATHCOUNTS-READY', 'MATHCOUNTS Ready',
   'Prepared for MATHCOUNTS competition with speed and accuracy in middle school mathematics.',
   'Ready for MATHCOUNTS',
   'competition_prep', 'silver', 'competition',
@@ -305,7 +305,7 @@ INSERT INTO certification_programs (
   is_free, is_featured, display_order
 ) VALUES
 (
-  'cert-tutor-basic', 'TUTOR-BASIC', 'MathPivot Certified Tutor',
+  'c0000000-0000-0000-0030-000000000001', 'TUTOR-BASIC', 'MathPivot Certified Tutor',
   'Completed MathPivot tutor training including pedagogy, platform usage, and student engagement.',
   'Certified MathPivot Tutor',
   'tutor_qualification', 'bronze', 'tutor',
@@ -314,7 +314,7 @@ INSERT INTO certification_programs (
   true, false, 80
 ),
 (
-  'cert-tutor-elem', 'TUTOR-ELEM', 'Elementary Math Specialist',
+  'c0000000-0000-0000-0030-000000000002', 'TUTOR-ELEM', 'Elementary Math Specialist',
   'Specialized in teaching K-5 mathematics with age-appropriate methods and engaging activities.',
   'Elementary math specialist',
   'tutor_qualification', 'silver', 'tutor',
@@ -323,7 +323,7 @@ INSERT INTO certification_programs (
   true, false, 81
 ),
 (
-  'cert-tutor-middle', 'TUTOR-MIDDLE', 'Middle School Math Specialist',
+  'c0000000-0000-0000-0030-000000000003', 'TUTOR-MIDDLE', 'Middle School Math Specialist',
   'Specialized in teaching grades 6-8 mathematics including pre-algebra and introductory algebra.',
   'Middle school math specialist',
   'tutor_qualification', 'silver', 'tutor',
@@ -332,7 +332,7 @@ INSERT INTO certification_programs (
   true, false, 82
 ),
 (
-  'cert-tutor-high', 'TUTOR-HIGH', 'High School Math Specialist',
+  'c0000000-0000-0000-0030-000000000004', 'TUTOR-HIGH', 'High School Math Specialist',
   'Specialized in teaching high school mathematics including algebra, geometry, and calculus.',
   'High school math specialist',
   'tutor_qualification', 'gold', 'tutor',
@@ -341,7 +341,7 @@ INSERT INTO certification_programs (
   true, false, 83
 ),
 (
-  'cert-tutor-competition', 'TUTOR-COMP', 'Competition Math Coach',
+  'c0000000-0000-0000-0030-000000000005', 'TUTOR-COMP', 'Competition Math Coach',
   'Qualified to coach students for math competitions including AMC, MATHCOUNTS, and olympiads.',
   'Competition math coach',
   'tutor_qualification', 'platinum', 'tutor',
@@ -359,8 +359,8 @@ INSERT INTO certification_requirements (
   id, program_id, requirement_type, name, description, parameters, is_required, display_order
 ) VALUES
 (
-  'req-alg1-gold-1',
-  'cert-alg1-gold',
+  'r0000000-0000-0000-0001-000000000001',
+  'c0000000-0000-0000-0001-000000000003',
   'skill_count',
   'Master Core Algebra Skills',
   'Master at least 15 algebra skills to level 3 or higher',
@@ -368,8 +368,8 @@ INSERT INTO certification_requirements (
   true, 1
 ),
 (
-  'req-alg1-gold-2',
-  'cert-alg1-gold',
+  'r0000000-0000-0000-0001-000000000002',
+  'c0000000-0000-0000-0001-000000000003',
   'sessions_completed',
   'Complete Tutoring Sessions',
   'Complete at least 10 tutoring sessions',
@@ -377,21 +377,21 @@ INSERT INTO certification_requirements (
   true, 2
 ),
 (
-  'req-alg1-gold-3',
-  'cert-alg1-gold',
+  'r0000000-0000-0000-0001-000000000003',
+  'c0000000-0000-0000-0001-000000000003',
   'assessment_passed',
   'Pass Final Assessment',
   'Score 85% or higher on the Algebra I Mastery Assessment',
-  '{"assessment_id": "assess-alg1-final", "min_score": 85}',
+  '{"assessment_id": "e0000000-0000-0000-0001-000000000001", "min_score": 85}',
   true, 3
 ),
 (
-  'req-alg1-gold-4',
-  'cert-alg1-gold',
+  'r0000000-0000-0000-0001-000000000004',
+  'c0000000-0000-0000-0001-000000000003',
   'prerequisite_cert',
   'Earn Silver Certification',
   'Must have earned Algebra I Proficient (Silver) certification',
-  '{"program_id": "cert-alg1-silver"}',
+  '{"program_id": "c0000000-0000-0000-0001-000000000002"}',
   true, 4
 )
 ON CONFLICT DO NOTHING;
@@ -404,17 +404,17 @@ INSERT INTO certification_requirements (
   id, program_id, requirement_type, name, description, parameters, is_required, display_order
 ) VALUES
 (
-  'req-act-p-1',
-  'cert-act-p-prep',
+  'r0000000-0000-0000-0002-000000000001',
+  'c0000000-0000-0000-0010-000000000002',
   'prerequisite_cert',
   'Complete Foundations',
   'Complete Actuarial Foundations certification',
-  '{"program_id": "cert-act-found"}',
+  '{"program_id": "c0000000-0000-0000-0010-000000000001"}',
   true, 1
 ),
 (
-  'req-act-p-2',
-  'cert-act-p-prep',
+  'r0000000-0000-0000-0002-000000000002',
+  'c0000000-0000-0000-0010-000000000002',
   'hours_logged',
   'Study Hours',
   'Log at least 80 hours of exam preparation',
@@ -422,21 +422,21 @@ INSERT INTO certification_requirements (
   true, 2
 ),
 (
-  'req-act-p-3',
-  'cert-act-p-prep',
+  'r0000000-0000-0000-0002-000000000003',
+  'c0000000-0000-0000-0010-000000000002',
   'assessment_passed',
   'Practice Exams',
   'Pass 3 practice exams with 70% or higher',
-  '{"assessment_id": "assess-act-p-practice", "min_score": 70}',
+  '{"assessment_id": "e0000000-0000-0000-0002-000000000001", "min_score": 70}',
   true, 3
 ),
 (
-  'req-act-p-4',
-  'cert-act-p-prep',
+  'r0000000-0000-0000-0002-000000000004',
+  'c0000000-0000-0000-0010-000000000002',
   'assessment_passed',
   'Final Readiness Exam',
   'Score 75% or higher on final readiness assessment',
-  '{"assessment_id": "assess-act-p-final", "min_score": 75}',
+  '{"assessment_id": "e0000000-0000-0000-0002-000000000002", "min_score": 75}',
   true, 4
 )
 ON CONFLICT DO NOTHING;
@@ -454,8 +454,8 @@ INSERT INTO certification_assessments (
   allows_calculator, is_active
 ) VALUES
 (
-  'assess-alg1-final',
-  'cert-alg1-gold',
+  'e0000000-0000-0000-0001-000000000001',
+  'c0000000-0000-0000-0001-000000000003',
   'ALG1-FINAL',
   'Algebra I Mastery Assessment',
   'Comprehensive assessment covering all Algebra I topics including equations, inequalities, functions, and systems.',
@@ -475,8 +475,8 @@ INSERT INTO assessment_questions (
   points, difficulty, display_order
 ) VALUES
 (
-  'q-alg1-1',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000001',
+  'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'Solve for x: 3x + 7 = 22',
   '[{"id": "a", "text": "x = 3"}, {"id": "b", "text": "x = 5"}, {"id": "c", "text": "x = 7"}, {"id": "d", "text": "x = 15"}]',
@@ -484,8 +484,8 @@ INSERT INTO assessment_questions (
   2.5, 2, 1
 ),
 (
-  'q-alg1-2',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000002',
+  'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'Which equation represents a line with slope 2 passing through point (0, 3)?',
   '[{"id": "a", "text": "y = 2x + 3"}, {"id": "b", "text": "y = 3x + 2"}, {"id": "c", "text": "y = 2x - 3"}, {"id": "d", "text": "y = -2x + 3"}]',
@@ -493,8 +493,8 @@ INSERT INTO assessment_questions (
   2.5, 2, 2
 ),
 (
-  'q-alg1-3',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000003',
+  'e0000000-0000-0000-0001-000000000001',
   'numeric',
   'Evaluate: 2^4 + 3^2',
   NULL,
@@ -502,8 +502,8 @@ INSERT INTO assessment_questions (
   2.5, 1, 3
 ),
 (
-  'q-alg1-4',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000004',
+  'e0000000-0000-0000-0001-000000000001',
   'multiple_select',
   'Select all expressions that simplify to 6x:',
   '[{"id": "a", "text": "3x + 3x"}, {"id": "b", "text": "2(3x)"}, {"id": "c", "text": "x + 5x"}, {"id": "d", "text": "12x ÷ 2"}]',
@@ -511,8 +511,8 @@ INSERT INTO assessment_questions (
   2.5, 2, 4
 ),
 (
-  'q-alg1-5',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000005',
+  'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'If f(x) = 2x² - 3x + 1, what is f(2)?',
   '[{"id": "a", "text": "3"}, {"id": "b", "text": "5"}, {"id": "c", "text": "7"}, {"id": "d", "text": "9"}]',
@@ -520,8 +520,8 @@ INSERT INTO assessment_questions (
   2.5, 3, 5
 ),
 (
-  'q-alg1-6',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000006',
+  'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'Solve the system: y = 2x + 1 and y = -x + 7. What is x?',
   '[{"id": "a", "text": "1"}, {"id": "b", "text": "2"}, {"id": "c", "text": "3"}, {"id": "d", "text": "4"}]',
@@ -529,8 +529,8 @@ INSERT INTO assessment_questions (
   2.5, 3, 6
 ),
 (
-  'q-alg1-7',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000007',
+  'e0000000-0000-0000-0001-000000000001',
   'true_false',
   'The expression (x + 3)² equals x² + 9',
   '[{"id": "true", "text": "True"}, {"id": "false", "text": "False"}]',
@@ -538,8 +538,8 @@ INSERT INTO assessment_questions (
   2.5, 2, 7
 ),
 (
-  'q-alg1-8',
-  'assess-alg1-final',
+  'q0000000-0000-0000-0001-000000000008',
+  'e0000000-0000-0000-0001-000000000001',
   'numeric',
   'What is the y-intercept of the line 4x - 2y = 10?',
   NULL,
