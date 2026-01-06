@@ -13,6 +13,7 @@
     "@supabase/supabase-js": "^2.89.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "googleapis": "^169.0.0",
     "ical-generator": "^10.0.0",
     "next": "16.1.1",
     "react": "19.2.3",
@@ -20,6 +21,7 @@
     "resend": "^6.6.0",
     "stripe": "^20.1.0",
     "tailwind-merge": "^3.4.0",
+    "twilio": "^5.11.1",
     "uuid": "^13.0.0",
     "zod": "^4.3.5"
   },
