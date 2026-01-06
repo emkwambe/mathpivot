@@ -1,0 +1,283 @@
+import Link from 'next/link';
+import { requireRole } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
+import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
+import { formatDateTime, formatDate } from '@/lib/utils';
+
+export default async function ParentDashboardPage() {
+  const user = await requireRole(['parent', 'student']);
+  const supabase = await createClient();
+
+  // Get family info
+  const { data: familyMember } = await supabase
+    .from('family_members')
+    .select('family_id')
+    .eq('user_id', user.id)
+    .single();
+
+  const familyId = familyMember?.family_id;
+
+  // Get students in family
+  const { data: students } = await supabase
+    .from('students_profile')
+    .select(`
+      user_id,
+      grade,
+      course_track,
+      users_profile!inner (
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq('family_id', familyId || '');
+
+  // Get credit balance
+  const { data: creditEntry } = await supabase
+    .from('credit_ledger')
+    .select('balance_after')
+    .eq('family_id', familyId || '')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  const creditBalance = creditEntry?.balance_after || 0;
+
+  // Get upcoming bookings
+  const { data: upcomingBookings } = await supabase
+    .from('bookings')
+    .select(`
+      id,
+      start_at,
+      end_at,
+      modality,
+      status,
+      student_user_id,
+      tutors_profile!inner (
+        users_profile!inner (
+          full_name
+        )
+      )
+    `)
+    .eq('family_id', familyId || '')
+    .in('status', ['pending', 'confirmed'])
+    .gte('start_at', new Date().toISOString())
+    .order('start_at', { ascending: true })
+    .limit(5);
+
+  // Get student names for bookings
+  const studentIds = upcomingBookings?.map(b => b.student_user_id) || [];
+  const { data: studentNames } = await supabase
+    .from('users_profile')
+    .select('id, full_name')
+    .in('id', studentIds.length > 0 ? studentIds : ['']);
+
+  const studentNameMap = new Map(studentNames?.map(s => [s.id, s.full_name]) || []);
+
+  // Get recent sessions with summaries
+  const { data: recentSessions } = await supabase
+    .from('sessions')
+    .select(`
+      id,
+      parent_summary,
+      completed_at,
+      booking_id
+    `)
+    .eq('status', 'completed')
+    .not('parent_summary', 'is', null)
+    .order('completed_at', { ascending: false })
+    .limit(3);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Welcome back, {user.fullName.split(' ')[0]}!</h1>
+          <p className="text-slate-600">Here&apos;s what&apos;s happening with your family&apos;s tutoring.</p>
+        </div>
+        <Link
+          href="/parent/book"
+          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+        >
+          Book a Session
+        </Link>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">Available Credits</p>
+                <p className="text-3xl font-bold text-slate-900">{creditBalance}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <Link href="/parent/credits" className="text-sm text-blue-600 hover:underline mt-2 inline-block">
+              Purchase more credits
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">Upcoming Sessions</p>
+                <p className="text-3xl font-bold text-slate-900">{upcomingBookings?.length || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            <Link href="/parent/book" className="text-sm text-blue-600 hover:underline mt-2 inline-block">
+              Schedule a session
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-600">Students</p>
+                <p className="text-3xl font-bold text-slate-900">{students?.length || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Students List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Students</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {students && students.length > 0 ? (
+              <div className="space-y-4">
+                {students.map((student) => {
+                  const profile = student.users_profile as unknown as { full_name: string; avatar_url: string | null };
+                  return (
+                    <Link
+                      key={student.user_id}
+                      href={`/parent/students/${student.user_id}`}
+                      className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-blue-600 font-medium">
+                            {profile.full_name.charAt(0)}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{profile.full_name}</p>
+                          <p className="text-sm text-slate-500">
+                            Grade {student.grade} • {student.course_track.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                          </p>
+                        </div>
+                      </div>
+                      <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-slate-500 text-center py-4">No students in your family yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Upcoming Sessions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Upcoming Sessions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {upcomingBookings && upcomingBookings.length > 0 ? (
+              <div className="space-y-4">
+                {upcomingBookings.map((booking) => {
+                  const tutorProfile = booking.tutors_profile as unknown as { users_profile: { full_name: string } };
+                  const studentName = studentNameMap.get(booking.student_user_id) || 'Student';
+                  return (
+                    <div
+                      key={booking.id}
+                      className="p-3 rounded-lg border border-slate-200"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium text-slate-900">
+                          {studentName}
+                        </p>
+                        <Badge variant={booking.status === 'confirmed' ? 'success' : 'warning'}>
+                          {booking.status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-slate-600">
+                        with {tutorProfile.users_profile.full_name}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {formatDateTime(booking.start_at)} • {booking.modality === 'online' ? 'Online' : 'In Person'}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-slate-500 mb-4">No upcoming sessions scheduled.</p>
+                <Link
+                  href="/parent/book"
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Book your first session
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Session Summaries */}
+      {recentSessions && recentSessions.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Session Summaries</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentSessions.map((session) => (
+                <div key={session.id} className="p-4 rounded-lg bg-slate-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-medium text-slate-900">Session Summary</p>
+                    <p className="text-sm text-slate-500">
+                      {session.completed_at ? formatDate(session.completed_at) : ''}
+                    </p>
+                  </div>
+                  <p className="text-sm text-slate-600 line-clamp-2">
+                    {session.parent_summary}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
