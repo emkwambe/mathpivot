@@ -115,13 +115,57 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
     );
   }
 
+  const steps = [
+    { number: 1, label: 'Student' },
+    { number: 2, label: 'Tutor' },
+    { number: 3, label: 'Date' },
+    { number: 4, label: 'Time' },
+    { number: 5, label: 'Confirm' },
+  ];
+
+  const currentStep = selectedSlot ? 5 : step;
+
   return (
     <div className="space-y-6">
+      {/* Step Indicator */}
+      <div className="flex items-center justify-between mb-8">
+        {steps.map((s, index) => (
+          <div key={s.number} className="flex items-center flex-1">
+            <div className="flex flex-col items-center">
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                  currentStep >= s.number
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 text-slate-400'
+                }`}
+              >
+                {currentStep > s.number ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  s.number
+                )}
+              </div>
+              <span className={`text-xs mt-2 ${currentStep >= s.number ? 'text-blue-600 font-medium' : 'text-slate-400'}`}>
+                {s.label}
+              </span>
+            </div>
+            {index < steps.length - 1 && (
+              <div className={`flex-1 h-0.5 mx-2 ${currentStep > s.number ? 'bg-blue-600' : 'bg-slate-200'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+
       {error && <Alert variant="destructive">{error}</Alert>}
 
       {/* Step 1: Select Student */}
-      <div className={step === 1 ? '' : 'opacity-50'}>
-        <h3 className="font-medium text-slate-900 mb-3">1. Select Student</h3>
+      <div className={step === 1 ? '' : step > 1 ? 'opacity-60' : 'hidden'}>
+        <h3 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+          <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">1</span>
+          Select Student
+        </h3>
         <Select
           value={selectedStudent}
           onChange={(e) => {
@@ -138,9 +182,12 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
 
       {/* Step 2: Select Tutor */}
       {step >= 2 && (
-        <div className={step === 2 ? '' : 'opacity-50'}>
-          <h3 className="font-medium text-slate-900 mb-3">2. Select Tutor</h3>
-          <div className="space-y-2">
+        <div className={step === 2 ? '' : 'opacity-60'}>
+          <h3 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">2</span>
+            Select Tutor
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {tutors.map((tutor) => (
               <button
                 key={tutor.id}
@@ -152,22 +199,34 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
                   setSelectedSlot(null);
                   setStep(Math.max(step, 3));
                 }}
-                className={`w-full p-4 text-left border rounded-lg transition-colors ${
+                className={`p-4 text-left border-2 rounded-xl transition-all ${
                   selectedTutor === tutor.id
-                    ? 'border-sky-500 bg-sky-50'
-                    : 'border-slate-200 hover:border-slate-300'
+                    ? 'border-blue-500 bg-blue-50 shadow-sm'
+                    : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
                 }`}
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-slate-900">{tutor.name}</p>
-                    {tutor.bio && (
-                      <p className="text-sm text-slate-600 mt-1">{tutor.bio}</p>
-                    )}
+                <div className="flex items-start gap-3">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold ${
+                    selectedTutor === tutor.id ? 'bg-blue-500' : 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                  }`}>
+                    {tutor.name.charAt(0)}
                   </div>
-                  <span className="text-sm text-slate-600">
-                    {formatCurrency(tutor.hourlyRateCents)}/hr
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-slate-900">{tutor.name}</p>
+                      {selectedTutor === tutor.id && (
+                        <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    {tutor.bio && (
+                      <p className="text-sm text-slate-600 mt-1 line-clamp-2">{tutor.bio}</p>
+                    )}
+                    <p className="text-sm font-medium text-slate-700 mt-2">
+                      {formatCurrency(tutor.hourlyRateCents)}/hr
+                    </p>
+                  </div>
                 </div>
               </button>
             ))}
@@ -177,8 +236,11 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
 
       {/* Step 3: Select Date */}
       {step >= 3 && (
-        <div className={step === 3 ? '' : 'opacity-50'}>
-          <h3 className="font-medium text-slate-900 mb-3">3. Select Date</h3>
+        <div className={step === 3 ? '' : 'opacity-60'}>
+          <h3 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">3</span>
+            Select Date
+          </h3>
           <input
             type="date"
             value={selectedDate}
@@ -196,7 +258,10 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
       {/* Step 4: Select Time Slot */}
       {step >= 4 && selectedDate && (
         <div>
-          <h3 className="font-medium text-slate-900 mb-3">4. Select Time</h3>
+          <h3 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">4</span>
+            Select Time
+          </h3>
           {loading ? (
             <p className="text-slate-500 text-center py-4">Loading available times...</p>
           ) : availableSlots.length > 0 ? (
@@ -226,7 +291,52 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
 
       {/* Step 5: Notes & Confirm */}
       {selectedSlot && (
-        <div className="space-y-4 border-t border-slate-200 pt-6">
+        <div className="space-y-4 border-t-2 border-slate-100 pt-6">
+          <h3 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">5</span>
+            Confirm Booking
+          </h3>
+
+          {/* Summary Card */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+            <div className="flex items-center gap-4 mb-4 pb-4 border-b border-blue-200">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-lg">
+                {selectedTutorData?.name.charAt(0)}
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900">{selectedTutorData?.name}</p>
+                <p className="text-sm text-slate-600">
+                  Session with {students.find((s) => s.id === selectedStudent)?.name}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-slate-500">Date</p>
+                <p className="font-medium text-slate-900">
+                  {new Date(selectedDate).toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-500">Time</p>
+                <p className="font-medium text-slate-900">
+                  {formatSlotTime(selectedSlot.start)} - {formatSlotTime(selectedSlot.end)}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-blue-200 flex items-center justify-between">
+              <span className="text-slate-600">Credits to use:</span>
+              <span className="text-lg font-bold text-blue-600">1 credit</span>
+            </div>
+          </div>
+
+          {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Notes for the tutor (optional)
@@ -235,54 +345,27 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any specific topics or areas you'd like to focus on?"
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               rows={3}
             />
-          </div>
-
-          {/* Summary */}
-          <div className="bg-slate-50 rounded-lg p-4">
-            <h4 className="font-medium text-slate-900 mb-2">Booking Summary</h4>
-            <dl className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-slate-600">Student:</dt>
-                <dd className="text-slate-900">
-                  {students.find((s) => s.id === selectedStudent)?.name}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-600">Tutor:</dt>
-                <dd className="text-slate-900">{selectedTutorData?.name}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-600">Date:</dt>
-                <dd className="text-slate-900">
-                  {new Date(selectedDate).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-600">Time:</dt>
-                <dd className="text-slate-900">
-                  {formatSlotTime(selectedSlot.start)} - {formatSlotTime(selectedSlot.end)}
-                </dd>
-              </div>
-              <div className="flex justify-between pt-2 border-t border-slate-200 mt-2">
-                <dt className="text-slate-600">Credits Used:</dt>
-                <dd className="font-medium text-slate-900">1 credit</dd>
-              </div>
-            </dl>
           </div>
 
           <Button
             onClick={handleSubmit}
             disabled={isPending}
-            className="w-full"
+            className="w-full py-3 text-base"
           >
-            {isPending ? 'Booking...' : 'Confirm Booking'}
+            {isPending ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Booking...
+              </span>
+            ) : (
+              'Confirm Booking'
+            )}
           </Button>
 
           <p className="text-xs text-slate-500 text-center">
