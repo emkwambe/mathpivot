@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from '@/app/(auth)/actions';
 import { cn } from '@/lib/utils';
+import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher';
 import type { AuthUser, UserRole } from '@/types';
 
 interface NavItem {
@@ -213,6 +214,9 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
           ))}
         </div>
       </nav>
+
+      {/* Dev Account Switcher */}
+      <DevAccountSwitcher currentEmail={user.email} />
     </div>
   );
 }
