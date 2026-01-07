@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDateTime, formatDate } from '@/lib/utils';
 
@@ -89,8 +88,7 @@ export default async function ParentDashboardPage() {
     .limit(3);
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Welcome Banner */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -298,7 +296,6 @@ export default async function ParentDashboardPage() {
           </CardContent>
         </Card>
       )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

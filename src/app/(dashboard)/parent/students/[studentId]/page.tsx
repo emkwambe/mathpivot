@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { requireRole, canAccessStudent, getCurrentUser } from '@/lib/auth';
+import { requireRole, canAccessStudent } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
-import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { StudentProgressVisualization } from '@/components/StudentProgressVisualization';
 import { formatDate, snakeToTitle } from '@/lib/utils';
 
@@ -101,10 +100,9 @@ export default async function StudentProfilePage({ params }: PageProps) {
   const profile = student.users_profile as unknown as { full_name: string; email: string; avatar_url: string | null };
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Back Link */}
-        <Link
+    <div className="space-y-6">
+      {/* Back Link */}
+      <Link
           href="/parent"
           className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
         >
@@ -261,7 +259,6 @@ export default async function StudentProfilePage({ params }: PageProps) {
           )}
         </CardContent>
       </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

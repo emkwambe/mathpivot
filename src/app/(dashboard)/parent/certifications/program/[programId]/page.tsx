@@ -1,13 +1,11 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/ui';
 import {
   getCertificationProgram,
   checkRequirements,
   getAssessmentsForProgram,
-  getUserProgress,
   getAttemptHistory,
 } from '@/lib/certifications';
 import { formatDate } from '@/lib/utils';
@@ -80,10 +78,9 @@ export default async function CertificationProgramPage({ params }: PageProps) {
   };
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Back Link */}
-        <Link
+    <div className="space-y-6">
+      {/* Back Link */}
+      <Link
           href="/parent/certifications"
           className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
         >
@@ -351,7 +348,6 @@ export default async function CertificationProgramPage({ params }: PageProps) {
             </CardContent>
           </Card>
         )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

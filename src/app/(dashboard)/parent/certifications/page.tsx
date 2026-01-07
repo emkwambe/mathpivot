@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
-import { getCertificationPrograms, getCertificationDashboard, getUserProgress } from '@/lib/certifications';
-import { formatDate, formatRelativeTime } from '@/lib/utils';
+import { getCertificationPrograms, getCertificationDashboard } from '@/lib/certifications';
+import { formatRelativeTime } from '@/lib/utils';
 
 export default async function CertificationsPage() {
   const user = await requireRole(['parent', 'student', 'admin']);
@@ -39,9 +38,8 @@ export default async function CertificationsPage() {
   };
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Header */}
+    <div className="space-y-6">
+      {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Certifications</h1>
@@ -272,7 +270,6 @@ export default async function CertificationsPage() {
             </CardContent>
           </Card>
         )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
