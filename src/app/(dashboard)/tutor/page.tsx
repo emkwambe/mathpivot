@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate, formatTime } from '@/lib/utils';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -81,20 +82,37 @@ export default async function TutorDashboardPage() {
     .lte('completed_at', weekEnd);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome, {user.fullName.split(' ')[0]}!</h1>
-          <p className="text-slate-600">{formatDate(now, 'EEEE, MMMM d, yyyy')}</p>
+    <DashboardLayout user={user}>
+      <div className="space-y-6">
+        {/* Welcome Banner */}
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">Welcome, {user.fullName.split(' ')[0]}!</h1>
+              <p className="text-emerald-100 mt-1">{formatDate(now, 'EEEE, MMMM d, yyyy')}</p>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                href="/tutor/sessions"
+                className="inline-flex items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg font-medium transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                All Sessions
+              </Link>
+              <Link
+                href="/tutor/availability"
+                className="inline-flex items-center justify-center px-4 py-2 bg-white text-emerald-600 rounded-lg hover:bg-emerald-50 font-medium shadow-sm"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Availability
+              </Link>
+            </div>
+          </div>
         </div>
-        <Link
-          href="/tutor/availability"
-          className="inline-flex items-center justify-center px-4 py-2 border border-slate-300 text-slate-700 rounded-md hover:bg-slate-50 font-medium"
-        >
-          Manage Availability
-        </Link>
-      </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -183,7 +201,15 @@ export default async function TutorDashboardPage() {
                 })}
               </div>
             ) : (
-              <p className="text-slate-500 text-center py-6">No sessions scheduled for today.</p>
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No sessions scheduled for today</p>
+                <p className="text-sm text-slate-400 mt-1">Enjoy your free time!</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -214,11 +240,25 @@ export default async function TutorDashboardPage() {
                 })}
               </div>
             ) : (
-              <p className="text-slate-500 text-center py-6">No upcoming sessions this week.</p>
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No upcoming sessions this week</p>
+                <Link
+                  href="/tutor/availability"
+                  className="text-sm text-blue-600 hover:underline font-medium mt-2 inline-block"
+                >
+                  Update your availability
+                </Link>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

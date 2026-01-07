@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation';
+import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
@@ -164,26 +166,38 @@ export default async function SessionDetailPage({ params }: Props) {
   const booking = session.booking as { start_at: string; end_at: string; notes: string | null; status: string };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Session with {studentProfile?.full_name || 'Student'}
-          </h1>
-          <p className="text-slate-600">
-            {formatDate(booking.start_at, 'EEEE, MMMM d, yyyy')} at{' '}
-            {formatDate(booking.start_at, 'h:mm a')}
-          </p>
-        </div>
-        <Badge
-          variant={
-            isCompleted ? 'success' : isActive ? 'warning' : 'secondary'
-          }
+    <DashboardLayout user={user}>
+      <div className="space-y-6">
+        {/* Back Link */}
+        <Link
+          href="/tutor/sessions"
+          className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
         >
-          {isCompleted ? 'Completed' : isActive ? 'In Progress' : 'Scheduled'}
-        </Badge>
-      </div>
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Sessions
+        </Link>
+
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Session with {studentProfile?.full_name || 'Student'}
+            </h1>
+            <p className="text-slate-600">
+              {formatDate(booking.start_at, 'EEEE, MMMM d, yyyy')} at{' '}
+              {formatDate(booking.start_at, 'h:mm a')}
+            </p>
+          </div>
+          <Badge
+            variant={
+              isCompleted ? 'success' : isActive ? 'warning' : 'secondary'
+            }
+          >
+            {isCompleted ? 'Completed' : isActive ? 'In Progress' : 'Scheduled'}
+          </Badge>
+        </div>
 
       {/* Session Info */}
       <Card>
@@ -352,7 +366,8 @@ export default async function SessionDetailPage({ params }: Props) {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
 

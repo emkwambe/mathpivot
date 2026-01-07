@@ -1,9 +1,9 @@
+import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
-import Link from 'next/link';
 
 export default async function TutorSessionsPage() {
   const user = await requireRole(['tutor', 'admin']);

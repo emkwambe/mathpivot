@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDateTime, formatDate } from '@/lib/utils';
 
@@ -88,20 +89,26 @@ export default async function ParentDashboardPage() {
     .limit(3);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome back, {user.fullName.split(' ')[0]}!</h1>
-          <p className="text-slate-600">Here&apos;s what&apos;s happening with your family&apos;s tutoring.</p>
+    <DashboardLayout user={user}>
+      <div className="space-y-6">
+        {/* Welcome Banner */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">Welcome back, {user.fullName.split(' ')[0]}!</h1>
+              <p className="text-blue-100 mt-1">Here&apos;s what&apos;s happening with your family&apos;s tutoring.</p>
+            </div>
+            <Link
+              href="/parent/book"
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-medium shadow-sm"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Book a Session
+            </Link>
+          </div>
         </div>
-        <Link
-          href="/parent/book"
-          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
-        >
-          Book a Session
-        </Link>
-      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -199,7 +206,15 @@ export default async function ParentDashboardPage() {
                 })}
               </div>
             ) : (
-              <p className="text-slate-500 text-center py-4">No students in your family yet.</p>
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No students in your family yet</p>
+                <p className="text-sm text-slate-400 mt-1">Contact support to add students</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -240,10 +255,15 @@ export default async function ParentDashboardPage() {
               </div>
             ) : (
               <div className="text-center py-6">
-                <p className="text-slate-500 mb-4">No upcoming sessions scheduled.</p>
+                <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No upcoming sessions scheduled</p>
                 <Link
                   href="/parent/book"
-                  className="text-blue-600 hover:underline font-medium"
+                  className="text-sm text-blue-600 hover:underline font-medium mt-2 inline-block"
                 >
                   Book your first session
                 </Link>
@@ -278,6 +298,7 @@ export default async function ParentDashboardPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

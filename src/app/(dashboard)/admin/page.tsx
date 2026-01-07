@@ -1,11 +1,13 @@
+import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 export default async function AdminDashboardPage() {
-  await requireRole('admin');
+  const user = await requireRole('admin');
   const supabase = await createClient();
 
   const now = new Date();
@@ -103,12 +105,37 @@ export default async function AdminDashboardPage() {
   const atRiskNameMap = new Map(atRiskProfiles?.map(u => [u.id, u.full_name]) || []);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-        <p className="text-slate-600">Platform overview and operations</p>
-      </div>
+    <DashboardLayout user={user}>
+      <div className="space-y-6">
+        {/* Welcome Banner */}
+        <div className="bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl p-6 text-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+              <p className="text-purple-100 mt-1">Platform overview and operations</p>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                href="/admin/skills"
+                className="inline-flex items-center justify-center px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg font-medium transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Skills
+              </Link>
+              <Link
+                href="/admin/reports"
+                className="inline-flex items-center justify-center px-4 py-2 bg-white text-purple-600 rounded-lg hover:bg-purple-50 font-medium shadow-sm"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Reports
+              </Link>
+            </div>
+          </div>
+        </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -171,7 +198,14 @@ export default async function AdminDashboardPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-center py-6">No sessions scheduled for today.</p>
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No sessions scheduled for today</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -198,7 +232,15 @@ export default async function AdminDashboardPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-center py-6">No at-risk students flagged.</p>
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No at-risk students</p>
+                <p className="text-sm text-slate-400 mt-1">All students are making progress</p>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -224,6 +266,7 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

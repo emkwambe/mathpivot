@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { BookingForm } from './BookingForm';
 
@@ -16,15 +18,17 @@ export default async function BookPage() {
 
   if (!familyMember) {
     return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-slate-600">
-              You are not associated with a family. Please contact support.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout user={user}>
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">No Family Associated</h2>
+          <p className="text-slate-600">You are not associated with a family. Please contact support.</p>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -70,55 +74,94 @@ export default async function BookPage() {
   })) || [];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Book a Session</h1>
-        <p className="text-slate-600">Schedule a tutoring session for your student</p>
-      </div>
+    <DashboardLayout user={user}>
+      <div className="space-y-6">
+        {/* Back Link */}
+        <Link
+          href="/parent"
+          className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </Link>
 
-      {/* Credit Balance Alert */}
-      {family && family.credit_balance < 1 && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <div>
-                <p className="font-medium text-amber-900">No Credits Available</p>
-                <p className="text-sm text-amber-700">
-                  You need credits to book sessions. Please purchase a package first.
-                </p>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Book a Session</h1>
+            <p className="text-slate-600">Schedule a tutoring session for your student</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-slate-600">Available Credits</p>
+            <p className="text-2xl font-bold text-blue-600">{family?.credit_balance || 0}</p>
+          </div>
+        </div>
+
+        {/* Credit Balance Alert */}
+        {family && family.credit_balance < 1 && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <p className="font-medium text-amber-900">No Credits Available</p>
+                    <p className="text-sm text-amber-700">
+                      You need credits to book sessions.
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/parent/credits"
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium text-sm"
+                >
+                  Purchase Credits
+                </Link>
               </div>
-            </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Booking Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Session Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {formattedStudents.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No students found in your family</p>
+                <p className="text-sm text-slate-400 mt-1">Please add a student first</p>
+              </div>
+            ) : formattedTutors.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <p className="text-slate-500">No tutors are currently available</p>
+                <p className="text-sm text-slate-400 mt-1">Please check back later</p>
+              </div>
+            ) : (
+              <BookingForm
+                students={formattedStudents}
+                tutors={formattedTutors}
+                creditBalance={family?.credit_balance || 0}
+              />
+            )}
           </CardContent>
         </Card>
-      )}
-
-      {/* Booking Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Session Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {formattedStudents.length === 0 ? (
-            <p className="text-center text-slate-600 py-6">
-              No students found in your family. Please add a student first.
-            </p>
-          ) : formattedTutors.length === 0 ? (
-            <p className="text-center text-slate-600 py-6">
-              No tutors are currently available. Please check back later.
-            </p>
-          ) : (
-            <BookingForm
-              students={formattedStudents}
-              tutors={formattedTutors}
-              creditBalance={family?.credit_balance || 0}
-            />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
