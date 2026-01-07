@@ -359,7 +359,7 @@ INSERT INTO certification_requirements (
   id, program_id, requirement_type, name, description, parameters, is_required, display_order
 ) VALUES
 (
-  'r0000000-0000-0000-0001-000000000001',
+  'b0000000-0000-0000-0001-000000000001',
   'c0000000-0000-0000-0001-000000000003',
   'skill_count',
   'Master Core Algebra Skills',
@@ -368,7 +368,7 @@ INSERT INTO certification_requirements (
   true, 1
 ),
 (
-  'r0000000-0000-0000-0001-000000000002',
+  'b0000000-0000-0000-0001-000000000002',
   'c0000000-0000-0000-0001-000000000003',
   'sessions_completed',
   'Complete Tutoring Sessions',
@@ -377,7 +377,7 @@ INSERT INTO certification_requirements (
   true, 2
 ),
 (
-  'r0000000-0000-0000-0001-000000000003',
+  'b0000000-0000-0000-0001-000000000003',
   'c0000000-0000-0000-0001-000000000003',
   'assessment_passed',
   'Pass Final Assessment',
@@ -386,7 +386,7 @@ INSERT INTO certification_requirements (
   true, 3
 ),
 (
-  'r0000000-0000-0000-0001-000000000004',
+  'b0000000-0000-0000-0001-000000000004',
   'c0000000-0000-0000-0001-000000000003',
   'prerequisite_cert',
   'Earn Silver Certification',
@@ -404,7 +404,7 @@ INSERT INTO certification_requirements (
   id, program_id, requirement_type, name, description, parameters, is_required, display_order
 ) VALUES
 (
-  'r0000000-0000-0000-0002-000000000001',
+  'b0000000-0000-0000-0002-000000000001',
   'c0000000-0000-0000-0010-000000000002',
   'prerequisite_cert',
   'Complete Foundations',
@@ -413,7 +413,7 @@ INSERT INTO certification_requirements (
   true, 1
 ),
 (
-  'r0000000-0000-0000-0002-000000000002',
+  'b0000000-0000-0000-0002-000000000002',
   'c0000000-0000-0000-0010-000000000002',
   'hours_logged',
   'Study Hours',
@@ -422,7 +422,7 @@ INSERT INTO certification_requirements (
   true, 2
 ),
 (
-  'r0000000-0000-0000-0002-000000000003',
+  'b0000000-0000-0000-0002-000000000003',
   'c0000000-0000-0000-0010-000000000002',
   'assessment_passed',
   'Practice Exams',
@@ -431,7 +431,7 @@ INSERT INTO certification_requirements (
   true, 3
 ),
 (
-  'r0000000-0000-0000-0002-000000000004',
+  'b0000000-0000-0000-0002-000000000004',
   'c0000000-0000-0000-0010-000000000002',
   'assessment_passed',
   'Final Readiness Exam',
@@ -475,7 +475,7 @@ INSERT INTO assessment_questions (
   points, difficulty, display_order
 ) VALUES
 (
-  'q0000000-0000-0000-0001-000000000001',
+  'd0000000-0000-0000-0001-000000000001',
   'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'Solve for x: 3x + 7 = 22',
@@ -484,7 +484,7 @@ INSERT INTO assessment_questions (
   2.5, 2, 1
 ),
 (
-  'q0000000-0000-0000-0001-000000000002',
+  'd0000000-0000-0000-0001-000000000002',
   'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'Which equation represents a line with slope 2 passing through point (0, 3)?',
@@ -493,7 +493,7 @@ INSERT INTO assessment_questions (
   2.5, 2, 2
 ),
 (
-  'q0000000-0000-0000-0001-000000000003',
+  'd0000000-0000-0000-0001-000000000003',
   'e0000000-0000-0000-0001-000000000001',
   'numeric',
   'Evaluate: 2^4 + 3^2',
@@ -502,7 +502,7 @@ INSERT INTO assessment_questions (
   2.5, 1, 3
 ),
 (
-  'q0000000-0000-0000-0001-000000000004',
+  'd0000000-0000-0000-0001-000000000004',
   'e0000000-0000-0000-0001-000000000001',
   'multiple_select',
   'Select all expressions that simplify to 6x:',
@@ -511,7 +511,7 @@ INSERT INTO assessment_questions (
   2.5, 2, 4
 ),
 (
-  'q0000000-0000-0000-0001-000000000005',
+  'd0000000-0000-0000-0001-000000000005',
   'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'If f(x) = 2x² - 3x + 1, what is f(2)?',
@@ -520,7 +520,7 @@ INSERT INTO assessment_questions (
   2.5, 3, 5
 ),
 (
-  'q0000000-0000-0000-0001-000000000006',
+  'd0000000-0000-0000-0001-000000000006',
   'e0000000-0000-0000-0001-000000000001',
   'multiple_choice',
   'Solve the system: y = 2x + 1 and y = -x + 7. What is x?',
@@ -529,7 +529,7 @@ INSERT INTO assessment_questions (
   2.5, 3, 6
 ),
 (
-  'q0000000-0000-0000-0001-000000000007',
+  'd0000000-0000-0000-0001-000000000007',
   'e0000000-0000-0000-0001-000000000001',
   'true_false',
   'The expression (x + 3)² equals x² + 9',
@@ -538,7 +538,7 @@ INSERT INTO assessment_questions (
   2.5, 2, 7
 ),
 (
-  'q0000000-0000-0000-0001-000000000008',
+  'd0000000-0000-0000-0001-000000000008',
   'e0000000-0000-0000-0001-000000000001',
   'numeric',
   'What is the y-intercept of the line 4x - 2y = 10?',
