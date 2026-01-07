@@ -216,7 +216,7 @@ export async function getAvailableSlotsForDate(
     const [endHour, endMin] = avail.end_time.split(':').map(Number);
 
     let currentHour = startHour;
-    let currentMin = startMin;
+    const currentMin = startMin;
 
     while (currentHour < endHour || (currentHour === endHour && currentMin < endMin)) {
       const slotStart = new Date(date);

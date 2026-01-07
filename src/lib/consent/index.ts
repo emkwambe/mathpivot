@@ -125,7 +125,7 @@ export async function requestConsent(
 
   let studentAge: number | null = null;
   let isCoppaApplicable = false;
-  let isFerpaApplicable = true; // Always true for educational records
+  const isFerpaApplicable = true; // Always true for educational records
 
   if (student?.date_of_birth) {
     const birthDate = new Date(student.date_of_birth);

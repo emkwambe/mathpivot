@@ -237,7 +237,7 @@ export async function startAttempt(
   if (!assessment) throw new Error('Assessment not found');
 
   // Get questions
-  let query = supabaseAdmin
+  const query = supabaseAdmin
     .from('assessment_questions')
     .select('*')
     .eq('assessment_id', assessmentId)

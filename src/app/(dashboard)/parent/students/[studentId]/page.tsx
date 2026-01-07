@@ -4,6 +4,7 @@ import { requireRole, canAccessStudent, getCurrentUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
+import { StudentProgressVisualization } from '@/components/StudentProgressVisualization';
 import { formatDate, snakeToTitle } from '@/lib/utils';
 
 interface PageProps {
@@ -70,14 +71,6 @@ export default async function StudentProfilePage({ params }: PageProps) {
     `)
     .eq('student_user_id', studentId)
     .order('mastery_level', { ascending: false });
-
-  // Group mastery by level
-  const masteryByLevel = {
-    mastered: masteryData?.filter(m => m.mastery_level === 'mastered') || [],
-    proficient: masteryData?.filter(m => m.mastery_level === 'proficient') || [],
-    developing: masteryData?.filter(m => m.mastery_level === 'developing') || [],
-    not_started: masteryData?.filter(m => m.mastery_level === 'not_started') || [],
-  };
 
   // Get recent sessions
   const { data: recentSessions } = await supabase
@@ -202,60 +195,26 @@ export default async function StudentProfilePage({ params }: PageProps) {
         </Card>
       </div>
 
-      {/* Mastery Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Skill Mastery Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {masteryData && masteryData.length > 0 ? (
-            <div className="space-y-6">
-              {/* Mastery Stats */}
-              <div className="grid grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{masteryByLevel.mastered.length}</p>
-                  <p className="text-xs text-green-700">Mastered</p>
-                </div>
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{masteryByLevel.proficient.length}</p>
-                  <p className="text-xs text-blue-700">Proficient</p>
-                </div>
-                <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                  <p className="text-2xl font-bold text-yellow-600">{masteryByLevel.developing.length}</p>
-                  <p className="text-xs text-yellow-700">Developing</p>
-                </div>
-                <div className="text-center p-3 bg-slate-50 rounded-lg">
-                  <p className="text-2xl font-bold text-slate-600">{masteryByLevel.not_started.length}</p>
-                  <p className="text-xs text-slate-700">Not Started</p>
-                </div>
-              </div>
-
-              {/* Recent Skills */}
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-3">Recently Practiced Skills</h4>
-                <div className="flex flex-wrap gap-2">
-                  {masteryData.slice(0, 10).map((m) => {
-                    const skill = m.skills as unknown as { code: string; name: string; category: string };
-                    const levelColors = {
-                      mastered: 'success',
-                      proficient: 'info',
-                      developing: 'warning',
-                      not_started: 'secondary',
-                    } as const;
-                    return (
-                      <Badge key={m.id} variant={levelColors[m.mastery_level as keyof typeof levelColors]}>
-                        {skill.name}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="text-slate-500 text-center py-4">No skill mastery data yet.</p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Progress Visualization */}
+      <StudentProgressVisualization
+        masteryData={(masteryData || []).map(m => ({
+          ...m,
+          skills: m.skills as unknown as {
+            code: string;
+            name: string;
+            category: string | null;
+            course_track: 'math_1' | 'math_2' | 'math_3' | 'pre_calc' | 'ap_calc_ab' | 'ap_calc_bc' | 'ap_stats';
+          }
+        }))}
+        diagnostics={(diagnostics || []).map(d => ({
+          id: d.id,
+          administered_at: d.administered_at,
+          course_track: d.course_track as 'math_1' | 'math_2' | 'math_3' | 'pre_calc' | 'ap_calc_ab' | 'ap_calc_bc' | 'ap_stats',
+          score: d.score,
+          max_score: d.max_score
+        }))}
+        studentName={profile.full_name}
+      />
 
       {/* Recent Sessions */}
       <Card>

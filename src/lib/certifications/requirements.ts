@@ -167,7 +167,7 @@ async function evaluateHoursLogged(
   const category = params.category as string | undefined;
 
   // Get completed sessions
-  let query = supabaseAdmin
+  const query = supabaseAdmin
     .from('bookings')
     .select('duration_minutes')
     .eq('student_id', userId)
