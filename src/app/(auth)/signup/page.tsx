@@ -67,60 +67,69 @@ export default function SignupPage() {
       return;
     }
 
-    // Sign up
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        data: {
-          full_name: formData.fullName,
-          role: formData.role,
+    try {
+      // Sign up
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            role: formData.role,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+      });
 
-    if (error) {
-      setServerError(error.message);
-      setIsLoading(false);
-      return;
-    }
+      if (error) {
+        setServerError(error.message);
+        setIsLoading(false);
+        return;
+      }
 
-    // Check if email confirmation is required
-    if (data.user && !data.session) {
-      setSuccessMessage(
-        'Account created! Please check your email to confirm your account.'
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        setSuccessMessage(
+          'Account created! Please check your email to confirm your account.'
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // If auto-confirmed (dev mode), redirect to onboarding
+      router.push('/');
+      router.refresh();
+    } catch (err) {
+      // Network or connection error
+      console.error('Signup error:', err);
+      setServerError(
+        'Unable to connect to authentication service. Please check your internet connection and try again.'
       );
       setIsLoading(false);
-      return;
     }
-
-    // If auto-confirmed (dev mode), redirect to onboarding
-    router.push('/');
-    router.refresh();
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-            <span className="text-white font-bold text-xl">M</span>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md shadow-xl border-0">
+        <CardHeader className="text-center pb-2">
+          <div className="mx-auto w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+            <span className="text-white font-bold text-2xl">M</span>
           </div>
-          <CardTitle className="text-2xl">Create your account</CardTitle>
-          <CardDescription>Join MathPivot to start learning</CardDescription>
+          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
+          <CardDescription className="text-slate-500">Join MathPivot to start learning</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {successMessage ? (
-            <Alert variant="success">
-              <AlertDescription>{successMessage}</AlertDescription>
+            <Alert variant="success" className="border-green-200 bg-green-50">
+              <AlertDescription className="text-green-700">{successMessage}</AlertDescription>
             </Alert>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {serverError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{serverError}</AlertDescription>
+                <Alert variant="destructive" className="border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-700">{serverError}</AlertDescription>
                 </Alert>
               )}
 
@@ -135,6 +144,7 @@ export default function SignupPage() {
                 disabled={isLoading}
                 autoComplete="name"
                 required
+                className="h-11"
               />
 
               <Input
@@ -148,6 +158,7 @@ export default function SignupPage() {
                 disabled={isLoading}
                 autoComplete="email"
                 required
+                className="h-11"
               />
 
               <Select
@@ -171,6 +182,7 @@ export default function SignupPage() {
                 disabled={isLoading}
                 autoComplete="new-password"
                 required
+                className="h-11"
               />
 
               <Input
@@ -184,6 +196,7 @@ export default function SignupPage() {
                 disabled={isLoading}
                 autoComplete="new-password"
                 required
+                className="h-11"
               />
 
               <p className="text-xs text-slate-500">
@@ -191,17 +204,21 @@ export default function SignupPage() {
                 lowercase, and one number.
               </p>
 
-              <Button type="submit" className="w-full" isLoading={isLoading}>
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
+                isLoading={isLoading}
+              >
                 Create account
               </Button>
 
               <p className="text-xs text-center text-slate-500">
                 By creating an account, you agree to our{' '}
-                <Link href="/terms" className="text-blue-600 hover:underline">
+                <Link href="/terms" className="text-blue-600 hover:text-blue-700 font-medium">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-blue-600 hover:underline">
+                <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">
                   Privacy Policy
                 </Link>
                 .
@@ -209,12 +226,12 @@ export default function SignupPage() {
             </form>
           )}
 
-          <div className="mt-6 text-center">
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
             <p className="text-sm text-slate-600">
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="text-blue-600 hover:text-blue-500 font-medium"
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
               >
                 Sign in
               </Link>

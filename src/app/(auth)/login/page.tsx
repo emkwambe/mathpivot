@@ -45,93 +45,110 @@ function LoginForm() {
       return;
     }
 
-    // Sign in
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email: formData.email,
-      password: formData.password,
-    });
+    try {
+      // Sign in
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
 
-    if (error) {
-      setServerError(error.message);
+      if (error) {
+        setServerError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      // Redirect to intended page
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err) {
+      // Network or connection error
+      console.error('Login error:', err);
+      setServerError(
+        'Unable to connect to authentication service. Please check your internet connection and try again. If the problem persists, the service may be temporarily unavailable.'
+      );
       setIsLoading(false);
-      return;
     }
-
-    // Redirect to intended page
-    router.push(redirectTo);
-    router.refresh();
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
-        <div className="mx-auto w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-          <span className="text-white font-bold text-xl">M</span>
+    <Card className="w-full max-w-md shadow-xl border-0">
+      <CardHeader className="text-center pb-2">
+        <div className="mx-auto w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+          <span className="text-white font-bold text-2xl">M</span>
         </div>
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to your MathPivot account</CardDescription>
+        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+        <CardDescription className="text-slate-500">Sign in to your MathPivot account</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="pt-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {serverError && (
-            <Alert variant="destructive">
-              <AlertDescription>{serverError}</AlertDescription>
+            <Alert variant="destructive" className="border-red-200 bg-red-50">
+              <AlertDescription className="text-red-700">{serverError}</AlertDescription>
             </Alert>
           )}
 
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            placeholder="you@example.com"
-            value={formData.email}
-            onChange={handleChange}
-            error={errors.email}
-            disabled={isLoading}
-            autoComplete="email"
-            required
-          />
+          <div className="space-y-4">
+            <Input
+              label="Email"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+              disabled={isLoading}
+              autoComplete="email"
+              required
+              className="h-11"
+            />
 
-          <Input
-            label="Password"
-            type="password"
-            name="password"
-            placeholder="Your password"
-            value={formData.password}
-            onChange={handleChange}
-            error={errors.password}
-            disabled={isLoading}
-            autoComplete="current-password"
-            required
-          />
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              error={errors.password}
+              disabled={isLoading}
+              autoComplete="current-password"
+              required
+              className="h-11"
+            />
+          </div>
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer"
               />
-              <span className="ml-2 text-sm text-slate-600">Remember me</span>
+              <span className="ml-2 text-slate-600">Remember me</span>
             </label>
             <Link
               href="/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-500"
+              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
               Forgot password?
             </Link>
           </div>
 
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+          <Button
+            type="submit"
+            className="w-full h-11 text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
+            isLoading={isLoading}
+          >
             Sign in
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 pt-6 border-t border-slate-100 text-center">
           <p className="text-sm text-slate-600">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-600 hover:text-blue-500 font-medium">
-              Sign up
+            <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+              Sign up for free
             </Link>
           </p>
         </div>
@@ -142,19 +159,25 @@ function LoginForm() {
 
 function LoginFormFallback() {
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
-        <div className="mx-auto w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-          <span className="text-white font-bold text-xl">M</span>
+    <Card className="w-full max-w-md shadow-xl border-0">
+      <CardHeader className="text-center pb-2">
+        <div className="mx-auto w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
+          <span className="text-white font-bold text-2xl">M</span>
         </div>
-        <CardTitle className="text-2xl">Welcome back</CardTitle>
-        <CardDescription>Sign in to your MathPivot account</CardDescription>
+        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+        <CardDescription className="text-slate-500">Sign in to your MathPivot account</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="animate-pulse space-y-4">
-          <div className="h-10 bg-slate-200 rounded" />
-          <div className="h-10 bg-slate-200 rounded" />
-          <div className="h-10 bg-slate-200 rounded" />
+      <CardContent className="pt-4">
+        <div className="animate-pulse space-y-5">
+          <div className="space-y-2">
+            <div className="h-4 w-12 bg-slate-200 rounded" />
+            <div className="h-11 bg-slate-200 rounded-lg" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-16 bg-slate-200 rounded" />
+            <div className="h-11 bg-slate-200 rounded-lg" />
+          </div>
+          <div className="h-11 bg-slate-200 rounded-lg" />
         </div>
       </CardContent>
     </Card>
@@ -163,7 +186,7 @@ function LoginFormFallback() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
       <Suspense fallback={<LoginFormFallback />}>
         <LoginForm />
       </Suspense>
