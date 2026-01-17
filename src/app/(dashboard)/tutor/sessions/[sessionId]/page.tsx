@@ -2,7 +2,6 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
@@ -166,9 +165,8 @@ export default async function SessionDetailPage({ params }: Props) {
   const booking = session.booking as { start_at: string; end_at: string; notes: string | null; status: string };
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
-        {/* Back Link */}
+    <div className="space-y-6">
+      {/* Back Link */}
         <Link
           href="/tutor/sessions"
           className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
@@ -366,8 +364,7 @@ export default async function SessionDetailPage({ params }: Props) {
           </CardContent>
         </Card>
       )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
 

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate, formatTime } from '@/lib/utils';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -82,8 +81,7 @@ export default async function TutorDashboardPage() {
     .lte('completed_at', weekEnd);
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Welcome Banner */}
         <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -258,7 +256,6 @@ export default async function TutorDashboardPage() {
           </CardContent>
         </Card>
       </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

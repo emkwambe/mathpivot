@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { DashboardLayout } from '@/components/layouts/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 
@@ -52,8 +51,7 @@ export default async function TutorSessionsPage() {
   }) || [];
 
   return (
-    <DashboardLayout user={user}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">My Sessions</h1>
           <p className="text-slate-600">View and manage your tutoring sessions</p>
@@ -177,7 +175,6 @@ export default async function TutorSessionsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
