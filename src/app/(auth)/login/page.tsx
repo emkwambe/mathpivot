@@ -84,8 +84,8 @@ function LoginForm() {
       <CardContent className="pt-4">
         <form onSubmit={handleSubmit} className="space-y-5">
           {serverError && (
-            <Alert variant="destructive" className="border-red-200 bg-red-50">
-              <AlertDescription className="text-red-700">{serverError}</AlertDescription>
+            <Alert variant="destructive">
+              <AlertDescription>{serverError}</AlertDescription>
             </Alert>
           )}
 

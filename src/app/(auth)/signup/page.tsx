@@ -122,14 +122,14 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent className="pt-4">
           {successMessage ? (
-            <Alert variant="success" className="border-green-200 bg-green-50">
-              <AlertDescription className="text-green-700">{successMessage}</AlertDescription>
+            <Alert variant="success">
+              <AlertDescription>{successMessage}</AlertDescription>
             </Alert>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {serverError && (
-                <Alert variant="destructive" className="border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-700">{serverError}</AlertDescription>
+                <Alert variant="destructive">
+                  <AlertDescription>{serverError}</AlertDescription>
                 </Alert>
               )}
 
