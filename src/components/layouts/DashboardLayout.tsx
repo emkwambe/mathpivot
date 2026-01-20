@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { signOut } from '@/app/(auth)/actions';
 import { cn } from '@/lib/utils';
 import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher';
+import { AIChatWidget } from '@/components/AIChatWidget';
 import type { AuthUser, UserRole } from '@/types';
 
 interface NavItem {
@@ -214,6 +215,9 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
           ))}
         </div>
       </nav>
+
+      {/* AI Chat Widget - Only for students */}
+      {user.role === 'student' && <AIChatWidget />}
 
       {/* Dev Account Switcher */}
       <DevAccountSwitcher currentEmail={user.email} />
