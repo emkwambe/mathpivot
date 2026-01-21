@@ -11,6 +11,10 @@
     "prefix": ""
   },
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+  "iconLibrary": "lucide",
+>>>>>>> Stashed changes
 =======
   "iconLibrary": "lucide",
 >>>>>>> Stashed changes
@@ -22,7 +26,11 @@
     "hooks": "@/hooks"
   },
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "iconLibrary": "lucide"
+=======
+  "registries": {}
+>>>>>>> Stashed changes
 =======
   "registries": {}
 >>>>>>> Stashed changes

@@ -2,10 +2,13 @@
 @import "tw-animate-css";
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 @layer base {
   body {
     @apply antialiased;
 =======
+=======
+>>>>>>> Stashed changes
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -126,6 +129,9 @@
   }
   body {
     @apply bg-background text-foreground;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   }
 }
