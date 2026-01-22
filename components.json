@@ -10,6 +10,18 @@
     "cssVariables": true,
     "prefix": ""
   },
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+  "iconLibrary": "lucide",
+>>>>>>> Stashed changes
+=======
+  "iconLibrary": "lucide",
+>>>>>>> Stashed changes
+=======
+  "iconLibrary": "lucide",
+>>>>>>> Stashed changes
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
@@ -17,5 +29,17 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "iconLibrary": "lucide"
+=======
+  "registries": {}
+>>>>>>> Stashed changes
+=======
+  "registries": {}
+>>>>>>> Stashed changes
+=======
+  "registries": {}
+>>>>>>> Stashed changes
 }
