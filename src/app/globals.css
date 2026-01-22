@@ -3,10 +3,13 @@
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 @layer base {
   body {
     @apply antialiased;
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 @custom-variant dark (&:is(.dark *));
@@ -130,6 +133,9 @@
   body {
     @apply bg-background text-foreground;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
