@@ -104,17 +104,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get student context - if not found, create a default context
+    let context = await getStudentContext(user.id);
+    if (!context) {
+      // Use default context for students without a full profile
+      context = {
+        studentName: user.fullName?.split(' ')[0] || 'there',
+        gradeLevel: 9,
+        courseTrack: 'general_math',
+        recentSkills: [],
+        masteryLevels: {},
+        goals: undefined,
+      };
+    }
+
     // Get or create conversation
     const convoId = await getOrCreateConversation(user.id, conversationId);
-
-    // Get student context
-    const context = await getStudentContext(user.id);
-    if (!context) {
-      return NextResponse.json(
-        { error: 'Student profile not found' },
-        { status: 404 }
-      );
-    }
 
     // Get conversation history
     const history = await getConversationHistory(convoId);
