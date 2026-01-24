@@ -59,7 +59,7 @@ export default async function StudentSessionsPage() {
           {upcomingSessions.length > 0 ? (
             <div className="space-y-4">
               {upcomingSessions.map((session) => {
-                const tutor = session.tutor as { user: { full_name: string } | null } | null;
+                const tutor = session.tutor as unknown as { user: { full_name: string } | null } | null;
                 return (
                   <div
                     key={session.id}
@@ -118,7 +118,7 @@ export default async function StudentSessionsPage() {
           {pastSessions.length > 0 ? (
             <div className="space-y-4">
               {pastSessions.map((booking) => {
-                const tutor = booking.tutor as { user: { full_name: string } | null } | null;
+                const tutor = booking.tutor as unknown as { user: { full_name: string } | null } | null;
                 const sessionData = booking.session as Array<{
                   id: string;
                   started_at: string;
@@ -142,7 +142,7 @@ export default async function StudentSessionsPage() {
                           with {tutor?.user?.full_name || 'Your Tutor'}
                         </p>
                       </div>
-                      <Badge variant={booking.status === 'completed' ? 'success' : 'destructive'}>
+                      <Badge variant={booking.status === 'completed' ? 'success' : 'danger'}>
                         {booking.status}
                       </Badge>
                     </div>

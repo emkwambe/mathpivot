@@ -166,7 +166,7 @@ export default async function StudentDashboardPage() {
             {upcomingSessions && upcomingSessions.length > 0 ? (
               <div className="space-y-3">
                 {upcomingSessions.map((session) => {
-                  const tutor = session.tutor as { user: { full_name: string } | null } | null;
+                  const tutor = session.tutor as unknown as { user: { full_name: string } | null } | null;
                   return (
                     <div
                       key={session.id}
@@ -215,7 +215,7 @@ export default async function StudentDashboardPage() {
             {masteryData && masteryData.length > 0 ? (
               <div className="space-y-3">
                 {masteryData.map((item, idx) => {
-                  const skill = item.skill as { name: string; category: string } | null;
+                  const skill = item.skill as unknown as { name: string; category: string } | null;
                   return (
                     <div
                       key={idx}

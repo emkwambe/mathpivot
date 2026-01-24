@@ -28,7 +28,7 @@ export default async function StudentProgressPage() {
   // Group by category
   const skillsByCategory: Record<string, typeof masteryData> = {};
   masteryData?.forEach((item) => {
-    const skill = item.skill as { id: string; name: string; category: string; description: string | null } | null;
+    const skill = item.skill as unknown as { id: string; name: string; category: string; description: string | null } | null;
     const category = skill?.category || 'Other';
     if (!skillsByCategory[category]) {
       skillsByCategory[category] = [];
@@ -105,7 +105,7 @@ export default async function StudentProgressPage() {
               <CardContent>
                 <div className="space-y-4">
                   {skills?.map((item) => {
-                    const skill = item.skill as { id: string; name: string; category: string; description: string | null } | null;
+                    const skill = item.skill as unknown as { id: string; name: string; category: string; description: string | null } | null;
                     const levelInfo = masteryLevelInfo[item.current_level] || masteryLevelInfo.not_started;
 
                     return (
