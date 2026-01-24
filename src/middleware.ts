@@ -9,7 +9,7 @@ const ROLE_ROUTES: Record<string, string[]> = {
   admin: ['/admin'],
   tutor: ['/tutor'],
   parent: ['/parent'],
-  student: ['/parent'], // Students use parent routes in MVP
+  student: ['/student'],
 };
 
 export async function middleware(request: NextRequest) {
@@ -87,8 +87,9 @@ function getDashboardPath(role: string): string {
     case 'tutor':
       return '/tutor';
     case 'parent':
-    case 'student':
       return '/parent';
+    case 'student':
+      return '/student';
     default:
       return '/login';
   }
