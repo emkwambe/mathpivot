@@ -134,7 +134,7 @@ export function getDashboardPath(role: UserRole): string {
     case 'parent':
       return '/parent';
     case 'student':
-      return '/parent'; // Students see parent view in this MVP
+      return '/student';
     default:
       return '/login';
   }
