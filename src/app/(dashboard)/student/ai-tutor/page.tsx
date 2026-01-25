@@ -2,6 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +49,9 @@ export default function AITutorPage() {
     setInput('');
     setIsLoading(true);
 
+    const aiMessageId = `ai-${Date.now()}`;
+    let streamStarted = false;
+
     try {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -60,28 +67,102 @@ export default function AITutorPage() {
         throw new Error(errorData.error || 'Failed to get response');
       }
 
-      const data = await res.json();
-      setConversationId(data.conversationId);
+      // Check if response is streaming (SSE) or JSON (fallback)
+      const contentType = res.headers.get('content-type') || '';
 
-      const aiMessage: Message = {
-        id: `ai-${Date.now()}`,
-        role: 'assistant',
-        content: data.message,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiMessage]);
+      if (contentType.includes('text/event-stream')) {
+        // Handle streaming response
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
+          throw new Error('Failed to get response stream');
+        }
+
+        let accumulatedContent = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.error) {
+                  throw new Error(data.error);
+                }
+
+                if (data.text) {
+                  accumulatedContent += data.text;
+
+                  // On first chunk, create the message and hide loading dots
+                  if (!streamStarted) {
+                    streamStarted = true;
+                    setIsLoading(false);
+                    setMessages((prev) => [
+                      ...prev,
+                      {
+                        id: aiMessageId,
+                        role: 'assistant',
+                        content: accumulatedContent,
+                        timestamp: new Date(),
+                      },
+                    ]);
+                  } else {
+                    // Update existing message content
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === aiMessageId
+                          ? { ...msg, content: accumulatedContent }
+                          : msg
+                      )
+                    );
+                  }
+                }
+
+                if (data.done && data.conversationId) {
+                  setConversationId(data.conversationId);
+                }
+              } catch {
+                // Ignore JSON parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+      } else {
+        // Handle non-streaming JSON response (fallback mode)
+        const data = await res.json();
+        setConversationId(data.conversationId);
+        setIsLoading(false);
+
+        const aiMessage: Message = {
+          id: aiMessageId,
+          role: 'assistant',
+          content: data.message,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+      }
     } catch (err) {
       console.error('Chat error:', err);
       setError(err instanceof Error ? err.message : 'Something went wrong');
-      const errorMessage: Message = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: "I'm having trouble connecting right now. Please try again in a moment.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
       setIsLoading(false);
+
+      // Only add error message if stream hasn't started
+      if (!streamStarted) {
+        const errorMessage: Message = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: "I'm having trouble connecting right now. Please try again in a moment.",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      }
     }
   };
 
@@ -162,7 +243,12 @@ export default function AITutorPage() {
                       >
                         {msg.role === 'assistant' ? (
                           <div className="prose prose-sm prose-slate max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-indigo-700 prose-headings:text-slate-900">
-                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            <ReactMarkdown
+                              remarkPlugins={[remarkMath, remarkGfm]}
+                              rehypePlugins={[rehypeKatex]}
+                            >
+                              {msg.content}
+                            </ReactMarkdown>
                           </div>
                         ) : (
                           <p className="whitespace-pre-wrap">{msg.content}</p>
