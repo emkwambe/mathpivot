@@ -1,9 +1,66 @@
-import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
-import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, SortDropdown, type SortOption } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
 
-export default async function StudentCertificationsPage() {
+// Level order for sorting
+const levelOrder: Record<string, number> = {
+  foundation: 1,
+  bronze: 2,
+  silver: 3,
+  gold: 4,
+  platinum: 5,
+  expert: 6,
+};
+
+type CertificationProgram = {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  short_description: string | null;
+  level: string;
+  category: string | null;
+  badge_image_url: string | null;
+  badge_color: string | null;
+  estimated_hours: number | null;
+  difficulty_rating: number | null;
+  is_active: boolean;
+  target_audience: string;
+  display_order: number | null;
+};
+
+function sortPrograms(programs: CertificationProgram[], sort: SortOption): CertificationProgram[] {
+  const sorted = [...programs];
+
+  switch (sort) {
+    case 'name':
+      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+    case 'name-desc':
+      return sorted.sort((a, b) => b.name.localeCompare(a.name));
+    case 'level':
+      return sorted.sort((a, b) => (levelOrder[a.level] || 0) - (levelOrder[b.level] || 0));
+    case 'level-desc':
+      return sorted.sort((a, b) => (levelOrder[b.level] || 0) - (levelOrder[a.level] || 0));
+    case 'difficulty':
+      return sorted.sort((a, b) => (a.difficulty_rating || 0) - (b.difficulty_rating || 0));
+    case 'difficulty-desc':
+      return sorted.sort((a, b) => (b.difficulty_rating || 0) - (a.difficulty_rating || 0));
+    case 'hours':
+      return sorted.sort((a, b) => (a.estimated_hours || 0) - (b.estimated_hours || 0));
+    case 'hours-desc':
+      return sorted.sort((a, b) => (b.estimated_hours || 0) - (a.estimated_hours || 0));
+    default:
+      return sorted;
+  }
+}
+
+interface PageProps {
+  searchParams: Promise<{ sort?: SortOption }>;
+}
+
+export default async function StudentCertificationsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const sort = params.sort || 'name';
   const user = await requireRole(['student']);
   const supabase = await createClient();
 
@@ -55,25 +112,19 @@ export default async function StudentCertificationsPage() {
     .from('certification_programs')
     .select('*')
     .eq('is_active', true)
-    .eq('target_audience', 'student')
-    .order('display_order');
+    .eq('target_audience', 'student');
 
   const earned = earnedCerts || [];
   const inProgress = progressData || [];
-  const available = availablePrograms || [];
+  const available = (availablePrograms || []) as CertificationProgram[];
 
   // Filter out programs that are earned or in progress
   const earnedIds = earned.map(e => (e.certification_program as { id: string })?.id);
   const inProgressIds = inProgress.map(p => (p.certification_program as { id: string })?.id);
   const notStarted = available.filter(p => !earnedIds.includes(p.id) && !inProgressIds.includes(p.id));
 
-  // Group by category
-  const programsByCategory = notStarted.reduce((acc, program) => {
-    const category = program.category || 'General';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(program);
-    return acc;
-  }, {} as Record<string, typeof notStarted>);
+  // Sort the available programs
+  const sortedPrograms = sortPrograms(notStarted, sort);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -87,12 +138,23 @@ export default async function StudentCertificationsPage() {
     }
   };
 
+  const getDifficultyLabel = (rating: number | null) => {
+    if (!rating) return null;
+    if (rating <= 2) return 'Easy';
+    if (rating <= 3) return 'Medium';
+    if (rating <= 4) return 'Hard';
+    return 'Expert';
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">My Certifications</h1>
-        <p className="text-slate-600">Track your progress and earn badges</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">My Certifications</h1>
+          <p className="text-slate-600">Track your progress and earn badges</p>
+        </div>
+        <SortDropdown currentSort={sort} />
       </div>
 
       {/* Stats */}
@@ -234,53 +296,56 @@ export default async function StudentCertificationsPage() {
       )}
 
       {/* Available Certifications */}
-      {Object.keys(programsByCategory).length > 0 ? (
-        Object.entries(programsByCategory).map(([category, programs]) => (
-          <Card key={category}>
-            <CardHeader>
-              <CardTitle>{category}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {programs.map((program) => (
-                  <div
-                    key={program.id}
-                    className="p-4 bg-white border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-start gap-3 mb-3">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: program.badge_color || '#3B82F6' }}
-                      >
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-slate-900 truncate">
-                          {program.name}
-                        </h4>
-                        <p className="text-sm text-slate-500 line-clamp-2">
-                          {program.short_description || program.description || 'Complete this certification'}
-                        </p>
-                      </div>
+      {sortedPrograms.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Certifications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sortedPrograms.map((program) => (
+                <div
+                  key={program.id}
+                  className="p-4 bg-white border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: program.badge_color || '#3B82F6' }}
+                    >
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${getLevelColor(program.level)}`}>
-                        {program.level}
-                      </span>
-                      {program.estimated_hours && (
-                        <span className="text-xs text-slate-400">
-                          ~{program.estimated_hours}h
-                        </span>
-                      )}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-slate-900 truncate">
+                        {program.name}
+                      </h4>
+                      <p className="text-sm text-slate-500 line-clamp-2">
+                        {program.short_description || program.description || 'Complete this certification'}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${getLevelColor(program.level)}`}>
+                      {program.level}
+                    </span>
+                    {getDifficultyLabel(program.difficulty_rating) && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
+                        {getDifficultyLabel(program.difficulty_rating)}
+                      </span>
+                    )}
+                    {program.estimated_hours && (
+                      <span className="text-xs text-slate-400">
+                        ~{program.estimated_hours}h
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : earned.length === 0 && inProgress.length === 0 ? (
         <Card>
           <CardContent className="py-12">
