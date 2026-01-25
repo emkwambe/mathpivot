@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
@@ -159,7 +160,13 @@ export default function AITutorPage() {
                             : 'bg-slate-100 text-slate-900 rounded-bl-md'
                         )}
                       >
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                        {msg.role === 'assistant' ? (
+                          <div className="prose prose-sm prose-slate max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-indigo-700 prose-headings:text-slate-900">
+                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        )}
                       </div>
                     </div>
                   ))
