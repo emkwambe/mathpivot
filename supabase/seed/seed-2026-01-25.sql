@@ -63,7 +63,7 @@ INSERT INTO career_pathways (id, code, name, description, icon_url, color, targe
  ARRAY['Physician', 'Pharmacist', 'Nurse', 'Healthcare Administrator'],
  ARRAY['MCAT Math', 'PCAT Math'],
  true, 6)
-ON CONFLICT (id) DO UPDATE SET
+ON CONFLICT (code) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,
   career_outcomes = EXCLUDED.career_outcomes;
@@ -164,7 +164,7 @@ INSERT INTO programs (id, name, slug, description, program_type, career_pathway_
  9, 12, 'hybrid', 'MathPivot Learning Center + Online',
  ARRAY['Mentorship', 'Food provided', 'Prizes'],
  'published', true)
-ON CONFLICT (id) DO UPDATE SET
+ON CONFLICT (slug) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,
   status = EXCLUDED.status;
@@ -264,7 +264,7 @@ INSERT INTO certification_programs (id, code, name, description, short_descripti
  'competition_prep', 'expert', 'problem-solving',
  '/badges/problem-solver.svg', '#F97316',
  100, 5, 'student', 9, 12, true, 8)
-ON CONFLICT (id) DO UPDATE SET
+ON CONFLICT (code) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description;
 
