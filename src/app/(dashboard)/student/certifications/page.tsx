@@ -119,8 +119,8 @@ export default async function StudentCertificationsPage({ searchParams }: PagePr
   const available = (availablePrograms || []) as CertificationProgram[];
 
   // Filter out programs that are earned or in progress
-  const earnedIds = earned.map(e => (e.certification_program as unknown as { id: string })?.id);
-  const inProgressIds = inProgress.map(p => (p.certification_program as unknown as { id: string })?.id);
+  const earnedIds = earned.map(e => (e.certification_program as unknown as { id: string } | null)?.id);
+  const inProgressIds = inProgress.map(p => (p.certification_program as unknown as { id: string } | null)?.id);
   const notStarted = available.filter(p => !earnedIds.includes(p.id) && !inProgressIds.includes(p.id));
 
   // Sort the available programs
