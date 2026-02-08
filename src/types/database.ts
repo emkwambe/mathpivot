@@ -150,6 +150,29 @@ export interface SessionAttachment {
   created_at: string;
 }
 
+export interface SessionWhiteboard {
+  id: string;
+  session_id: string;
+  elements: unknown[]; // Excalidraw elements array
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Whiteboard {
+  id: string;
+  tutor_user_id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  elements: unknown[]; // Excalidraw elements array
+  is_public: boolean;
+  tags: string[];
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Skill {
   id: string;
   course_track: CourseTrack;

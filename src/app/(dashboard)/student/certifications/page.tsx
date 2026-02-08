@@ -119,8 +119,8 @@ export default async function StudentCertificationsPage({ searchParams }: PagePr
   const available = (availablePrograms || []) as CertificationProgram[];
 
   // Filter out programs that are earned or in progress
-  const earnedIds = earned.map(e => (e.certification_program as { id: string })?.id);
-  const inProgressIds = inProgress.map(p => (p.certification_program as { id: string })?.id);
+  const earnedIds = earned.map(e => (e.certification_program as unknown as { id: string })?.id);
+  const inProgressIds = inProgress.map(p => (p.certification_program as unknown as { id: string })?.id);
   const notStarted = available.filter(p => !earnedIds.includes(p.id) && !inProgressIds.includes(p.id));
 
   // Sort the available programs
@@ -222,7 +222,7 @@ export default async function StudentCertificationsPage({ searchParams }: PagePr
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {earned.map((cert) => {
-                const program = cert.certification_program as { id: string; name: string; badge_image_url: string | null; badge_color: string | null; level: string } | null;
+                const program = cert.certification_program as unknown as { id: string; name: string; badge_image_url: string | null; badge_color: string | null; level: string } | null;
                 return (
                   <div
                     key={cert.id}
@@ -266,7 +266,7 @@ export default async function StudentCertificationsPage({ searchParams }: PagePr
           <CardContent>
             <div className="space-y-4">
               {inProgress.map((progress) => {
-                const program = progress.certification_program as { id: string; name: string; level: string } | null;
+                const program = progress.certification_program as unknown as { id: string; name: string; level: string } | null;
                 return (
                   <div
                     key={progress.id}
