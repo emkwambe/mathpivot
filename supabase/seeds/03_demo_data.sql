@@ -275,11 +275,101 @@ INSERT INTO credit_ledger (family_id, transaction_type, amount, balance_after, r
 VALUES (
     '00000000-0000-0000-0000-000000000100',
     'purchase',
-    8,
-    8,
+    10,
+    10,
     'purchase',
     'Initial demo credits'
 );
+
+-- ============================================================================
+-- DEMO BOOKINGS AND SESSIONS
+-- ============================================================================
+
+-- Past completed session (Emma with Sarah)
+INSERT INTO bookings (id, family_id, student_user_id, parent_user_id, tutor_user_id, start_at, end_at, modality, status, notes)
+VALUES (
+    '00000000-0000-0000-0000-000000000201',
+    '00000000-0000-0000-0000-000000000100',
+    '00000000-0000-0000-0000-000000000030', -- Emma
+    '00000000-0000-0000-0000-000000000020', -- Jennifer
+    '00000000-0000-0000-0000-000000000010', -- Sarah
+    NOW() - INTERVAL '3 days',
+    NOW() - INTERVAL '3 days' + INTERVAL '1 hour',
+    'online',
+    'completed',
+    'Algebra fundamentals review'
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO sessions (id, booking_id, status, attendance_status, started_at, completed_at, internal_notes, parent_summary, next_steps)
+VALUES (
+    '00000000-0000-0000-0000-000000000301',
+    '00000000-0000-0000-0000-000000000201',
+    'completed',
+    'attended',
+    NOW() - INTERVAL '3 days',
+    NOW() - INTERVAL '3 days' + INTERVAL '55 minutes',
+    'Emma showed great progress on linear equations. Need to work on word problems next.',
+    'Emma did excellent work today! We covered solving linear equations and she mastered the basics. Looking forward to tackling word problems next session.',
+    'Practice word problems from Chapter 3, pages 45-48'
+) ON CONFLICT (id) DO NOTHING;
+
+-- Deduct credit for completed session
+INSERT INTO credit_ledger (family_id, transaction_type, amount, balance_after, reference_type, reference_id, description)
+VALUES (
+    '00000000-0000-0000-0000-000000000100',
+    'usage',
+    -1,
+    9,
+    'booking',
+    '00000000-0000-0000-0000-000000000201',
+    'Session with Sarah Johnson - Algebra fundamentals'
+);
+
+-- Upcoming session tomorrow (Jake with Sarah)
+INSERT INTO bookings (id, family_id, student_user_id, parent_user_id, tutor_user_id, start_at, end_at, modality, status, notes)
+VALUES (
+    '00000000-0000-0000-0000-000000000202',
+    '00000000-0000-0000-0000-000000000100',
+    '00000000-0000-0000-0000-000000000031', -- Jake
+    '00000000-0000-0000-0000-000000000020', -- Jennifer
+    '00000000-0000-0000-0000-000000000010', -- Sarah
+    NOW() + INTERVAL '1 day' + INTERVAL '16 hours',
+    NOW() + INTERVAL '1 day' + INTERVAL '17 hours',
+    'online',
+    'confirmed',
+    'SAT Math prep - focus on trigonometry'
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO sessions (id, booking_id, status)
+VALUES (
+    '00000000-0000-0000-0000-000000000302',
+    '00000000-0000-0000-0000-000000000202',
+    'scheduled'
+) ON CONFLICT (id) DO NOTHING;
+
+-- In-progress session NOW (Emma with Michael) - for testing whiteboard
+INSERT INTO bookings (id, family_id, student_user_id, parent_user_id, tutor_user_id, start_at, end_at, modality, status, notes)
+VALUES (
+    '00000000-0000-0000-0000-000000000203',
+    '00000000-0000-0000-0000-000000000100',
+    '00000000-0000-0000-0000-000000000030', -- Emma
+    '00000000-0000-0000-0000-000000000020', -- Jennifer
+    '00000000-0000-0000-0000-000000000011', -- Michael
+    NOW() - INTERVAL '30 minutes',
+    NOW() + INTERVAL '30 minutes',
+    'online',
+    'confirmed',
+    'Statistics introduction'
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO sessions (id, booking_id, status, attendance_status, started_at)
+VALUES (
+    '00000000-0000-0000-0000-000000000303',
+    '00000000-0000-0000-0000-000000000203',
+    'in_progress',
+    'attended',
+    NOW() - INTERVAL '30 minutes'
+) ON CONFLICT (id) DO NOTHING;
 
 -- Verify demo data
 -- SELECT 'users_profile' as table_name, COUNT(*) FROM users_profile
