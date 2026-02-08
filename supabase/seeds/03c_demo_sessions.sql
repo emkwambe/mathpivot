@@ -61,7 +61,7 @@ VALUES (
 INSERT INTO credit_ledger (family_id, transaction_type, amount, balance_after, reference_type, reference_id, description)
 VALUES (
     '00000000-0000-0000-0000-000000000100',
-    'usage',
+    'session_debit',
     -1,
     9,
     'booking',
