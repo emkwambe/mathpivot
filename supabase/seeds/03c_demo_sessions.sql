@@ -49,7 +49,7 @@ VALUES (
     '00000000-0000-0000-0000-000000000301',
     '00000000-0000-0000-0000-000000000201',
     'completed',
-    'attended',
+    'present',
     NOW() - INTERVAL '3 days',
     NOW() - INTERVAL '3 days' + INTERVAL '55 minutes',
     'Emma showed great progress on linear equations.',
@@ -111,6 +111,6 @@ VALUES (
     '00000000-0000-0000-0000-000000000303',
     '00000000-0000-0000-0000-000000000203',
     'in_progress',
-    'attended',
+    'present',
     NOW() - INTERVAL '30 minutes'
 ) ON CONFLICT (id) DO NOTHING;
