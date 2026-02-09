@@ -18,13 +18,17 @@ if (typeof window !== 'undefined') {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseServiceRoleKey) {
+const hasCredentials = Boolean(supabaseUrl && supabaseServiceRoleKey);
+
+if (!hasCredentials) {
   console.warn('Missing Supabase admin credentials - admin operations will fail');
 }
 
+// Create admin client - use placeholder values during build if not configured
+// The actual client will only work at runtime with proper env vars
 export const supabaseAdmin = createClient(
-  supabaseUrl || '',
-  supabaseServiceRoleKey || '',
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseServiceRoleKey || 'placeholder-key-for-build-only',
   {
     auth: {
       autoRefreshToken: false,

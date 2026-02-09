@@ -5,6 +5,15 @@
 
 export type UserRole = 'admin' | 'tutor' | 'parent' | 'student';
 
+// Guide Model Types
+export type GuideLevel = 'Guide I' | 'Guide II' | 'Guide III';
+
+export type GuideLevelCode = 'GUIDE_I' | 'GUIDE_II' | 'GUIDE_III' | 'GUIDE_SPECIALIST';
+
+export type EligibilityTier = 'TIER_1_EXPLORER' | 'TIER_2_DEVELOPER' | 'TIER_3_ACCELERATOR' | 'NOT_ELIGIBLE';
+
+export type ProgramType = 'package' | 'subscription' | 'cohort' | 'accelerator' | 'fellowship' | 'elite';
+
 export type BookingStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'canceled' | 'no_show';
 
 export type SessionStatus = 'scheduled' | 'in_progress' | 'completed' | 'canceled';
@@ -79,6 +88,14 @@ export interface TutorsProfile {
   timezone: string;
   is_active: boolean;
   hourly_rate: number | null;
+  // Guide model fields
+  guide_level: GuideLevel | null;
+  guide_level_code: GuideLevelCode | null;
+  career_pathway_specializations: string[] | null;
+  eligible_grades: number[] | null;
+  max_concurrent_students: number;
+  guide_certified_at: string | null;
+  guide_certification_expires_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -239,13 +256,16 @@ export interface Product {
   id: string;
   name: string;
   description: string | null;
-  product_type: ProductType;
+  product_type: ProgramType;
   credits: number;
   price_cents: number;
   currency: string;
   is_active: boolean;
   stripe_product_id: string | null;
   stripe_price_id: string | null;
+  // Guide model fields
+  guide_level_required: GuideLevelCode | null;
+  eligibility_tier_required: EligibilityTier | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
@@ -357,6 +377,137 @@ export interface Waitlist {
   notes: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// =============================================================================
+// GUIDE MODEL TYPES
+// =============================================================================
+
+export interface GuideLevelDefinition {
+  id: string;
+  level_code: GuideLevelCode;
+  name: string;
+  description: string | null;
+  coach_focus_percent: number;
+  mentor_focus_percent: number;
+  min_experience_years: number;
+  required_certifications: string[] | null;
+  hourly_rate_min: number | null;
+  hourly_rate_max: number | null;
+  max_students: number | null;
+  training_hours_required: number | null;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentEligibilityProfile {
+  id: string;
+  student_id: string;
+  assessment_date: string;
+  // 5-Factor Assessment Scores (1-5 each)
+  academic_performance: number | null;
+  math_passion: number | null;
+  achievement_level: number | null;
+  career_direction: number | null;
+  personal_qualities: number | null;
+  // Computed total (5-25)
+  total_score: number;
+  notes: string | null;
+  assessed_by: string | null;
+  next_assessment_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProgramGuide {
+  id: string;
+  program_id: string;
+  guide_level_code: GuideLevelCode;
+  min_guides_required: number;
+  max_guides_allowed: number | null;
+  guide_student_ratio: number | null;
+  created_at: string;
+}
+
+export interface GuideCompensationPlan {
+  id: string;
+  guide_level_code: GuideLevelCode;
+  base_rate_per_hour: number;
+  commission_percent: number | null;
+  session_bonus: number | null;
+  retention_bonus: number | null;
+  outcome_bonus_rules: Record<string, number> | null;
+  health_stipend: number | null;
+  training_budget: number | null;
+  technology_allowance: number | null;
+  effective_date: string;
+  expiration_date: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentPathwayRecommendation {
+  id: string;
+  student_id: string;
+  pathway_id: string;
+  recommended_guide_level: GuideLevelCode | null;
+  confidence_score: number | null;
+  reason_codes: string[] | null;
+  suggested_programs: string[] | null;
+  recommended_start_date: string | null;
+  estimated_completion_months: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CareerPathway {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  icon_url: string | null;
+  color: string | null;
+  target_grades: number[] | null;
+  guide_specializations: GuideLevel[] | null;
+  min_guide_level: GuideLevel | null;
+  prerequisite_tracks: CourseTrack[] | null;
+  career_outcomes: string[] | null;
+  certifications: string[] | null;
+  is_active: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Helper function to get eligibility tier from score
+export function getEligibilityTier(score: number): EligibilityTier {
+  if (score >= 23) return 'TIER_3_ACCELERATOR';
+  if (score >= 20) return 'TIER_2_DEVELOPER';
+  if (score >= 16) return 'TIER_1_EXPLORER';
+  return 'NOT_ELIGIBLE';
+}
+
+// Helper to get tier display name
+export function getEligibilityTierName(tier: EligibilityTier): string {
+  switch (tier) {
+    case 'TIER_3_ACCELERATOR': return 'Accelerator';
+    case 'TIER_2_DEVELOPER': return 'Developer';
+    case 'TIER_1_EXPLORER': return 'Explorer';
+    case 'NOT_ELIGIBLE': return 'Not Eligible';
+  }
+}
+
+// Helper to get guide level display info
+export function getGuideLevelInfo(code: GuideLevelCode): { name: string; coachPercent: number; mentorPercent: number } {
+  switch (code) {
+    case 'GUIDE_I': return { name: 'Guide I', coachPercent: 80, mentorPercent: 20 };
+    case 'GUIDE_II': return { name: 'Guide II', coachPercent: 50, mentorPercent: 50 };
+    case 'GUIDE_III': return { name: 'Guide III', coachPercent: 20, mentorPercent: 80 };
+    case 'GUIDE_SPECIALIST': return { name: 'Specialist', coachPercent: 30, mentorPercent: 70 };
+  }
 }
 
 // Joined/Extended types for UI
