@@ -5,6 +5,14 @@ import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui
 import { formatDate, formatTime } from '@/lib/utils';
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
 
+// Guide level display helpers
+const guideLevelInfo: Record<string, { name: string; coachPercent: number; mentorPercent: number; color: string }> = {
+  'GUIDE_I': { name: 'Guide I', coachPercent: 80, mentorPercent: 20, color: 'bg-blue-100 text-blue-800' },
+  'GUIDE_II': { name: 'Guide II', coachPercent: 50, mentorPercent: 50, color: 'bg-purple-100 text-purple-800' },
+  'GUIDE_III': { name: 'Guide III', coachPercent: 20, mentorPercent: 80, color: 'bg-amber-100 text-amber-800' },
+  'GUIDE_SPECIALIST': { name: 'Specialist', coachPercent: 30, mentorPercent: 70, color: 'bg-emerald-100 text-emerald-800' },
+};
+
 export default async function TutorDashboardPage() {
   const user = await requireRole('tutor');
   const supabase = await createClient();
@@ -14,6 +22,21 @@ export default async function TutorDashboardPage() {
   const todayEnd = endOfDay(now).toISOString();
   const weekStart = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 }).toISOString();
+
+  // Get tutor profile with guide level info
+  const { data: tutorProfile } = await supabase
+    .from('tutors_profile')
+    .select('guide_level, guide_level_code, career_pathway_specializations, eligible_grades, max_concurrent_students, guide_certified_at')
+    .eq('user_id', user.id)
+    .single();
+
+  // Get active student count for this tutor
+  const { count: activeStudentCount } = await supabase
+    .from('bookings')
+    .select('student_user_id', { count: 'exact', head: true })
+    .eq('tutor_user_id', user.id)
+    .gte('start_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+    .in('status', ['confirmed', 'completed']);
 
   // Get today's sessions
   const { data: todaySessions } = await supabase
@@ -162,6 +185,89 @@ export default async function TutorDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Guide Profile Card */}
+      {tutorProfile?.guide_level_code && (
+        <Card className="border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+              Guide Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Guide Level */}
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Your Guide Level</p>
+                <Badge className={`text-base px-3 py-1 ${guideLevelInfo[tutorProfile.guide_level_code]?.color || 'bg-slate-100'}`}>
+                  {guideLevelInfo[tutorProfile.guide_level_code]?.name || tutorProfile.guide_level}
+                </Badge>
+                {tutorProfile.guide_certified_at && (
+                  <p className="text-xs text-slate-500 mt-2">
+                    Certified {formatDate(tutorProfile.guide_certified_at, 'MMM d, yyyy')}
+                  </p>
+                )}
+              </div>
+
+              {/* Coach/Mentor Balance */}
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Focus Balance</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-500 rounded-full"
+                        style={{ width: `${guideLevelInfo[tutorProfile.guide_level_code]?.coachPercent || 50}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-slate-600">
+                      Coach {guideLevelInfo[tutorProfile.guide_level_code]?.coachPercent || 50}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-purple-500 rounded-full"
+                        style={{ width: `${guideLevelInfo[tutorProfile.guide_level_code]?.mentorPercent || 50}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-slate-600">
+                      Mentor {guideLevelInfo[tutorProfile.guide_level_code]?.mentorPercent || 50}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Student Capacity */}
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Student Capacity</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-slate-900">{activeStudentCount || 0}</span>
+                  <span className="text-slate-500">/ {tutorProfile.max_concurrent_students || 12}</span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">active students (30 days)</p>
+              </div>
+            </div>
+
+            {/* Eligible Grades */}
+            {tutorProfile.eligible_grades && tutorProfile.eligible_grades.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-emerald-200">
+                <p className="text-sm text-slate-600 mb-2">Eligible Grades</p>
+                <div className="flex flex-wrap gap-2">
+                  {tutorProfile.eligible_grades.map((grade: number) => (
+                    <span key={grade} className="px-2 py-1 bg-white rounded text-sm text-slate-700 border border-slate-200">
+                      Grade {grade}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

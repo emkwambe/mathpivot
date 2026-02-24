@@ -2,9 +2,24 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { requireRole, canAccessStudent } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { StudentProgressVisualization } from '@/components/StudentProgressVisualization';
 import { formatDate, snakeToTitle } from '@/lib/utils';
+
+// Eligibility tier display helpers
+const tierInfo: Record<string, { name: string; color: string; guideLevel: string }> = {
+  'TIER_1_EXPLORER': { name: 'Explorer', color: 'bg-blue-100 text-blue-800 border-blue-200', guideLevel: 'Guide I' },
+  'TIER_2_DEVELOPER': { name: 'Developer', color: 'bg-purple-100 text-purple-800 border-purple-200', guideLevel: 'Guide II' },
+  'TIER_3_ACCELERATOR': { name: 'Accelerator', color: 'bg-amber-100 text-amber-800 border-amber-200', guideLevel: 'Guide III' },
+  'NOT_ELIGIBLE': { name: 'Developing', color: 'bg-slate-100 text-slate-800 border-slate-200', guideLevel: 'Guide I' },
+};
+
+function getTierFromScore(score: number): string {
+  if (score >= 23) return 'TIER_3_ACCELERATOR';
+  if (score >= 20) return 'TIER_2_DEVELOPER';
+  if (score >= 16) return 'TIER_1_EXPLORER';
+  return 'NOT_ELIGIBLE';
+}
 
 interface PageProps {
   params: Promise<{ studentId: string }>;
@@ -97,7 +112,38 @@ export default async function StudentProfilePage({ params }: PageProps) {
     s => (s.bookings as unknown as { student_user_id: string })?.student_user_id === studentId
   ) || [];
 
+  // Get eligibility profile
+  const { data: eligibility } = await supabase
+    .from('student_eligibility_profiles')
+    .select('*')
+    .eq('student_id', studentId)
+    .single();
+
+  // Get pathway recommendations
+  const { data: pathwayRecs } = await supabase
+    .from('student_pathway_recommendations')
+    .select(`
+      id,
+      recommended_guide_level,
+      confidence_score,
+      reason_codes,
+      estimated_completion_months,
+      career_pathways!inner(
+        name,
+        code,
+        color,
+        description
+      )
+    `)
+    .eq('student_id', studentId)
+    .order('confidence_score', { ascending: false })
+    .limit(3);
+
   const profile = student.users_profile as unknown as { full_name: string; email: string; avatar_url: string | null };
+
+  // Calculate tier from eligibility score
+  const studentTier = eligibility ? getTierFromScore(eligibility.total_score) : null;
+  const currentTierInfo = studentTier ? tierInfo[studentTier] : null;
 
   return (
     <div className="space-y-6">
@@ -192,6 +238,97 @@ export default async function StudentProfilePage({ params }: PageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Eligibility & Pathways */}
+      {eligibility && (
+        <Card className={`border-2 ${currentTierInfo?.color.split(' ')[2] || 'border-slate-200'}`}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+              Eligibility Tier & Pathway
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Current Tier */}
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Current Tier</p>
+                <div className="flex items-center gap-3">
+                  <Badge className={`text-lg px-4 py-2 ${currentTierInfo?.color || 'bg-slate-100'}`}>
+                    {currentTierInfo?.name || 'Not Assessed'}
+                  </Badge>
+                  <div className="text-sm text-slate-600">
+                    <p>Score: <span className="font-medium">{eligibility.total_score}/25</span></p>
+                    <p>Recommended: <span className="font-medium">{currentTierInfo?.guideLevel}</span></p>
+                  </div>
+                </div>
+
+                {/* Assessment Breakdown */}
+                <div className="mt-4 grid grid-cols-5 gap-2">
+                  {[
+                    { label: 'Academic', value: eligibility.academic_performance },
+                    { label: 'Passion', value: eligibility.math_passion },
+                    { label: 'Achievement', value: eligibility.achievement_level },
+                    { label: 'Direction', value: eligibility.career_direction },
+                    { label: 'Qualities', value: eligibility.personal_qualities },
+                  ].map((factor) => (
+                    <div key={factor.label} className="text-center">
+                      <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 flex items-center justify-center">
+                        <span className="font-bold text-slate-700">{factor.value || '-'}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">{factor.label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-xs text-slate-500 mt-4">
+                  Last assessed: {formatDate(eligibility.assessment_date)}
+                  {eligibility.next_assessment_date && (
+                    <> • Next: {formatDate(eligibility.next_assessment_date)}</>
+                  )}
+                </p>
+              </div>
+
+              {/* Pathway Recommendations */}
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Recommended Pathways</p>
+                {pathwayRecs && pathwayRecs.length > 0 ? (
+                  <div className="space-y-3">
+                    {pathwayRecs.map((rec) => {
+                      const pathway = rec.career_pathways as unknown as { name: string; code: string; color: string; description: string };
+                      return (
+                        <div
+                          key={rec.id}
+                          className="p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                          style={{ borderLeftColor: pathway.color, borderLeftWidth: '4px' }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium text-slate-900">{pathway.name}</p>
+                            {rec.confidence_score && (
+                              <span className="text-xs text-slate-500">
+                                {Math.round(rec.confidence_score * 100)}% match
+                              </span>
+                            )}
+                          </div>
+                          {rec.estimated_completion_months && (
+                            <p className="text-xs text-slate-500 mt-1">
+                              Est. {rec.estimated_completion_months} months
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">No pathway recommendations yet</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Progress Visualization */}
       <StudentProgressVisualization
