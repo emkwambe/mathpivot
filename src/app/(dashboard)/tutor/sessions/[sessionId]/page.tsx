@@ -22,21 +22,23 @@ async function endSessionAction(formData: FormData) {
 
   const supabase = await createClient();
 
-  // Get session
+  // Get session with booking to verify tutor ownership
   const { data: session } = await supabase
     .from('sessions')
-    .select('*, booking_id')
+    .select('*, booking:bookings!inner(tutor_user_id)')
     .eq('id', sessionId)
     .single();
 
-  if (!session || session.tutor_user_id !== user.id) return;
+  const booking = session?.booking as { tutor_user_id: string } | null;
+  if (!session || booking?.tutor_user_id !== user.id) return;
 
   // Update session
   await supabase
     .from('sessions')
     .update({
-      ended_at: new Date().toISOString(),
-      tutor_notes: tutorNotes || null,
+      completed_at: new Date().toISOString(),
+      status: 'completed',
+      internal_notes: tutorNotes || null,
       next_steps: nextSteps || null,
     })
     .eq('id', sessionId);
@@ -67,14 +69,14 @@ async function updateMasteryAction(formData: FormData) {
   const supabase = await createClient();
 
   await supabase
-    .from('mastery')
+    .from('student_skill_mastery')
     .upsert(
       {
         student_user_id: studentUserId,
         skill_id: skillId,
-        current_level: level,
-        last_assessed_at: new Date().toISOString(),
-        last_assessed_by: user.id,
+        mastery_level: level,
+        last_practiced_at: new Date().toISOString(),
+        updated_by_user_id: user.id,
       },
       {
         onConflict: 'student_user_id,skill_id',
@@ -93,7 +95,7 @@ export default async function SessionDetailPage({ params }: Props) {
   const user = await requireRole(['tutor', 'admin']);
   const supabase = await createClient();
 
-  // Get session details
+  // Get session details (include booking for tutor/student info)
   const { data: session, error } = await supabase
     .from('sessions')
     .select(`
@@ -102,7 +104,9 @@ export default async function SessionDetailPage({ params }: Props) {
         start_at,
         end_at,
         notes,
-        status
+        status,
+        tutor_user_id,
+        student_user_id
       )
     `)
     .eq('id', sessionId)
@@ -112,43 +116,45 @@ export default async function SessionDetailPage({ params }: Props) {
     notFound();
   }
 
+  const bookingData = session.booking as { start_at: string; end_at: string; notes: string | null; status: string; tutor_user_id: string; student_user_id: string };
+
   // Verify tutor owns this session
-  if (session.tutor_user_id !== user.id && user.role !== 'admin') {
+  if (bookingData.tutor_user_id !== user.id && user.role !== 'admin') {
     redirect('/tutor');
   }
+
+  const studentUserId = bookingData.student_user_id;
 
   // Get student profile
   const { data: studentProfile } = await supabase
     .from('users_profile')
     .select('full_name')
-    .eq('id', session.student_user_id)
+    .eq('id', studentUserId)
     .single();
 
-  // Get student's grade level
+  // Get student's grade and course track
   const { data: studentDetails } = await supabase
     .from('students_profile')
-    .select('grade_level, goals')
-    .eq('user_id', session.student_user_id)
+    .select('grade, course_track, goals')
+    .eq('user_id', studentUserId)
     .single();
 
-  // Get skills for the student's grade level
+  // Get skills for the student's course track
   const { data: skills } = await supabase
     .from('skills')
     .select('*')
-    .eq('is_active', true)
-    .lte('min_grade', studentDetails?.grade_level || 9)
-    .gte('max_grade', studentDetails?.grade_level || 9)
+    .eq('course_track', studentDetails?.course_track || 'math_1')
     .order('category')
-    .order('name');
+    .order('order_index');
 
   // Get current mastery levels
   const { data: masteryLevels } = await supabase
-    .from('mastery')
-    .select('skill_id, current_level')
-    .eq('student_user_id', session.student_user_id);
+    .from('student_skill_mastery')
+    .select('skill_id, mastery_level')
+    .eq('student_user_id', studentUserId);
 
   const masteryMap = new Map(
-    masteryLevels?.map((m) => [m.skill_id, m.current_level]) || []
+    masteryLevels?.map((m) => [m.skill_id, m.mastery_level]) || []
   );
 
   // Group skills by category
@@ -161,9 +167,9 @@ export default async function SessionDetailPage({ params }: Props) {
     skillsByCategory[skill.category].push(skill);
   }
 
-  const isActive = session.started_at && !session.ended_at;
-  const isCompleted = !!session.ended_at;
-  const booking = session.booking as { start_at: string; end_at: string; notes: string | null; status: string };
+  const isActive = session.started_at && !session.completed_at;
+  const isCompleted = !!session.completed_at;
+  const booking = bookingData;
 
   return (
     <div className="space-y-6">
@@ -214,7 +220,7 @@ export default async function SessionDetailPage({ params }: Props) {
             <div>
               <dt className="text-slate-600">Grade Level</dt>
               <dd className="font-medium text-slate-900">
-                Grade {studentDetails?.grade_level}
+                Grade {studentDetails?.grade}
               </dd>
             </div>
             <div>
@@ -229,9 +235,9 @@ export default async function SessionDetailPage({ params }: Props) {
                 {isCompleted ? 'Actual Duration' : 'Duration'}
               </dt>
               <dd className="font-medium text-slate-900">
-                {isCompleted && session.ended_at
+                {isCompleted && session.completed_at
                   ? `${Math.round(
-                      (new Date(session.ended_at).getTime() -
+                      (new Date(session.completed_at).getTime() -
                         new Date(session.started_at).getTime()) /
                         60000
                     )} minutes`
@@ -289,7 +295,7 @@ export default async function SessionDetailPage({ params }: Props) {
                       <MasteryRow
                         key={skill.id}
                         skill={skill}
-                        studentUserId={session.student_user_id}
+                        studentUserId={studentUserId}
                         currentLevel={masteryMap.get(skill.id) || 'not_started'}
                       />
                     ))}
@@ -351,13 +357,13 @@ export default async function SessionDetailPage({ params }: Props) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {session.tutor_notes && (
+              {session.internal_notes && (
                 <div>
                   <h4 className="text-sm font-medium text-slate-700 mb-1">
                     Session Notes
                   </h4>
                   <p className="text-slate-900 whitespace-pre-wrap">
-                    {session.tutor_notes}
+                    {session.internal_notes}
                   </p>
                 </div>
               )}
@@ -373,7 +379,7 @@ export default async function SessionDetailPage({ params }: Props) {
                 </div>
               )}
 
-              {!session.tutor_notes && !session.next_steps && (
+              {!session.internal_notes && !session.next_steps && (
                 <p className="text-slate-500 text-center py-4">
                   No session notes were recorded.
                 </p>

@@ -17,20 +17,18 @@ async function createSkillAction(formData: FormData) {
   await supabase
     .from('skills')
     .insert({
+      code: formData.get('code') as string,
       name: formData.get('name') as string,
       description: (formData.get('description') as string) || null,
       category: formData.get('category') as string,
-      subcategory: (formData.get('subcategory') as string) || null,
-      min_grade: parseInt(formData.get('minGrade') as string, 10),
-      max_grade: parseInt(formData.get('maxGrade') as string, 10),
-      standard_code: (formData.get('standardCode') as string) || null,
-      is_active: true,
+      course_track: formData.get('courseTrack') as string,
+      order_index: parseInt(formData.get('orderIndex') as string, 10) || 0,
     });
 
   revalidatePath('/admin/skills');
 }
 
-async function toggleSkillAction(skillId: string, isActive: boolean) {
+async function deleteSkillAction(formData: FormData) {
   'use server';
 
   const { getCurrentUser } = await import('@/lib/auth');
@@ -39,11 +37,12 @@ async function toggleSkillAction(skillId: string, isActive: boolean) {
   const user = await getCurrentUser();
   if (!user || user.role !== 'admin') return;
 
+  const skillId = formData.get('skillId') as string;
   const supabase = await createClient();
 
   await supabase
     .from('skills')
-    .update({ is_active: isActive })
+    .delete()
     .eq('id', skillId);
 
   revalidatePath('/admin/skills');
@@ -57,23 +56,37 @@ export default async function AdminSkillsPage() {
   const { data: skills } = await supabase
     .from('skills')
     .select('*')
+    .order('course_track')
     .order('category')
-    .order('subcategory')
-    .order('name');
+    .order('order_index');
 
-  // Group skills by category
+  // Group skills by course track then category
   type Skill = NonNullable<typeof skills>[number];
-  const skillsByCategory: Record<string, Skill[]> = {};
+  const skillsByTrack: Record<string, Record<string, Skill[]>> = {};
   for (const skill of skills || []) {
-    const key = skill.category;
-    if (!skillsByCategory[key]) {
-      skillsByCategory[key] = [];
+    const track = skill.course_track;
+    if (!skillsByTrack[track]) {
+      skillsByTrack[track] = {};
     }
-    skillsByCategory[key].push(skill);
+    const cat = skill.category || 'Uncategorized';
+    if (!skillsByTrack[track][cat]) {
+      skillsByTrack[track][cat] = [];
+    }
+    skillsByTrack[track][cat].push(skill);
   }
 
-  // Get unique categories for the dropdown
-  const categories = [...new Set(skills?.map((s) => s.category) || [])].sort();
+  // Get unique categories and tracks for the dropdowns
+  const categories = [...new Set(skills?.map((s) => s.category).filter(Boolean) || [])].sort();
+  const courseTracks = ['math_1', 'math_2', 'math_3', 'pre_calc', 'ap_calc_ab', 'ap_calc_bc', 'ap_stats',
+    'actuarial', 'data_science', 'robotics', 'competition_math', 'epidemiology', 'financial_math'];
+
+  const trackLabels: Record<string, string> = {
+    math_1: 'Math 1', math_2: 'Math 2', math_3: 'Math 3',
+    pre_calc: 'Pre-Calculus', ap_calc_ab: 'AP Calc AB', ap_calc_bc: 'AP Calc BC',
+    ap_stats: 'AP Statistics', actuarial: 'Actuarial', data_science: 'Data Science',
+    robotics: 'Robotics', competition_math: 'Competition Math',
+    epidemiology: 'Epidemiology', financial_math: 'Financial Math',
+  };
 
   return (
     <div className="space-y-6">
@@ -98,15 +111,45 @@ export default async function AdminSkillsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Skill Code *
+                </label>
+                <input
+                  type="text"
+                  name="code"
+                  required
+                  placeholder="e.g., M1-EQ-05"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   Skill Name *
                 </label>
                 <input
                   type="text"
                   name="name"
                   required
-                  placeholder="e.g., Quadratic Equations"
+                  placeholder="e.g., Quadratic Formula"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Course Track *
+                </label>
+                <select
+                  name="courseTrack"
+                  required
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+                >
+                  {courseTracks.map((track) => (
+                    <option key={track} value={track}>
+                      {trackLabels[track] || track}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -118,7 +161,7 @@ export default async function AdminSkillsPage() {
                   name="category"
                   required
                   list="categories"
-                  placeholder="e.g., Algebra"
+                  placeholder="e.g., Equations"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
                 <datalist id="categories">
@@ -130,54 +173,13 @@ export default async function AdminSkillsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Subcategory
-                </label>
-                <input
-                  type="text"
-                  name="subcategory"
-                  placeholder="e.g., Equations"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Standard Code
-                </label>
-                <input
-                  type="text"
-                  name="standardCode"
-                  placeholder="e.g., NC.M1.A-REI.4"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Min Grade *
+                  Order Index
                 </label>
                 <input
                   type="number"
-                  name="minGrade"
-                  required
-                  min="1"
-                  max="12"
-                  defaultValue="9"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Max Grade *
-                </label>
-                <input
-                  type="number"
-                  name="maxGrade"
-                  required
-                  min="1"
-                  max="12"
-                  defaultValue="12"
+                  name="orderIndex"
+                  min="0"
+                  defaultValue="0"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
@@ -200,67 +202,52 @@ export default async function AdminSkillsPage() {
         </CardContent>
       </Card>
 
-      {/* Skills List */}
-      {Object.keys(skillsByCategory).length > 0 ? (
-        Object.entries(skillsByCategory).map(([category, categorySkills]) => (
-          <Card key={category}>
-            <CardHeader>
-              <CardTitle>{category}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {categorySkills?.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border ${
-                      skill.is_active
-                        ? 'bg-white border-slate-200'
-                        : 'bg-slate-50 border-slate-200 opacity-60'
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-slate-900">{skill.name}</p>
-                        {skill.subcategory && (
-                          <Badge variant="secondary">{skill.subcategory}</Badge>
-                        )}
-                        {skill.standard_code && (
-                          <Badge variant="info">{skill.standard_code}</Badge>
-                        )}
-                        {!skill.is_active && (
-                          <Badge variant="warning">Inactive</Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
-                        <span>
-                          Grades {skill.min_grade}-{skill.max_grade}
-                        </span>
-                        {skill.description && (
-                          <span className="truncate max-w-md">
-                            {skill.description}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <form
-                      action={toggleSkillAction.bind(null, skill.id, !skill.is_active)}
-                    >
-                      <button
-                        type="submit"
-                        className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                          skill.is_active
-                            ? 'text-red-600 hover:bg-red-50'
-                            : 'text-green-600 hover:bg-green-50'
-                        }`}
+      {/* Skills List - grouped by course track */}
+      {Object.keys(skillsByTrack).length > 0 ? (
+        Object.entries(skillsByTrack).map(([track, categories]) => (
+          <div key={track} className="space-y-4">
+            <h2 className="text-lg font-semibold text-slate-800">
+              {trackLabels[track] || track}
+            </h2>
+            {Object.entries(categories).map(([category, categorySkills]) => (
+              <Card key={`${track}-${category}`}>
+                <CardHeader>
+                  <CardTitle className="text-base">{category}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {categorySkills?.map((skill) => (
+                      <div
+                        key={skill.id}
+                        className="flex items-center justify-between p-3 rounded-lg border bg-white border-slate-200"
                       >
-                        {skill.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
-                    </form>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-slate-900">{skill.name}</p>
+                            <Badge variant="secondary">{skill.code}</Badge>
+                          </div>
+                          {skill.description && (
+                            <p className="text-sm text-slate-500 mt-1 truncate max-w-lg">
+                              {skill.description}
+                            </p>
+                          )}
+                        </div>
+                        <form action={deleteSkillAction}>
+                          <input type="hidden" name="skillId" value={skill.id} />
+                          <button
+                            type="submit"
+                            className="px-3 py-1 text-sm rounded-lg transition-colors text-red-600 hover:bg-red-50"
+                          >
+                            Delete
+                          </button>
+                        </form>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ))
       ) : (
         <Card>

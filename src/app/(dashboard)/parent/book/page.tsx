@@ -34,17 +34,21 @@ export default async function BookPage() {
     .from('students_profile')
     .select(`
       user_id,
-      grade_level,
+      grade,
       users_profile!inner(full_name)
     `)
     .eq('family_id', familyMember.family_id);
 
-  // Get family's credit balance
-  const { data: family } = await supabase
-    .from('families')
-    .select('credit_balance')
-    .eq('id', familyMember.family_id)
+  // Get family's credit balance from ledger (families table doesn't have credit_balance)
+  const { data: creditEntry } = await supabase
+    .from('credit_ledger')
+    .select('balance_after')
+    .eq('family_id', familyMember.family_id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single();
+
+  const creditBalance = creditEntry?.balance_after || 0;
 
   // Get active tutors
   const { data: tutors } = await supabase
@@ -52,7 +56,7 @@ export default async function BookPage() {
     .select(`
       user_id,
       bio,
-      hourly_rate_cents,
+      hourly_rate,
       users_profile!inner(full_name)
     `)
     .eq('is_active', true);
@@ -60,14 +64,14 @@ export default async function BookPage() {
   const formattedStudents = students?.map((s) => ({
     id: s.user_id,
     name: (s.users_profile as unknown as { full_name: string }).full_name,
-    gradeLevel: s.grade_level,
+    gradeLevel: s.grade,
   })) || [];
 
   const formattedTutors = tutors?.map((t) => ({
     id: t.user_id,
     name: (t.users_profile as unknown as { full_name: string }).full_name,
     bio: t.bio,
-    hourlyRateCents: t.hourly_rate_cents,
+    hourlyRateCents: t.hourly_rate,
   })) || [];
 
   return (
@@ -91,12 +95,12 @@ export default async function BookPage() {
           </div>
           <div className="text-right">
             <p className="text-sm text-slate-600">Available Credits</p>
-            <p className="text-2xl font-bold text-blue-600">{family?.credit_balance || 0}</p>
+            <p className="text-2xl font-bold text-blue-600">{creditBalance}</p>
           </div>
         </div>
 
         {/* Credit Balance Alert */}
-        {family && family.credit_balance < 1 && (
+        {creditBalance < 1 && (
           <Card className="border-amber-200 bg-amber-50">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -152,7 +156,7 @@ export default async function BookPage() {
               <BookingForm
                 students={formattedStudents}
                 tutors={formattedTutors}
-                creditBalance={family?.credit_balance || 0}
+                creditBalance={creditBalance}
               />
             )}
           </CardContent>

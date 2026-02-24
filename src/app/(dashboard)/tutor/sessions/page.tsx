@@ -15,19 +15,20 @@ export default async function TutorSessionsPage() {
     .eq('user_id', user.id)
     .single();
 
-  // Get all sessions for this tutor
+  // Get all sessions for this tutor (filter via bookings join)
   const { data: sessions } = await supabase
     .from('sessions')
     .select(`
       *,
-      booking:bookings(
+      booking:bookings!inner(
         start_at,
         end_at,
         status,
-        student_user_id
+        student_user_id,
+        tutor_user_id
       )
     `)
-    .eq('tutor_user_id', user.id)
+    .eq('bookings.tutor_user_id', user.id)
     .order('created_at', { ascending: false });
 
   // Get student names

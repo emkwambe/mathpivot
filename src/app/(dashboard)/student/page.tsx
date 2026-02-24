@@ -11,7 +11,7 @@ export default async function StudentDashboardPage() {
   // Get student profile
   const { data: studentProfile } = await supabase
     .from('students_profile')
-    .select('grade_level, course_track, goals')
+    .select('grade, course_track, goals')
     .eq('user_id', user.id)
     .single();
 
@@ -33,30 +33,31 @@ export default async function StudentDashboardPage() {
     .order('start_at', { ascending: true })
     .limit(5);
 
-  // Get recent session notes
+  // Get recent session notes (sessions don't have student_user_id, filter via bookings)
   const { data: recentSessions } = await supabase
     .from('sessions')
     .select(`
       id,
       started_at,
-      ended_at,
-      tutor_notes,
-      next_steps
+      completed_at,
+      internal_notes,
+      next_steps,
+      booking:bookings!inner(student_user_id)
     `)
-    .eq('student_user_id', user.id)
-    .not('ended_at', 'is', null)
-    .order('ended_at', { ascending: false })
+    .eq('bookings.student_user_id', user.id)
+    .not('completed_at', 'is', null)
+    .order('completed_at', { ascending: false })
     .limit(3);
 
   // Get mastery levels
   const { data: masteryData } = await supabase
-    .from('mastery')
+    .from('student_skill_mastery')
     .select(`
-      current_level,
+      mastery_level,
       skill:skills(name, category)
     `)
     .eq('student_user_id', user.id)
-    .order('last_assessed_at', { ascending: false })
+    .order('last_practiced_at', { ascending: false })
     .limit(6);
 
   const masteryLevelColors: Record<string, string> = {
@@ -74,8 +75,8 @@ export default async function StudentDashboardPage() {
           Welcome back, {user.fullName?.split(' ')[0]}!
         </h1>
         <p className="text-indigo-100 mt-1">
-          {studentProfile?.grade_level
-            ? `Grade ${studentProfile.grade_level} • ${studentProfile.course_track?.replace('_', ' ') || 'General Math'}`
+          {studentProfile?.grade
+            ? `Grade ${studentProfile.grade} • ${studentProfile.course_track?.replace('_', ' ') || 'General Math'}`
             : "Let's keep learning together!"}
         </p>
         {studentProfile?.goals && (
@@ -225,8 +226,8 @@ export default async function StudentDashboardPage() {
                         <p className="font-medium text-slate-900">{skill?.name}</p>
                         <p className="text-xs text-slate-500">{skill?.category}</p>
                       </div>
-                      <Badge className={masteryLevelColors[item.current_level] || 'bg-slate-100'}>
-                        {item.current_level.replace('_', ' ')}
+                      <Badge className={masteryLevelColors[item.mastery_level] || 'bg-slate-100'}>
+                        {item.mastery_level.replace('_', ' ')}
                       </Badge>
                     </div>
                   );
@@ -263,10 +264,10 @@ export default async function StudentDashboardPage() {
               {recentSessions.map((session) => (
                 <div key={session.id} className="border-l-4 border-amber-400 pl-4 py-2">
                   <p className="text-sm text-slate-500 mb-1">
-                    {formatDate(session.ended_at!, 'MMM d, yyyy')}
+                    {formatDate(session.completed_at!, 'MMM d, yyyy')}
                   </p>
-                  {session.tutor_notes && (
-                    <p className="text-slate-700">{session.tutor_notes}</p>
+                  {session.internal_notes && (
+                    <p className="text-slate-700">{session.internal_notes}</p>
                   )}
                   {session.next_steps && (
                     <div className="mt-2 p-2 bg-amber-50 rounded text-sm">
