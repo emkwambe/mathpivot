@@ -20,13 +20,15 @@ ALTER TABLE IF EXISTS public.question_bank_categories ENABLE ROW LEVEL SECURITY;
 -- ============================================================================
 
 -- Admin can manage all permissions
-CREATE POLICY IF NOT EXISTS permissions_admin_all ON public.permissions
+DROP POLICY IF EXISTS permissions_admin_all ON public.permissions;
+CREATE POLICY permissions_admin_all ON public.permissions
   FOR ALL USING (
     EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
   );
 
 -- All authenticated users can read permissions
-CREATE POLICY IF NOT EXISTS permissions_read ON public.permissions
+DROP POLICY IF EXISTS permissions_read ON public.permissions;
+CREATE POLICY permissions_read ON public.permissions
   FOR SELECT USING (auth.role() = 'authenticated');
 
 -- ============================================================================
@@ -34,13 +36,15 @@ CREATE POLICY IF NOT EXISTS permissions_read ON public.permissions
 -- ============================================================================
 
 -- Admin can manage all custom roles
-CREATE POLICY IF NOT EXISTS custom_roles_admin_all ON public.custom_roles
+DROP POLICY IF EXISTS custom_roles_admin_all ON public.custom_roles;
+CREATE POLICY custom_roles_admin_all ON public.custom_roles
   FOR ALL USING (
     EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
   );
 
 -- All authenticated users can read custom roles
-CREATE POLICY IF NOT EXISTS custom_roles_read ON public.custom_roles
+DROP POLICY IF EXISTS custom_roles_read ON public.custom_roles;
+CREATE POLICY custom_roles_read ON public.custom_roles
   FOR SELECT USING (auth.role() = 'authenticated');
 
 -- ============================================================================
@@ -48,13 +52,15 @@ CREATE POLICY IF NOT EXISTS custom_roles_read ON public.custom_roles
 -- ============================================================================
 
 -- Admin can manage all role assignments
-CREATE POLICY IF NOT EXISTS user_role_assignments_admin_all ON public.user_role_assignments
+DROP POLICY IF EXISTS user_role_assignments_admin_all ON public.user_role_assignments;
+CREATE POLICY user_role_assignments_admin_all ON public.user_role_assignments
   FOR ALL USING (
     EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
   );
 
 -- Users can see their own role assignments
-CREATE POLICY IF NOT EXISTS user_role_assignments_own ON public.user_role_assignments
+DROP POLICY IF EXISTS user_role_assignments_own ON public.user_role_assignments;
+CREATE POLICY user_role_assignments_own ON public.user_role_assignments
   FOR SELECT USING (user_id = auth.uid());
 
 -- ============================================================================
@@ -62,11 +68,13 @@ CREATE POLICY IF NOT EXISTS user_role_assignments_own ON public.user_role_assign
 -- ============================================================================
 
 -- Admin and tutors can manage question categories
-CREATE POLICY IF NOT EXISTS question_bank_categories_manage ON public.question_bank_categories
+DROP POLICY IF EXISTS question_bank_categories_manage ON public.question_bank_categories;
+CREATE POLICY question_bank_categories_manage ON public.question_bank_categories
   FOR ALL USING (
     EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor'))
   );
 
 -- All authenticated users can read question categories
-CREATE POLICY IF NOT EXISTS question_bank_categories_read ON public.question_bank_categories
+DROP POLICY IF EXISTS question_bank_categories_read ON public.question_bank_categories;
+CREATE POLICY question_bank_categories_read ON public.question_bank_categories
   FOR SELECT USING (auth.role() = 'authenticated');
