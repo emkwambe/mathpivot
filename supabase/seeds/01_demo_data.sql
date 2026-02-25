@@ -45,9 +45,9 @@ BEGIN
       guide_level = 'Guide II',
       guide_level_code = 'GUIDE_II',
       career_pathway_specializations = ARRAY[
-        (SELECT id::TEXT FROM career_pathways WHERE code = 'competition_math' LIMIT 1),
-        (SELECT id::TEXT FROM career_pathways WHERE code = 'data_science' LIMIT 1)
-      ],
+        (SELECT id FROM career_pathways WHERE code = 'competition_math' LIMIT 1),
+        (SELECT id FROM career_pathways WHERE code = 'data_science' LIMIT 1)
+      ]::uuid[],
       eligible_grades = ARRAY[6,7,8,9,10,11,12],
       max_concurrent_students = 12,
       guide_certified_at = NOW()
