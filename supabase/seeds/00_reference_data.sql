@@ -233,7 +233,7 @@ INSERT INTO guide_levels (
   is_active, display_order
 ) VALUES
 (
-  'g1000001-0000-0000-0000-000000000001',
+  'a1000001-0000-0000-0000-000000000001',
   'GUIDE_I',
   'Math Development Guide I',
   'Entry-level guide focusing primarily on skill development with introductory mentorship.',
@@ -243,7 +243,7 @@ INSERT INTO guide_levels (
   true, 1
 ),
 (
-  'g1000001-0000-0000-0000-000000000002',
+  'a1000001-0000-0000-0000-000000000002',
   'GUIDE_II',
   'Math Development Guide II',
   'Balanced guide equally skilled in coaching and mentoring. Develops skills while providing career guidance.',
@@ -253,7 +253,7 @@ INSERT INTO guide_levels (
   true, 2
 ),
 (
-  'g1000001-0000-0000-0000-000000000003',
+  'a1000001-0000-0000-0000-000000000003',
   'GUIDE_III',
   'Math Development Guide III',
   'Advanced guide focusing on mentorship, career guidance, and inspiration for advanced students.',
@@ -263,7 +263,7 @@ INSERT INTO guide_levels (
   true, 3
 ),
 (
-  'g1000001-0000-0000-0000-000000000004',
+  'a1000001-0000-0000-0000-000000000004',
   'GUIDE_SPECIALIST',
   'Math Specialist Guide',
   'Expert in specific domains (competitions, research, industry). Highly focused mentorship.',
