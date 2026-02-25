@@ -13,12 +13,9 @@ interface DemoAccount {
 }
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
-  { email: 'admin@mathpivot.dev', password: 'Demo123!', role: 'admin', name: 'Admin', color: 'bg-purple-500' },
-  { email: 'tutor1@mathpivot.dev', password: 'Demo123!', role: 'tutor', name: 'Sarah (Tutor)', color: 'bg-green-500' },
-  { email: 'tutor2@mathpivot.dev', password: 'Demo123!', role: 'tutor', name: 'Michael (Tutor)', color: 'bg-emerald-500' },
-  { email: 'parent1@mathpivot.dev', password: 'Demo123!', role: 'parent', name: 'Jennifer (Parent)', color: 'bg-blue-500' },
-  { email: 'student1@mathpivot.dev', password: 'Demo123!', role: 'student', name: 'Emma (Student)', color: 'bg-orange-500' },
-  { email: 'student2@mathpivot.dev', password: 'Demo123!', role: 'student', name: 'Jake (Student)', color: 'bg-amber-500' },
+  { email: 'demo.tutor@mathpivot.com', password: 'Demo123!', role: 'tutor', name: 'Demo Tutor', color: 'bg-green-500' },
+  { email: 'demo.parent@mathpivot.com', password: 'Demo123!', role: 'parent', name: 'Demo Parent', color: 'bg-blue-500' },
+  { email: 'demo.student@mathpivot.com', password: 'Demo123!', role: 'student', name: 'Demo Student', color: 'bg-orange-500' },
 ];
 
 interface DevAccountSwitcherProps {
