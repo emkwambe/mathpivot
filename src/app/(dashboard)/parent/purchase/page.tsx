@@ -9,7 +9,7 @@ interface Product {
   description: string | null;
   credits: number;
   price_cents: number;
-  type: string;
+  product_type: string;
   stripe_price_id: string | null;
 }
 
@@ -89,7 +89,7 @@ export default function PurchasePage() {
     );
   }
 
-  const packages = products.filter((p) => p.type === 'package');
+  const packages = products.filter((p) => p.product_type === 'package');
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
