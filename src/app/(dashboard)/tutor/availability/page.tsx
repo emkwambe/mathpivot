@@ -2,6 +2,7 @@ import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
+import { formatTimeRange } from '@/lib/utils/time';
 import { revalidatePath } from 'next/cache';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -105,6 +106,15 @@ export default async function AvailabilityPage() {
   const user = await requireRole('tutor');
   const supabase = await createClient();
 
+  // Get user's time format preference
+  const { data: userProfile } = await supabase
+    .from('users_profile')
+    .select('time_format')
+    .eq('id', user.id)
+    .single();
+
+  const timeFormat = (userProfile?.time_format as '12h' | '24h') || '12h';
+
   // Get tutor's availability rules
   const { data: availability, error: availError } = await supabase
     .from('availability_rules')
@@ -164,7 +174,7 @@ export default async function AvailabilityPage() {
                         {slots.map((slot) => (
                           <div key={slot.id} className="flex items-center gap-2">
                             <Badge variant="secondary">
-                              {slot.start_time.slice(0, 5)} - {slot.end_time.slice(0, 5)}
+                              {formatTimeRange(slot.start_time, slot.end_time, timeFormat)}
                             </Badge>
                             <form action={removeAvailabilityAction.bind(null, slot.id)}>
                               <button
