@@ -423,6 +423,91 @@ INSERT INTO certification_assessments (
 ON CONFLICT (code) DO NOTHING;
 
 -- =============================================================================
+-- SECTION 8: PROGRAMS & CAMPS
+-- =============================================================================
+
+INSERT INTO programs (
+  id, name, slug, description, program_type,
+  career_pathway_id, start_date, end_date,
+  min_participants, max_participants, price_cents,
+  early_bird_price_cents, early_bird_deadline,
+  min_grade, max_grade, status, featured
+) VALUES
+(
+  'p0000000-0000-0000-0000-000000000001',
+  'AMC 8 Prep Workshop',
+  'amc-8-prep-workshop-spring-2026',
+  'Intensive preparation for the AMC 8 competition. Learn problem-solving strategies and practice with past problems.',
+  'workshop',
+  (SELECT id FROM career_pathways WHERE code = 'competition_math'),
+  '2026-04-01', '2026-04-15',
+  5, 20, 19900,
+  14900, '2026-03-15',
+  5, 8, 'registration_open', true
+),
+(
+  'p0000000-0000-0000-0000-000000000002',
+  'Summer Math Camp 2026',
+  'summer-math-camp-2026',
+  'A week-long immersive math experience covering advanced topics, games, and competitions. Perfect for math enthusiasts!',
+  'camp',
+  NULL,
+  '2026-06-15', '2026-06-21',
+  10, 30, 49900,
+  39900, '2026-05-01',
+  6, 10, 'published', true
+),
+(
+  'p0000000-0000-0000-0000-000000000003',
+  'Algebra Bootcamp',
+  'algebra-bootcamp-spring-2026',
+  'Intensive 3-day bootcamp to master algebra fundamentals. Perfect for students preparing for high school.',
+  'bootcamp',
+  NULL,
+  '2026-03-20', '2026-03-22',
+  8, 15, 29900,
+  NULL, NULL,
+  7, 9, 'draft', false
+),
+(
+  'p0000000-0000-0000-0000-000000000004',
+  'MATHCOUNTS Competition Training',
+  'mathcounts-training-2026',
+  'Comprehensive training program for MATHCOUNTS competition. Includes mock competitions and strategy sessions.',
+  'competition',
+  (SELECT id FROM career_pathways WHERE code = 'competition_math'),
+  '2026-01-15', '2026-02-15',
+  5, 12, 34900,
+  29900, '2026-01-01',
+  6, 8, 'in_progress', true
+),
+(
+  'p0000000-0000-0000-0000-000000000005',
+  'Data Science for Teens',
+  'data-science-teens-spring-2026',
+  'Introduction to data science using Python. Learn statistics, data visualization, and basic machine learning.',
+  'workshop',
+  (SELECT id FROM career_pathways WHERE code = 'data_science'),
+  '2026-04-10', '2026-04-24',
+  5, 15, 39900,
+  NULL, NULL,
+  9, 12, 'published', false
+),
+(
+  'p0000000-0000-0000-0000-000000000006',
+  'SAT Math Intensive',
+  'sat-math-intensive-spring-2026',
+  'Focused SAT math preparation covering all tested topics. Includes practice tests and personalized feedback.',
+  'clinic',
+  (SELECT id FROM career_pathways WHERE code = 'college_prep'),
+  '2026-05-01', '2026-05-31',
+  5, 20, 44900,
+  39900, '2026-04-15',
+  10, 12, 'registration_open', true
+)
+ON CONFLICT (slug) DO NOTHING;
+
+-- =============================================================================
 -- SUMMARY
 -- =============================================================================
 /*
@@ -432,6 +517,7 @@ Reference Data Summary:
 - 4 Guide levels with compensation plans
 - 15+ Products (base + tiered)
 - 15+ Certification programs
+- 6 Sample programs/camps
 - Sample assessments
 
 Run this file ONCE after migrations to set up all reference data.
