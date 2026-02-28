@@ -130,7 +130,7 @@ export default async function AdminPackagesPage() {
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <Badge variant="outline">
+                            <Badge variant="secondary">
                               {billingLabels[pkg.billing_type] || pkg.billing_type}
                             </Badge>
                           </td>

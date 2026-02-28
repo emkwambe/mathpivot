@@ -27,8 +27,12 @@ export async function getStudentFeatures(studentUserId: string): Promise<Feature
     return DEFAULT_FEATURE_GATES;
   }
 
-  const pkg = subscription.package as { feature_gates: FeatureGates };
-  return pkg.feature_gates ?? DEFAULT_FEATURE_GATES;
+  // Handle Supabase relation which may be array or object depending on type inference
+  const pkgData = Array.isArray(subscription.package)
+    ? subscription.package[0]
+    : subscription.package;
+  const pkg = pkgData as { feature_gates: FeatureGates };
+  return pkg?.feature_gates ?? DEFAULT_FEATURE_GATES;
 }
 
 /**
@@ -51,8 +55,12 @@ export async function getStudentTier(studentUserId: string): Promise<ServiceTier
     return null;
   }
 
-  const pkg = subscription.package as { service_tier: ServiceTier };
-  return pkg.service_tier;
+  // Handle Supabase relation which may be array or object depending on type inference
+  const pkgData = Array.isArray(subscription.package)
+    ? subscription.package[0]
+    : subscription.package;
+  const pkg = pkgData as { service_tier: ServiceTier };
+  return pkg?.service_tier ?? null;
 }
 
 /**
