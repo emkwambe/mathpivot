@@ -13,6 +13,7 @@ interface DemoAccount {
 }
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
+  { email: 'demo.admin@mathpivot.com', password: 'Demo123!', role: 'admin', name: 'Demo Admin', color: 'bg-purple-500' },
   { email: 'demo.tutor@mathpivot.com', password: 'Demo123!', role: 'tutor', name: 'Demo Tutor', color: 'bg-green-500' },
   { email: 'demo.parent@mathpivot.com', password: 'Demo123!', role: 'parent', name: 'Demo Parent', color: 'bg-blue-500' },
   { email: 'demo.student@mathpivot.com', password: 'Demo123!', role: 'student', name: 'Demo Student', color: 'bg-orange-500' },
@@ -57,6 +58,7 @@ export function DevAccountSwitcher({ currentEmail }: DevAccountSwitcherProps) {
     // Redirect based on role
     const redirectPath = account.role === 'admin' ? '/admin'
       : account.role === 'tutor' ? '/tutor'
+      : account.role === 'student' ? '/student'
       : '/parent';
 
     router.push(redirectPath);
