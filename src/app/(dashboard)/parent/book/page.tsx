@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { BookingForm } from './BookingForm';
+import { getSchedulingSuggestions } from '@/lib/scheduling/intelligent-scheduler';
 
 export default async function BookPage() {
   const user = await requireRole(['parent', 'student']);
@@ -73,6 +74,25 @@ export default async function BookPage() {
     bio: t.bio,
     hourlyRateCents: t.hourly_rate,
   })) || [];
+
+  // Get scheduling suggestions for the first student (if any)
+  let suggestions: Array<{
+    date: string;
+    startTime: string;
+    endTime: string;
+    tutorId: string;
+    tutorName: string;
+    reason: string;
+    score: number;
+  }> = [];
+
+  if (formattedStudents.length > 0) {
+    try {
+      suggestions = await getSchedulingSuggestions(formattedStudents[0].id);
+    } catch (error) {
+      console.error('Failed to load scheduling suggestions:', error);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -157,6 +177,8 @@ export default async function BookPage() {
                 students={formattedStudents}
                 tutors={formattedTutors}
                 creditBalance={creditBalance}
+                initialStudentId={formattedStudents.length === 1 ? formattedStudents[0].id : undefined}
+                suggestions={suggestions}
               />
             )}
           </CardContent>

@@ -6,6 +6,9 @@ import { Button, Select, Alert } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
 import { createBooking } from '@/app/actions/booking';
 import { getAvailableSlotsForDate } from '@/app/actions/availability';
+import { CalendarPicker } from '@/components/CalendarPicker';
+import { AddToCalendar } from '@/components/AddToCalendar';
+import { parseISO, addDays, format } from 'date-fns';
 
 type Student = {
   id: string;
@@ -24,6 +27,8 @@ type Props = {
   students: Student[];
   tutors: Tutor[];
   creditBalance: number;
+  initialStudentId?: string;
+  suggestions?: Suggestion[];
 };
 
 type Slot = {
@@ -31,30 +36,51 @@ type Slot = {
   end: string;
 };
 
-export function BookingForm({ students, tutors, creditBalance }: Props) {
+type Suggestion = {
+  date: string;
+  startTime: string;
+  endTime: string;
+  tutorId: string;
+  tutorName: string;
+  reason: string;
+  score: number;
+};
+
+export function BookingForm({ students, tutors, creditBalance, initialStudentId, suggestions }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const [step, setStep] = useState(1);
-  const [selectedStudent, setSelectedStudent] = useState<string>('');
+  const [step, setStep] = useState(initialStudentId ? 2 : 1);
+  const [selectedStudent, setSelectedStudent] = useState<string>(initialStudentId || '');
   const [selectedTutor, setSelectedTutor] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDateObj, setSelectedDateObj] = useState<Date | null>(null);
   const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState<{
+    tutorName: string;
+    studentName: string;
+    startAt: Date;
+    endAt: Date;
+  } | null>(null);
 
   const selectedTutorData = tutors.find((t) => t.id === selectedTutor);
 
-  const handleDateChange = async (date: string) => {
-    setSelectedDate(date);
+  const handleDateChange = async (date: string | Date) => {
+    const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+    const dateObj = typeof date === 'string' ? parseISO(date) : date;
+
+    setSelectedDate(dateStr);
+    setSelectedDateObj(dateObj);
     setSelectedSlot(null);
     setLoading(true);
     setError(null);
 
     try {
-      const result = await getAvailableSlotsForDate(selectedTutor, date);
+      const result = await getAvailableSlotsForDate(selectedTutor, dateStr);
       if (result.error) {
         setError(result.error);
       } else {
@@ -64,6 +90,22 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
       setError('Failed to load available slots');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle suggestion selection
+  const handleSuggestionSelect = (suggestion: Suggestion) => {
+    const tutor = tutors.find(t => t.id === suggestion.tutorId);
+    if (tutor) {
+      setSelectedTutor(suggestion.tutorId);
+      const date = parseISO(suggestion.date);
+      setSelectedDate(suggestion.date);
+      setSelectedDateObj(date);
+      setStep(4);
+      // Create the slot from suggestion times
+      const startAt = `${suggestion.date}T${suggestion.startTime}:00`;
+      const endAt = `${suggestion.date}T${suggestion.endTime}:00`;
+      setSelectedSlot({ start: startAt, end: endAt });
     }
   };
 
@@ -81,7 +123,13 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
     startTransition(async () => {
       const result = await createBooking(formData);
       if (result.success) {
-        router.push('/parent?booked=true');
+        // Show success state with Add to Calendar option
+        setBookingSuccess({
+          tutorName: selectedTutorData?.name || 'Tutor',
+          studentName: students.find(s => s.id === selectedStudent)?.name || 'Student',
+          startAt: new Date(selectedSlot.start),
+          endAt: new Date(selectedSlot.end),
+        });
       } else {
         setError(result.error || 'Failed to create booking');
       }
@@ -101,17 +149,103 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
+  const minDateObj = addDays(new Date(), 1);
 
   // Get maximum date (2 weeks out)
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 14);
   const maxDateStr = maxDate.toISOString().split('T')[0];
+  const maxDateObj = addDays(new Date(), 14);
+
+  // Get highlighted dates from suggestions
+  const suggestedDates = suggestions?.map(s => parseISO(s.date)) || [];
 
   if (creditBalance < 1) {
     return (
       <Alert variant="warning">
         You need at least 1 credit to book a session. Please purchase a package.
       </Alert>
+    );
+  }
+
+  // Success screen with Add to Calendar
+  if (bookingSuccess) {
+    return (
+      <div className="text-center py-8 space-y-6">
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Session Booked!</h2>
+          <p className="text-slate-600">
+            Your tutoring session has been scheduled successfully.
+          </p>
+        </div>
+
+        <div className="bg-slate-50 rounded-xl p-5 max-w-sm mx-auto text-left">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <div>
+                <p className="text-xs text-slate-500">Student</p>
+                <p className="font-medium text-slate-900">{bookingSuccess.studentName}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <div>
+                <p className="text-xs text-slate-500">Tutor</p>
+                <p className="font-medium text-slate-900">{bookingSuccess.tutorName}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <div>
+                <p className="text-xs text-slate-500">Date & Time</p>
+                <p className="font-medium text-slate-900">
+                  {bookingSuccess.startAt.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  })} at {bookingSuccess.startAt.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <AddToCalendar
+            title={`Math Tutoring: ${bookingSuccess.studentName}`}
+            description={`Tutoring session with ${bookingSuccess.tutorName}`}
+            startAt={bookingSuccess.startAt}
+            endAt={bookingSuccess.endAt}
+          />
+          <Button
+            onClick={() => router.push('/parent')}
+            variant="outline"
+          >
+            Back to Dashboard
+          </Button>
+        </div>
+
+        <p className="text-sm text-slate-500">
+          The tutor will confirm your session shortly. You&apos;ll receive a notification when confirmed.
+        </p>
+      </div>
     );
   }
 
@@ -127,6 +261,67 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* AI Scheduling Suggestions */}
+      {suggestions && suggestions.length > 0 && step < 3 && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-900">Quick Book - AI Suggestions</h3>
+              <p className="text-sm text-slate-600">Based on your scheduling patterns</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {suggestions.slice(0, 3).map((suggestion, index) => (
+              <button
+                key={`${suggestion.date}-${suggestion.startTime}-${index}`}
+                type="button"
+                onClick={() => handleSuggestionSelect(suggestion)}
+                className={`text-left p-4 rounded-lg border-2 transition-all hover:scale-[1.02] ${
+                  index === 0
+                    ? 'bg-white border-blue-300 shadow-md'
+                    : 'bg-white/70 border-transparent hover:border-blue-200 hover:bg-white'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="font-semibold text-slate-900">
+                      {new Date(suggestion.date).toLocaleDateString('en-US', {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      {suggestion.startTime} - {suggestion.endTime}
+                    </p>
+                  </div>
+                  {index === 0 && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                      Best
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-slate-700">
+                  with <span className="font-medium">{suggestion.tutorName}</span>
+                </p>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-blue-200">
+            <p className="text-xs text-slate-500 text-center">
+              Or use the form below to choose your own date and time
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Step Indicator */}
       <div className="flex items-center justify-between mb-8">
         {steps.map((s, index) => (
@@ -241,16 +436,15 @@ export function BookingForm({ students, tutors, creditBalance }: Props) {
             <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm">3</span>
             Select Date
           </h3>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => {
-              handleDateChange(e.target.value);
-              if (e.target.value) setStep(Math.max(step, 4));
+          <CalendarPicker
+            selectedDate={selectedDateObj}
+            onDateSelect={(date) => {
+              handleDateChange(date);
+              setStep(Math.max(step, 4));
             }}
-            min={minDate}
-            max={maxDateStr}
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+            minDate={minDateObj}
+            maxDate={maxDateObj}
+            highlightedDates={suggestedDates}
           />
         </div>
       )}
