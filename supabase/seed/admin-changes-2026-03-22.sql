@@ -1,20 +1,6 @@
 -- ============================================================================
 -- Admin Changes: 2026-03-22
--- ============================================================================
--- 1. Delete user: fresh@mathpivot.com
--- 2. Set super_admin: eddy@mpingo.ai
--- ============================================================================
-
--- ============================================================================
--- DELETE USER: fresh@mathpivot.com
--- ============================================================================
--- This will cascade delete from users_profile due to ON DELETE CASCADE
-
-DELETE FROM auth.users
-WHERE email = 'fresh@mathpivot.com';
-
--- ============================================================================
--- SET SUPER_ADMIN: eddy@mpingo.ai
+-- Set eddy@mpingo.ai as super_admin (platform-level admin)
 -- ============================================================================
 
 UPDATE users_profile
@@ -23,14 +9,6 @@ SET role = 'super_admin',
 WHERE id = (
     SELECT id FROM auth.users WHERE email = 'eddy@mpingo.ai'
 );
-
--- ============================================================================
--- VERIFY CHANGES
--- ============================================================================
-
--- Verify fresh@mathpivot.com is deleted
-SELECT 'fresh@mathpivot.com deleted:' AS check,
-       NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'fresh@mathpivot.com') AS success;
 
 -- Verify eddy@mpingo.ai is super_admin
 SELECT
