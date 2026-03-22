@@ -94,7 +94,8 @@ function getDashboardPath(role: string): string {
     case 'student':
       return '/student';
     default:
-      return '/login';
+      // Default to student dashboard instead of login to prevent redirect loops
+      return '/student';
   }
 }
 

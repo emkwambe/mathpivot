@@ -1,14 +1,13 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { loginSchema, type LoginInput } from '@/lib/validators';
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, Alert, AlertDescription } from '@/components/ui';
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/';
 
@@ -59,9 +58,12 @@ function LoginForm() {
         return;
       }
 
-      // Redirect to intended page
-      router.push(redirectTo);
-      router.refresh();
+      // Redirect to intended page using full page navigation
+      // This ensures middleware runs with fresh session cookies
+      const safeRedirect = redirectTo.startsWith('/login') || redirectTo.startsWith('/signup')
+        ? '/'
+        : redirectTo;
+      window.location.href = safeRedirect;
     } catch (err) {
       console.error('Login error:', err);
 
