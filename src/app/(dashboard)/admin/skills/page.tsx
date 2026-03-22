@@ -10,7 +10,7 @@ async function createSkillAction(formData: FormData) {
   const { createClient } = await import('@/lib/supabase/server');
 
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') return;
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) return;
 
   const supabase = await createClient();
 
@@ -35,7 +35,7 @@ async function deleteSkillAction(formData: FormData) {
   const { createClient } = await import('@/lib/supabase/server');
 
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') return;
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) return;
 
   const skillId = formData.get('skillId') as string;
   const supabase = await createClient();
@@ -49,7 +49,7 @@ async function deleteSkillAction(formData: FormData) {
 }
 
 export default async function AdminSkillsPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get all skills

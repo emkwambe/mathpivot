@@ -27,7 +27,7 @@ const STATUS_COLORS: Record<ProgramStatus, 'secondary' | 'info' | 'success' | 'w
 };
 
 export default async function ProgramsAdminPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get all programs with registration counts

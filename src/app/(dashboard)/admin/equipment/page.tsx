@@ -21,7 +21,7 @@ const CONDITION_COLORS: Record<EquipmentCondition, 'success' | 'info' | 'warning
 };
 
 export default async function AdminEquipmentPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get equipment types

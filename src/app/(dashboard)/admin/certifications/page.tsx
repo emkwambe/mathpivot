@@ -35,7 +35,7 @@ const TYPE_LABELS: Record<CertType, string> = {
 };
 
 export default async function CertificationsAdminPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get all certification programs

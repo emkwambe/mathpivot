@@ -14,7 +14,7 @@ const STATUS_COLORS: Record<WaitlistStatus, 'warning' | 'info' | 'success' | 'se
 };
 
 export default async function AdminWaitlistPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get waitlist entries with related data

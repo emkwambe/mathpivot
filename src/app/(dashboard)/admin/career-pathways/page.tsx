@@ -22,7 +22,7 @@ const PATHWAY_COLORS: Record<string, string> = {
 };
 
 export default async function CareerPathwaysPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get all career pathways with related programs count

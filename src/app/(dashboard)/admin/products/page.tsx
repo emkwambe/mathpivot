@@ -11,7 +11,7 @@ async function createProductAction(formData: FormData) {
   const { createClient } = await import('@/lib/supabase/server');
 
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') return;
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) return;
 
   const supabase = await createClient();
 
@@ -38,7 +38,7 @@ async function toggleProductAction(productId: string, isActive: boolean) {
   const { createClient } = await import('@/lib/supabase/server');
 
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') return;
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) return;
 
   const supabase = await createClient();
 
@@ -51,7 +51,7 @@ async function toggleProductAction(productId: string, isActive: boolean) {
 }
 
 export default async function AdminProductsPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get all products

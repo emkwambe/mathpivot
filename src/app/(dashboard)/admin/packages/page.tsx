@@ -30,7 +30,7 @@ const billingLabels: Record<string, string> = {
 };
 
 export default async function AdminPackagesPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   const { data: packages } = await supabase

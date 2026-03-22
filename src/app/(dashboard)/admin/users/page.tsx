@@ -14,7 +14,7 @@ export default async function AdminUsersPage() {
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'admin') {
+  if (profile?.role !== 'admin' && profile?.role !== 'super_admin') {
     redirect('/');
   }
 
@@ -25,6 +25,7 @@ export default async function AdminUsersPage() {
     .order('created_at', { ascending: false });
 
   const roleColors: Record<string, string> = {
+    'super_admin': 'bg-red-100 text-red-800',
     'admin': 'bg-purple-100 text-purple-800',
     'tutor': 'bg-green-100 text-green-800',
     'parent': 'bg-blue-100 text-blue-800',
@@ -33,6 +34,7 @@ export default async function AdminUsersPage() {
 
   const stats = {
     total: users?.length || 0,
+    superAdmins: users?.filter(u => u.role === 'super_admin').length || 0,
     admins: users?.filter(u => u.role === 'admin').length || 0,
     tutors: users?.filter(u => u.role === 'tutor').length || 0,
     parents: users?.filter(u => u.role === 'parent').length || 0,

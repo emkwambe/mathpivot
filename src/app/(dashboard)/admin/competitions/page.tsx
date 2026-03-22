@@ -31,7 +31,7 @@ const FORMAT_ICONS: Record<CompetitionFormat, React.ReactNode> = {
 };
 
 export default async function CompetitionsAdminPage() {
-  await requireRole('admin');
+  await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   // Get competition programs with their competition details

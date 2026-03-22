@@ -6,7 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 export default async function AdminDashboardPage() {
-  const user = await requireRole('admin');
+  const user = await requireRole(['admin', 'super_admin']);
   const supabase = await createClient();
 
   const now = new Date();
