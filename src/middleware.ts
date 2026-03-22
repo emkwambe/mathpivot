@@ -31,7 +31,10 @@ export async function middleware(request: NextRequest) {
 
       if (profile?.role) {
         const dashboardPath = getDashboardPath(profile.role);
-        return NextResponse.redirect(new URL(dashboardPath, request.url));
+        // Only redirect if we have a valid dashboard path (not login itself)
+        if (dashboardPath !== '/login') {
+          return NextResponse.redirect(new URL(dashboardPath, request.url));
+        }
       }
     }
     return supabaseResponse;
