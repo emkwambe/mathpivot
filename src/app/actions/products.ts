@@ -38,7 +38,7 @@ export async function createProduct(
   formData: FormData
 ): Promise<ProductActionResult> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Admin access required' };
   }
 
@@ -91,7 +91,7 @@ export async function updateProduct(
   formData: FormData
 ): Promise<ProductActionResult> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Admin access required' };
   }
 
@@ -147,7 +147,7 @@ export async function toggleProductActive(
   isActive: boolean
 ): Promise<ProductActionResult> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Admin access required' };
   }
 
@@ -285,7 +285,7 @@ export async function getPurchaseHistory(familyId: string) {
     .eq('user_id', user.id)
     .single();
 
-  if (!familyMember && user.role !== 'admin') {
+  if (!familyMember && user.role !== 'admin' && user.role !== 'super_admin') {
     return { purchases: [], error: 'Access denied' };
   }
 

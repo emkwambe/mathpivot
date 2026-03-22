@@ -30,7 +30,7 @@ export async function createSkill(
   formData: FormData
 ): Promise<SkillActionResult> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Admin access required' };
   }
 
@@ -86,7 +86,7 @@ export async function updateSkill(
   formData: FormData
 ): Promise<SkillActionResult> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Admin access required' };
   }
 
@@ -142,7 +142,7 @@ export async function deleteSkill(
   skillId: string
 ): Promise<SkillActionResult> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Admin access required' };
   }
 
@@ -168,7 +168,7 @@ export async function toggleSkillActive(
   isActive: boolean
 ): Promise<SkillActionResult> {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Admin access required' };
   }
 

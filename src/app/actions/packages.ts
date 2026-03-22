@@ -70,7 +70,7 @@ function assembleFeatureGates(data: z.infer<typeof createPackageSchema>) {
 
 async function requireAdmin() {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'super_admin')) {
     throw new Error('Admin access required');
   }
   return user;
@@ -261,7 +261,7 @@ export async function getAllPackages() {
     .select('*')
     .order('display_order', { ascending: true });
 
-  if (user.role !== 'admin') {
+  if (user.role !== 'admin' && user.role !== 'super_admin') {
     query.eq('is_active', true);
   }
 

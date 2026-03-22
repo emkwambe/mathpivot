@@ -3,7 +3,7 @@
  * These types mirror the Supabase database schema
  */
 
-export type UserRole = 'admin' | 'tutor' | 'parent' | 'student';
+export type UserRole = 'super_admin' | 'admin' | 'tutor' | 'parent' | 'student';
 
 // Guide Model Types
 export type GuideLevel = 'Guide I' | 'Guide II' | 'Guide III';

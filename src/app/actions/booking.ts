@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { getCurrentUser, canAccessStudent } from '@/lib/auth';
+import { getCurrentUser, canAccessStudent, isAdminOrAbove } from '@/lib/auth';
 import { emitEvent } from '@/lib/events';
 import { z } from 'zod';
 
@@ -150,7 +150,7 @@ export async function confirmBooking(
     return { success: false, error: 'Booking not found' };
   }
 
-  if (booking.tutor_user_id !== user.id && user.role !== 'admin') {
+  if (booking.tutor_user_id !== user.id && !isAdminOrAbove(user)) {
     return { success: false, error: 'Only the assigned tutor can confirm' };
   }
 
@@ -223,7 +223,7 @@ export async function rescheduleBooking(
   // Check permissions (parent in family or tutor assigned or admin)
   const canAccess = await canAccessStudent(booking.student_user_id);
   const isTutor = booking.tutor_user_id === user.id;
-  const isAdmin = user.role === 'admin';
+  const isAdmin = isAdminOrAbove(user);
 
   if (!canAccess && !isTutor && !isAdmin) {
     return { success: false, error: 'You cannot reschedule this booking' };
@@ -307,7 +307,7 @@ export async function cancelBooking(
   // Check permissions
   const canAccess = await canAccessStudent(booking.student_user_id);
   const isTutor = booking.tutor_user_id === user.id;
-  const isAdmin = user.role === 'admin';
+  const isAdmin = isAdminOrAbove(user);
 
   if (!canAccess && !isTutor && !isAdmin) {
     return { success: false, error: 'You cannot cancel this booking' };
@@ -379,7 +379,7 @@ export async function markNoShow(
 
   // Only tutor or admin can mark no-show
   const isTutor = booking.tutor_user_id === user.id;
-  const isAdmin = user.role === 'admin';
+  const isAdmin = isAdminOrAbove(user);
 
   if (!isTutor && !isAdmin) {
     return { success: false, error: 'Only the tutor can mark a no-show' };

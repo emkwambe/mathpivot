@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ suggestions });
     }
 
-    // Admins can get any student's suggestions
-    if (user.role === 'admin' && studentUserId) {
+    // Admins and super admins can get any student's suggestions
+    if ((user.role === 'admin' || user.role === 'super_admin') && studentUserId) {
       const suggestions = await getSchedulingSuggestions(studentUserId);
       return NextResponse.json({ suggestions });
     }

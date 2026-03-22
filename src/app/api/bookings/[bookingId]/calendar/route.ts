@@ -42,7 +42,8 @@ export async function GET(
     user.id === booking.student_user_id ||
     user.id === booking.tutor_user_id ||
     user.id === booking.parent_user_id ||
-    user.role === 'admin';
+    user.role === 'admin' ||
+    user.role === 'super_admin';
 
   if (!hasAccess) {
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });

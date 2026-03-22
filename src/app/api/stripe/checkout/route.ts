@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     .eq('user_id', user.id)
     .single();
 
-  if (!familyMember && user.role !== 'admin') {
+  if (!familyMember && user.role !== 'admin' && user.role !== 'super_admin') {
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });
   }
 

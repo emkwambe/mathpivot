@@ -52,7 +52,7 @@ export async function startSession(
   }
 
   // Only the assigned tutor or admin can start
-  if (booking.tutor_user_id !== user.id && user.role !== 'admin') {
+  if (booking.tutor_user_id !== user.id && (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Only the assigned tutor can start this session' };
   }
 
@@ -138,7 +138,7 @@ export async function endSession(
     return { success: false, error: 'Session not found' };
   }
 
-  if (session.tutor_user_id !== user.id && user.role !== 'admin') {
+  if (session.tutor_user_id !== user.id && (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Only the assigned tutor can end this session' };
   }
 
@@ -200,7 +200,7 @@ export async function updateStudentMastery(
   formData: FormData
 ): Promise<{ success: boolean; error?: string }> {
   const user = await getCurrentUser();
-  if (!user || (user.role !== 'tutor' && user.role !== 'admin')) {
+  if (!user || (user.role !== 'tutor' && (user.role !== 'admin' && user.role !== 'super_admin'))) {
     return { success: false, error: 'Only tutors can update mastery' };
   }
 
@@ -283,7 +283,7 @@ export async function addSessionNote(
     return { success: false, error: 'Session not found' };
   }
 
-  if (session.tutor_user_id !== user.id && user.role !== 'admin') {
+  if (session.tutor_user_id !== user.id && (user.role !== 'admin' && user.role !== 'super_admin')) {
     return { success: false, error: 'Only the assigned tutor can add notes' };
   }
 

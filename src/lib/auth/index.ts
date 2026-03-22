@@ -7,7 +7,8 @@ import type { UserRole, UsersProfile, AuthUser } from '@/types';
 
 // Role hierarchy for permission checks
 const ROLE_HIERARCHY: Record<UserRole, number> = {
-  admin: 100,
+  super_admin: 200,  // Platform-level admin (all tenants)
+  admin: 100,        // Organization-level admin
   tutor: 50,
   parent: 25,
   student: 10,
@@ -127,6 +128,8 @@ export function hasMinimumRole(user: AuthUser | null, minimumRole: UserRole): bo
  */
 export function getDashboardPath(role: UserRole): string {
   switch (role) {
+    case 'super_admin':
+      return '/admin';  // Super admins use admin dashboard with elevated access
     case 'admin':
       return '/admin';
     case 'tutor':
@@ -141,6 +144,20 @@ export function getDashboardPath(role: UserRole): string {
 }
 
 /**
+ * Check if user is a super admin (platform-level)
+ */
+export function isSuperAdmin(user: AuthUser | null): boolean {
+  return user?.role === 'super_admin';
+}
+
+/**
+ * Check if user is admin or super admin
+ */
+export function isAdminOrAbove(user: AuthUser | null): boolean {
+  return user?.role === 'admin' || user?.role === 'super_admin';
+}
+
+/**
  * Check if the current user can access a specific student's data
  */
 export async function canAccessStudent(studentUserId: string): Promise<boolean> {
@@ -148,8 +165,8 @@ export async function canAccessStudent(studentUserId: string): Promise<boolean> 
 
   if (!user) return false;
 
-  // Admin can access all
-  if (user.role === 'admin') return true;
+  // Super admin and admin can access all
+  if (user.role === 'super_admin' || user.role === 'admin') return true;
 
   // Student can access own data
   if (user.role === 'student' && user.id === studentUserId) return true;
@@ -201,8 +218,8 @@ export async function canAccessBooking(bookingId: string): Promise<boolean> {
 
   if (!user) return false;
 
-  // Admin can access all
-  if (user.role === 'admin') return true;
+  // Super admin and admin can access all
+  if (user.role === 'super_admin' || user.role === 'admin') return true;
 
   const supabase = await createServerClient();
 
