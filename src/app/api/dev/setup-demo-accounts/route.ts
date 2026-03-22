@@ -1,12 +1,14 @@
 // src/app/api/dev/setup-demo-accounts/route.ts
-// Purpose: DEV ONLY - Sets up demo account roles in users_profile
-// This fixes the issue where demo accounts default to 'parent' role
+// Purpose: DEV ONLY - Sets up demo accounts (creates in auth + updates profiles)
+// This ensures demo accounts exist and have correct roles
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Only allow in development
 const isDev = process.env.NODE_ENV !== 'production';
+
+const DEMO_PASSWORD = 'Demo123!';
 
 const DEMO_ACCOUNTS = [
   { email: 'demo.admin@mathpivot.com', role: 'admin', full_name: 'Demo Admin' },
@@ -34,22 +36,37 @@ export async function POST() {
     auth: { autoRefreshToken: false, persistSession: false }
   });
 
-  const results: { email: string; status: string; error?: string }[] = [];
+  const results: { email: string; status: string; role?: string; error?: string }[] = [];
+
+  // Get all existing users first
+  const { data: userData, error: listError } = await supabase.auth.admin.listUsers();
+
+  if (listError) {
+    return NextResponse.json({ error: `Failed to list users: ${listError.message}` }, { status: 500 });
+  }
 
   for (const account of DEMO_ACCOUNTS) {
-    // Find user by email
-    const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+    let user = userData.users.find(u => u.email === account.email);
 
-    if (userError) {
-      results.push({ email: account.email, status: 'error', error: userError.message });
-      continue;
-    }
-
-    const user = userData.users.find(u => u.email === account.email);
-
+    // Create user if doesn't exist
     if (!user) {
-      results.push({ email: account.email, status: 'user_not_found' });
-      continue;
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email: account.email,
+        password: DEMO_PASSWORD,
+        email_confirm: true,
+        user_metadata: {
+          full_name: account.full_name,
+          role: account.role,
+        },
+      });
+
+      if (createError) {
+        results.push({ email: account.email, status: 'create_failed', error: createError.message });
+        continue;
+      }
+
+      user = newUser.user;
+      results.push({ email: account.email, status: 'created', role: account.role });
     }
 
     // Update or insert users_profile with correct role
@@ -64,9 +81,20 @@ export async function POST() {
       }, { onConflict: 'id' });
 
     if (upsertError) {
-      results.push({ email: account.email, status: 'error', error: upsertError.message });
+      // Update status if we just created the user
+      const existingResult = results.find(r => r.email === account.email);
+      if (existingResult) {
+        existingResult.status = 'created_profile_failed';
+        existingResult.error = upsertError.message;
+      } else {
+        results.push({ email: account.email, status: 'profile_error', error: upsertError.message });
+      }
     } else {
-      results.push({ email: account.email, status: 'updated', role: account.role } as any);
+      // Only add 'updated' status if user already existed
+      const existingResult = results.find(r => r.email === account.email);
+      if (!existingResult) {
+        results.push({ email: account.email, status: 'updated', role: account.role });
+      }
     }
   }
 
