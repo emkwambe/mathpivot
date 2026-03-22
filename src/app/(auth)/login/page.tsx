@@ -63,11 +63,17 @@ function LoginForm() {
       router.push(redirectTo);
       router.refresh();
     } catch (err) {
-      // Network or connection error
       console.error('Login error:', err);
-      setServerError(
-        'Unable to connect to authentication service. Please check your internet connection and try again. If the problem persists, the service may be temporarily unavailable.'
-      );
+
+      // Check for missing Supabase configuration
+      const errorMessage = err instanceof Error ? err.message : '';
+      if (errorMessage.includes('NEXT_PUBLIC_SUPABASE')) {
+        setServerError(errorMessage);
+      } else {
+        setServerError(
+          'Unable to connect to authentication service. Please check your internet connection and try again. If the problem persists, the service may be temporarily unavailable.'
+        );
+      }
       setIsLoading(false);
     }
   };

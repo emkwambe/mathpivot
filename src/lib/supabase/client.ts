@@ -4,12 +4,11 @@
  * RLS is enforced based on the authenticated user
  */
 import { createBrowserClient } from '@supabase/ssr';
+import { validateSupabaseEnv } from './validate-env';
 
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const { url, anonKey } = validateSupabaseEnv();
+  return createBrowserClient(url, anonKey);
 }
 
 // Singleton for client-side use
