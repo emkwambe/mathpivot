@@ -71,6 +71,7 @@ export async function middleware(request: NextRequest) {
   // Check if user can access the requested route
   const allowedPrefixes = ROLE_ROUTES[userRole] || [];
   const isAllowed =
+    userRole === 'super_admin' || // Super admin can access everything
     userRole === 'admin' || // Admin can access everything
     allowedPrefixes.some((prefix) => pathname.startsWith(prefix));
 
@@ -85,6 +86,8 @@ export async function middleware(request: NextRequest) {
 
 function getDashboardPath(role: string): string {
   switch (role) {
+    case 'super_admin':
+      return '/admin';  // Super admins use admin dashboard with elevated access
     case 'admin':
       return '/admin';
     case 'tutor':
