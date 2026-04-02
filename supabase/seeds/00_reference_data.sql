@@ -510,15 +510,13 @@ ON CONFLICT (slug) DO NOTHING;
 -- =============================================================================
 -- SUMMARY
 -- =============================================================================
-/*
-Reference Data Summary:
-- 50+ Math skills (Math 1, Math 3, career-specific)
-- 6 Career pathways
-- 4 Guide levels with compensation plans
-- 15+ Products (base + tiered)
-- 15+ Certification programs
-- 6 Sample programs/camps
-- Sample assessments
-
-Run this file ONCE after migrations to set up all reference data.
-*/
+-- Reference Data Summary:
+-- - 50+ Math skills (Math 1, Math 3, career-specific)
+-- - 6 Career pathways
+-- - 4 Guide levels with compensation plans
+-- - 15+ Products (base + tiered)
+-- - 15+ Certification programs
+-- - 6 Sample programs/camps
+-- - Sample assessments
+--
+-- Run this file ONCE after migrations to set up all reference data.
