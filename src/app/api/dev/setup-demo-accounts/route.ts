@@ -11,6 +11,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 const DEMO_PASSWORD = 'Demo123!';
 
 const DEMO_ACCOUNTS = [
+  { email: 'demo.superadmin@mathpivot.com', role: 'super_admin', full_name: 'Demo Super Admin' },
   { email: 'demo.admin@mathpivot.com', role: 'admin', full_name: 'Demo Admin' },
   { email: 'demo.tutor@mathpivot.com', role: 'tutor', full_name: 'Demo Tutor' },
   { email: 'demo.parent@mathpivot.com', role: 'parent', full_name: 'Demo Parent' },
