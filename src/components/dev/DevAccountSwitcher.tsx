@@ -51,7 +51,14 @@ export function DevAccountSwitcher({ currentEmail }: DevAccountSwitcherProps) {
     });
 
     if (signInError) {
-      setError(`Failed: ${signInError.message}`);
+      // Provide more helpful error messages
+      let errorMessage = signInError.message;
+      if (signInError.message.includes('Invalid login credentials') ||
+          signInError.status === 400 ||
+          signInError.status === 500) {
+        errorMessage = `Account not found. Run create-demo-admin-users.sql in Supabase SQL Editor.`;
+      }
+      setError(errorMessage);
       setIsLoading(null);
       return;
     }
@@ -121,9 +128,12 @@ export function DevAccountSwitcher({ currentEmail }: DevAccountSwitcherProps) {
             ))}
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-200">
+          <div className="mt-3 pt-3 border-t border-slate-200 space-y-1">
             <p className="text-xs text-slate-500">
-              Password for all accounts: <code className="bg-slate-100 px-1 rounded">Demo123!</code>
+              Password: <code className="bg-slate-100 px-1 rounded">Demo123!</code>
+            </p>
+            <p className="text-xs text-slate-400">
+              If accounts fail, run <code className="bg-slate-100 px-1 rounded text-slate-600">create-demo-admin-users.sql</code> in Supabase SQL Editor.
             </p>
           </div>
         </div>
