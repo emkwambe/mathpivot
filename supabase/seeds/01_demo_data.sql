@@ -136,7 +136,7 @@ BEGIN
       ON CONFLICT DO NOTHING;
 
       -- Update student profile
-      UPDATE student_profiles SET
+      UPDATE students_profile SET
         family_id = family_id,
         grade = 10,
         course_track = 'math_3',
