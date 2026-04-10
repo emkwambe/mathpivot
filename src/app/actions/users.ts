@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
 
 export type UserResult = { success: boolean; error?: string };
@@ -16,11 +17,13 @@ const updateRoleSchema = z.object({
 });
 
 export async function updateUserRole(formData: FormData): Promise<UserResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  const currentUser = await getCurrentUser();
+  if (
+    !currentUser ||
+    (currentUser.role !== "admin" && currentUser.role !== "super_admin")
+  ) {
+    return { success: false, error: "Admin access required" };
+  }
 
   const parsed = updateRoleSchema.safeParse({
     userId: formData.get("userId"),
@@ -47,8 +50,13 @@ export async function updateUserRole(formData: FormData): Promise<UserResult> {
 export async function updateUserProfile(
   formData: FormData,
 ): Promise<UserResult> {
-  // TODO: Add auth check — currently relies on layout-level requireRole
-  const _supabase = await createClient();
+  const currentUser = await getCurrentUser();
+  if (
+    !currentUser ||
+    (currentUser.role !== "admin" && currentUser.role !== "super_admin")
+  ) {
+    return { success: false, error: "Admin access required" };
+  }
 
   const userId = formData.get("userId") as string;
   const fullName = formData.get("fullName") as string;
@@ -80,6 +88,14 @@ export async function updateUserProfile(
 // DEACTIVATE USER (admin only — soft delete)
 // ============================================================
 export async function deactivateUser(userId: string): Promise<UserResult> {
+  const currentUser = await getCurrentUser();
+  if (
+    !currentUser ||
+    (currentUser.role !== "admin" && currentUser.role !== "super_admin")
+  ) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const admin = createAdminClient();
 
   // Ban user via Supabase auth
@@ -97,6 +113,14 @@ export async function deactivateUser(userId: string): Promise<UserResult> {
 // REACTIVATE USER
 // ============================================================
 export async function reactivateUser(userId: string): Promise<UserResult> {
+  const currentUser = await getCurrentUser();
+  if (
+    !currentUser ||
+    (currentUser.role !== "admin" && currentUser.role !== "super_admin")
+  ) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const admin = createAdminClient();
 
   const { error } = await admin.auth.admin.updateUserById(userId, {
