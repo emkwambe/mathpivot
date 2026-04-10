@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser, canAccessStudent, isAdminOrAbove } from '@/lib/auth';
 import { emitEvent } from '@/lib/events';
+import { sendBookingConfirmation } from '@/lib/notifications';
 import { z } from 'zod';
 
 const createBookingSchema = z.object({
@@ -122,6 +123,18 @@ export async function createBooking(
       end_at: endAt,
     },
   });
+
+  // Send notification (fire and forget — don't block on email)
+  sendBookingConfirmation({
+    id: booking.id,
+    student_user_id: studentUserId,
+    tutor_user_id: tutorUserId,
+    parent_user_id: user.id,
+    family_id: student.family_id,
+    start_at: startAt,
+    end_at: endAt,
+    modality: 'online',
+  }).catch(err => console.error('[notifications] booking confirmation:', err));
 
   revalidatePath('/parent');
   revalidatePath('/tutor');

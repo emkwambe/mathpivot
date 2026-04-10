@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { BookingForm } from './BookingForm';
 import { getSchedulingSuggestions } from '@/lib/scheduling/intelligent-scheduler';
 
 export default async function BookPage() {
-  const user = await requireRole(['parent', 'student']);
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get user's family
   const { data: familyMember } = await supabase

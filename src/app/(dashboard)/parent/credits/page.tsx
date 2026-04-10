@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -19,8 +18,9 @@ const guideLevelLabels: Record<string, string> = {
 };
 
 export default async function CreditsPage() {
-  const user = await requireRole(['parent', 'student']);
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get user's family
   const { data: familyMember } = await supabase

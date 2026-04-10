@@ -1,203 +1,90 @@
-'use client';
+﻿"use client";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { loginAction } from "@/app/(auth)/actions";
 
-import { Suspense, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { loginSchema, type LoginInput } from '@/lib/validators';
-import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, Alert, AlertDescription } from '@/components/ui';
-
-function LoginForm() {
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') || '/';
-
-  const [formData, setFormData] = useState<LoginInput>({
-    email: '',
-    password: '',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: '' }));
-    setServerError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setServerError(null);
-
-    // Validate
-    const result = loginSchema.safeParse(formData);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as string;
-        fieldErrors[field] = issue.message;
-      });
-      setErrors(fieldErrors);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Sign in
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (error) {
-        setServerError(error.message);
-        setIsLoading(false);
-        return;
-      }
-
-      // Redirect to intended page using full page navigation
-      // This ensures middleware runs with fresh session cookies
-      const safeRedirect = redirectTo.startsWith('/login') || redirectTo.startsWith('/signup')
-        ? '/'
-        : redirectTo;
-      window.location.href = safeRedirect;
-    } catch (err) {
-      console.error('Login error:', err);
-
-      // Check for missing Supabase configuration
-      const errorMessage = err instanceof Error ? err.message : '';
-      if (errorMessage.includes('NEXT_PUBLIC_SUPABASE')) {
-        setServerError(errorMessage);
-      } else {
-        setServerError(
-          'Unable to connect to authentication service. Please check your internet connection and try again. If the problem persists, the service may be temporarily unavailable.'
-        );
-      }
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <Card className="w-full max-w-md shadow-xl border-0">
-      <CardHeader className="text-center pb-2">
-        <div className="mx-auto w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-          <span className="text-white font-bold text-2xl">M</span>
-        </div>
-        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-        <CardDescription className="text-slate-500">Sign in to your MathPivot account</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-4">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {serverError && (
-            <Alert variant="destructive">
-              <AlertDescription>{serverError}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="space-y-4">
-            <Input
-              label="Email"
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
-              disabled={isLoading}
-              autoComplete="email"
-              required
-              className="h-11"
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              error={errors.password}
-              disabled={isLoading}
-              autoComplete="current-password"
-              required
-              className="h-11"
-            />
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer"
-              />
-              <span className="ml-2 text-slate-600">Remember me</span>
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-            >
-              Forgot password?
-            </Link>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full h-11 text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
-            isLoading={isLoading}
-          >
-            Sign in
-          </Button>
-        </form>
-
-        <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-          <p className="text-sm text-slate-600">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
-              Sign up for free
-            </Link>
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function LoginFormFallback() {
-  return (
-    <Card className="w-full max-w-md shadow-xl border-0">
-      <CardHeader className="text-center pb-2">
-        <div className="mx-auto w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-          <span className="text-white font-bold text-2xl">M</span>
-        </div>
-        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-        <CardDescription className="text-slate-500">Sign in to your MathPivot account</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-4">
-        <div className="animate-pulse space-y-5">
-          <div className="space-y-2">
-            <div className="h-4 w-12 bg-slate-200 rounded" />
-            <div className="h-11 bg-slate-200 rounded-lg" />
-          </div>
-          <div className="space-y-2">
-            <div className="h-4 w-16 bg-slate-200 rounded" />
-            <div className="h-11 bg-slate-200 rounded-lg" />
-          </div>
-          <div className="h-11 bg-slate-200 rounded-lg" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+const initial = { error: undefined as string | undefined, redirectTo: undefined as string | undefined };
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [state, formAction, pending] = useActionState(loginAction, initial);
+
+  useEffect(() => {
+    if (state?.redirectTo) {
+      router.push(state.redirectTo);
+    }
+  }, [state?.redirectTo, router]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Suspense fallback={<LoginFormFallback />}>
-        <LoginForm />
-      </Suspense>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm space-y-6">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-xl mb-4">
+            <span className="text-primary-foreground font-bold text-lg">M</span>
+          </div>
+          <h1 className="text-2xl font-semibold text-foreground">Welcome back</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to MathPivot TutorOS</p>
+        </div>
+
+        <form action={formAction} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                Password
+              </label>
+              <Link href="/reset-password" className="text-xs text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+              placeholder="••••••••"
+            />
+          </div>
+
+          {state?.error && (
+            <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2">
+              <p className="text-sm text-destructive">{state.error}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            {pending ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" className="text-primary hover:underline font-medium">
+            Sign up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate, formatTime } from '@/lib/utils';
@@ -14,8 +13,9 @@ const guideLevelInfo: Record<string, { name: string; coachPercent: number; mento
 };
 
 export default async function TutorDashboardPage() {
-  const user = await requireRole('tutor');
   const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) return null;
 
   const now = new Date();
   const todayStart = startOfDay(now).toISOString();
@@ -23,85 +23,60 @@ export default async function TutorDashboardPage() {
   const weekStart = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 }).toISOString();
 
-  // Get tutor profile with guide level info
-  const { data: tutorProfile } = await supabase
-    .from('tutors_profile')
-    .select('guide_level, guide_level_code, career_pathway_specializations, eligible_grades, max_concurrent_students, guide_certified_at')
-    .eq('user_id', user.id)
-    .single();
+  // PARALLEL BATCH: All independent queries at once
+  const [profileResult, studentCountResult, todayResult, weekResult, completedResult] = await Promise.all([
+    supabase
+      .from('tutors_profile')
+      .select('*')
+      .eq('user_id', authUser.id)
+      .maybeSingle(),
+    supabase
+      .from('bookings')
+      .select('student_user_id', { count: 'exact', head: true })
+      .eq('tutor_user_id', authUser.id)
+      .gte('start_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+      .in('status', ['confirmed', 'completed']),
+    supabase
+      .from('bookings')
+      .select('id, start_at, end_at, modality, status, student_user_id, sessions (id, status)')
+      .eq('tutor_user_id', authUser.id)
+      .gte('start_at', todayStart)
+      .lte('start_at', todayEnd)
+      .in('status', ['confirmed', 'in_progress'])
+      .order('start_at', { ascending: true }),
+    supabase
+      .from('bookings')
+      .select('id, start_at, end_at, modality, status, student_user_id')
+      .eq('tutor_user_id', authUser.id)
+      .gte('start_at', now.toISOString())
+      .lte('start_at', weekEnd)
+      .in('status', ['pending', 'confirmed'])
+      .order('start_at', { ascending: true })
+      .limit(10),
+    supabase
+      .from('sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'completed')
+      .gte('completed_at', weekStart)
+      .lte('completed_at', weekEnd),
+  ]);
 
-  // Get active student count for this tutor
-  const { count: activeStudentCount } = await supabase
-    .from('bookings')
-    .select('student_user_id', { count: 'exact', head: true })
-    .eq('tutor_user_id', user.id)
-    .gte('start_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
-    .in('status', ['confirmed', 'completed']);
+  const tutorProfile = profileResult.data;
+  const activeStudentCount = studentCountResult.count;
+  const todaySessions = todayResult.data;
+  const weekSessions = weekResult.data;
+  const completedThisWeek = completedResult.count;
 
-  // Get today's sessions
-  const { data: todaySessions } = await supabase
-    .from('bookings')
-    .select(`
-      id,
-      start_at,
-      end_at,
-      modality,
-      status,
-      student_user_id,
-      sessions (
-        id,
-        status
-      )
-    `)
-    .eq('tutor_user_id', user.id)
-    .gte('start_at', todayStart)
-    .lte('start_at', todayEnd)
-    .in('status', ['confirmed', 'in_progress'])
-    .order('start_at', { ascending: true });
+  // Single name lookup for all student IDs
+  const allStudentIds = new Set([
+    ...(todaySessions?.map(b => b.student_user_id) || []),
+    ...(weekSessions?.map(b => b.student_user_id) || []),
+  ]);
+  const { data: allStudentNames } = allStudentIds.size > 0
+    ? await supabase.from('users_profile').select('id, full_name').in('id', [...allStudentIds])
+    : { data: [] };
 
-  // Get student names for today's sessions
-  const todayStudentIds = todaySessions?.map(b => b.student_user_id) || [];
-  const { data: todayStudents } = await supabase
-    .from('users_profile')
-    .select('id, full_name')
-    .in('id', todayStudentIds.length > 0 ? todayStudentIds : ['']);
-
-  const studentNameMap = new Map(todayStudents?.map(s => [s.id, s.full_name]) || []);
-
-  // Get this week's upcoming sessions
-  const { data: weekSessions } = await supabase
-    .from('bookings')
-    .select(`
-      id,
-      start_at,
-      end_at,
-      modality,
-      status,
-      student_user_id
-    `)
-    .eq('tutor_user_id', user.id)
-    .gte('start_at', now.toISOString())
-    .lte('start_at', weekEnd)
-    .in('status', ['pending', 'confirmed'])
-    .order('start_at', { ascending: true })
-    .limit(10);
-
-  // Get student names for week sessions
-  const weekStudentIds = weekSessions?.map(b => b.student_user_id) || [];
-  const { data: weekStudents } = await supabase
-    .from('users_profile')
-    .select('id, full_name')
-    .in('id', weekStudentIds.length > 0 ? weekStudentIds : ['']);
-
-  weekStudents?.forEach(s => studentNameMap.set(s.id, s.full_name));
-
-  // Get session stats for this week
-  const { count: completedThisWeek } = await supabase
-    .from('sessions')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'completed')
-    .gte('completed_at', weekStart)
-    .lte('completed_at', weekEnd);
+  const studentNameMap = new Map(allStudentNames?.map(s => [s.id, s.full_name]) || []);
 
   return (
     <div className="space-y-6">
@@ -109,7 +84,7 @@ export default async function TutorDashboardPage() {
         <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">Welcome, {user.fullName.split(' ')[0]}!</h1>
+              <h1 className="text-2xl font-bold">Welcome, {(authUser.user_metadata?.full_name || 'Tutor').split(' ')[0]}!</h1>
               <p className="text-emerald-100 mt-1">{formatDate(now, 'EEEE, MMMM d, yyyy')}</p>
             </div>
             <div className="flex gap-3">

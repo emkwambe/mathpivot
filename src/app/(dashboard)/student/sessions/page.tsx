@@ -1,11 +1,11 @@
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 
 export default async function StudentSessionsPage() {
-  const user = await requireRole(['student']);
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get all sessions for this student
   const { data: sessions } = await supabase

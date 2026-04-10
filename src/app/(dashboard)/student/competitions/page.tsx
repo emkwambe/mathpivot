@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
@@ -20,8 +19,9 @@ function getRankBadge(rank: number) {
 }
 
 export default async function StudentCompetitionsPage() {
-  const user = await requireRole('student');
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get student's competition results
   const { data: myResults } = await supabase

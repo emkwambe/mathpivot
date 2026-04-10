@@ -1,244 +1,133 @@
-'use client';
+﻿"use client";
+import { useActionState } from "react";
+import Link from "next/link";
+import { signupAction } from "@/app/(auth)/actions";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
-import { signUpSchema, type SignUpInput } from '@/lib/validators';
-import {
-  Button,
-  Input,
-  Select,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Alert,
-  AlertDescription,
-} from '@/components/ui';
-
-const roleOptions = [
-  { value: 'parent', label: 'Parent/Guardian' },
-  { value: 'student', label: 'Student' },
-  { value: 'tutor', label: 'Tutor' },
-];
+const initial = { error: undefined as string | undefined, success: undefined as string | undefined };
 
 export default function SignupPage() {
-  const router = useRouter();
+  const [state, formAction, pending] = useActionState(signupAction, initial);
 
-  const [formData, setFormData] = useState<SignUpInput>({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    fullName: '',
-    role: 'parent',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: '' }));
-    setServerError(null);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setServerError(null);
-    setSuccessMessage(null);
-
-    // Validate
-    const result = signUpSchema.safeParse(formData);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as string;
-        fieldErrors[field] = issue.message;
-      });
-      setErrors(fieldErrors);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Sign up
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            role: formData.role,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        setServerError(error.message);
-        setIsLoading(false);
-        return;
-      }
-
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
-        setSuccessMessage(
-          'Account created! Please check your email to confirm your account.'
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      // If auto-confirmed (dev mode), redirect to onboarding
-      router.push('/');
-      router.refresh();
-    } catch (err) {
-      // Network or connection error
-      console.error('Signup error:', err);
-      setServerError(
-        'Unable to connect to authentication service. Please check your internet connection and try again.'
-      );
-      setIsLoading(false);
-    }
-  };
+  if (state?.success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-2">
+            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-semibold text-foreground">Check your email</h1>
+          <p className="text-sm text-muted-foreground">{state.success}</p>
+          <Link href="/login" className="block text-sm text-primary hover:underline">
+            Back to login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md shadow-xl border-0">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-            <span className="text-white font-bold text-2xl">M</span>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-sm space-y-6">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-xl mb-4">
+            <span className="text-primary-foreground font-bold text-lg">M</span>
           </div>
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-          <CardDescription className="text-slate-500">Join MathPivot to start learning</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4">
-          {successMessage ? (
-            <Alert variant="success">
-              <AlertDescription>{successMessage}</AlertDescription>
-            </Alert>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {serverError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{serverError}</AlertDescription>
-                </Alert>
-              )}
+          <h1 className="text-2xl font-semibold text-foreground">Create your account</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Join MathPivot TutorOS</p>
+        </div>
 
-              <Input
-                label="Full Name"
-                type="text"
-                name="fullName"
-                placeholder="John Doe"
-                value={formData.fullName}
-                onChange={handleChange}
-                error={errors.fullName}
-                disabled={isLoading}
-                autoComplete="name"
-                required
-                className="h-11"
-              />
+        <form action={formAction} className="space-y-4">
+          <div>
+            <label htmlFor="full_name" className="block text-sm font-medium text-foreground mb-1">
+              Full name
+            </label>
+            <input
+              id="full_name"
+              name="full_name"
+              type="text"
+              required
+              autoComplete="name"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+              placeholder="Jane Smith"
+            />
+          </div>
 
-              <Input
-                label="Email"
-                type="email"
-                name="email"
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                error={errors.email}
-                disabled={isLoading}
-                autoComplete="email"
-                required
-                className="h-11"
-              />
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+              placeholder="you@example.com"
+            />
+          </div>
 
-              <Select
-                label="I am a..."
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                options={roleOptions}
-                error={errors.role}
-                disabled={isLoading}
-              />
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-foreground mb-1">
+              I am a...
+            </label>
+            <select
+              id="role"
+              name="role"
+              defaultValue="parent"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+            >
+              <option value="parent">Parent / Guardian</option>
+              <option value="student">Student</option>
+              <option value="tutor">Tutor</option>
+            </select>
+          </div>
 
-              <Input
-                label="Password"
-                type="password"
-                name="password"
-                placeholder="Create a strong password"
-                value={formData.password}
-                onChange={handleChange}
-                error={errors.password}
-                disabled={isLoading}
-                autoComplete="new-password"
-                required
-                className="h-11"
-              />
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+              placeholder="Min. 8 characters"
+            />
+          </div>
 
-              <Input
-                label="Confirm Password"
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={errors.confirmPassword}
-                disabled={isLoading}
-                autoComplete="new-password"
-                required
-                className="h-11"
-              />
-
-              <p className="text-xs text-slate-500">
-                Password must be at least 8 characters with one uppercase, one
-                lowercase, and one number.
-              </p>
-
-              <Button
-                type="submit"
-                className="w-full h-11 text-base font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
-                isLoading={isLoading}
-              >
-                Create account
-              </Button>
-
-              <p className="text-xs text-center text-slate-500">
-                By creating an account, you agree to our{' '}
-                <Link href="/terms" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Privacy Policy
-                </Link>
-                .
-              </p>
-            </form>
+          {state?.error && (
+            <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2">
+              <p className="text-sm text-destructive">{state.error}</p>
+            </div>
           )}
 
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-            <p className="text-sm text-slate-600">
-              Already have an account?{' '}
-              <Link
-                href="/login"
-                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          <button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            {pending ? "Creating account..." : "Create account"}
+          </button>
+
+          <p className="text-xs text-center text-muted-foreground">
+            By signing up you agree to our{" "}
+            <Link href="/terms" className="text-primary hover:underline">Terms</Link>
+            {" "}and{" "}
+            <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+          </p>
+        </form>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="text-primary hover:underline font-medium">Sign in</Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,43 +1,44 @@
+﻿import { createClient } from "@supabase/supabase-js";
+
 /**
- * Admin Supabase client (service role)
- * ONLY use this on the server for operations that need to bypass RLS:
- * - Inserting events
- * - Processing notifications
- * - Handling webhooks
- * - Admin cross-tenant operations
- *
- * NEVER expose this client to the browser or import it in client components
+ * Check whether admin env vars are present (without throwing).
  */
-import { createClient } from '@supabase/supabase-js';
-
-// Ensure this is only used server-side
-if (typeof window !== 'undefined') {
-  throw new Error('supabase/admin.ts should only be imported server-side');
+export function isAdminConfigured(): boolean {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
 }
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+/**
+ * Supabase admin client with service_role key.
+ * NEVER expose this to the client — server-only.
+ * Bypasses RLS — use only for trusted server operations.
+ */
+export function createAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const hasCredentials = Boolean(supabaseUrl && supabaseServiceRoleKey);
+  if (!url || !serviceKey) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars"
+    );
+  }
 
-if (!hasCredentials) {
-  console.warn('Missing Supabase admin credentials - admin operations will fail');
-}
-
-// Create admin client - use placeholder values during build if not configured
-// The actual client will only work at runtime with proper env vars
-export const supabaseAdmin = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseServiceRoleKey || 'placeholder-key-for-build-only',
-  {
+  return createClient(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-);
-
-// Helper to check if admin client is configured
-export function isAdminConfigured(): boolean {
-  return Boolean(supabaseUrl && supabaseServiceRoleKey);
+  });
 }
+
+/**
+ * Lazy singleton admin client for modules that import `supabaseAdmin` directly.
+ */
+export const supabaseAdmin = new Proxy({} as ReturnType<typeof createAdminClient>, {
+  get(_target, prop, receiver) {
+    const client = createAdminClient();
+    return Reflect.get(client, prop, receiver);
+  },
+});

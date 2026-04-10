@@ -6,7 +6,9 @@
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Add Anthropic SDK, KaTeX rendering, and improved tutor prompts\n\n- Switch to official @anthropic-ai/sdk for API calls with streaming\n- Add KaTeX + remark-math + rehype-katex for LaTeX math rendering\n- Update system prompt with balanced teaching approach:\n  - Contextual questions for vague requests\n  - Direct answers when context is clear\n  - Strict LaTeX formatting requirements \\(no Unicode math\\)\n- Add ReactMarkdown with math plugins to chat UI\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(npm uninstall:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(curl -s -X POST http://localhost:3000/api/dev/setup-demo-accounts)",
+      "WebFetch(domain:tutorbase.com)"
     ]
   }
 }

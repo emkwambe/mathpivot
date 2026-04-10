@@ -1,0 +1,13 @@
+﻿
+FullName                                                            
+--------                                                            
+C:\Users\HP\Documents\mathpivot\scripts\create-test-session.js      
+C:\Users\HP\Documents\mathpivot\scripts\seed-test-session.ts        
+C:\Users\HP\Documents\mathpivot\src\middleware.ts                   
+C:\Users\HP\Documents\mathpivot\src\app\actions\session.ts          
+C:\Users\HP\Documents\mathpivot\src\components\SessionManager.tsx   
+C:\Users\HP\Documents\mathpivot\src\components\SessionWhiteboard.tsx
+C:\Users\HP\Documents\mathpivot\src\lib\supabase\middleware.ts      
+C:\Users\HP\Documents\mathpivot\src\lib\validators\auth.ts          
+
+

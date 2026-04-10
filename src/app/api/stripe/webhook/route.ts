@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import { constructWebhookEvent, isStripeConfigured } from '@/lib/stripe';
 import { supabaseAdmin, isAdminConfigured } from '@/lib/supabase/admin';
 import { emitEvent } from '@/lib/events';
+import { sendPurchaseConfirmation } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   if (!isStripeConfigured()) {
@@ -156,6 +157,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripe_session_id: session.id,
     },
   });
+
+  // Send purchase confirmation (fire and forget)
+  sendPurchaseConfirmation(purchase.id).catch(err => console.error('[notifications] purchase:', err));
 
   // Emit credits added event
   await emitEvent({

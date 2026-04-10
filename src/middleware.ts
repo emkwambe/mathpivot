@@ -1,117 +1,101 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
-// Routes that don't require authentication
-const PUBLIC_ROUTES = ['/login', '/signup', '/auth/callback', '/auth/confirm'];
+const PUBLIC_ROUTES = [
+  '/',
+  '/login',
+  '/signup',
+  '/reset-password',
+  '/update-password',
+  '/auth/callback',
+  '/auth/confirm',
+  '/get-started',
+  '/pricing',
+];
 
-// Routes by role
-const ROLE_ROUTES: Record<string, string[]> = {
-  admin: ['/admin'],
-  tutor: ['/tutor'],
-  parent: ['/parent'],
-  student: ['/student'],
+const ROLE_PREFIXES: Record<string, string> = {
+  super_admin: '/admin',
+  admin: '/admin',
+  tutor: '/tutor',
+  parent: '/parent',
+  student: '/student',
 };
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Update session (refresh token if needed)
   const { supabaseResponse, user, supabase } = await updateSession(request);
 
-  // Allow public routes
-  if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
-    // Redirect authenticated users away from login/signup
-    if (user && (pathname === '/login' || pathname === '/signup')) {
-      // Get user role to redirect to correct dashboard
-      const { data: profile } = await supabase
+  const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+
+  // Unauthenticated — send to login (except public routes)
+  if (!user) {
+    if (isPublic) return supabaseResponse;
+    const url = new URL('/login', request.url);
+    url.searchParams.set('redirectTo', pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Landing page, pricing, get-started — let authenticated users through too
+  // (the landing page handles its own redirect client-side)
+  if (pathname === '/' || pathname === '/get-started' || pathname === '/pricing') {
+    return supabaseResponse;
+  }
+
+  // Authenticated on auth routes (login/signup) — redirect to dashboard
+  if (isPublic) {
+    try {
+      const { data: profile, error } = await supabase
         .from('users_profile')
         .select('role')
         .eq('id', user.id)
         .single();
 
-      if (profile?.role) {
-        const dashboardPath = getDashboardPath(profile.role);
-        // Only redirect if we have a valid dashboard path (not login itself)
-        if (dashboardPath !== '/login') {
-          return NextResponse.redirect(new URL(dashboardPath, request.url));
-        }
-      }
+      if (error) throw error;
+
+      const role = profile?.role ?? 'student';
+      const dest = ROLE_PREFIXES[role] ?? '/student';
+      return NextResponse.redirect(new URL(dest, request.url));
+    } catch (err) {
+      console.error('Middleware: failed to fetch user profile', err);
+      // Fallback: send to a generic dashboard (student is safest)
+      return NextResponse.redirect(new URL('/student', request.url));
     }
-    return supabaseResponse;
   }
 
-  // Check if user is authenticated for protected routes
-  if (!user) {
-    const redirectUrl = new URL('/login', request.url);
-    redirectUrl.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // Get user role for RBAC
+  // Role-based access check
   const { data: profile } = await supabase
     .from('users_profile')
     .select('role')
     .eq('id', user.id)
     .single();
 
-  if (!profile?.role) {
-    // User exists but no profile - redirect to complete signup
+  const role = profile?.role as string | undefined;
+
+  // No profile yet — send to signup to complete
+  if (!role) {
+    if (pathname.startsWith('/signup')) return supabaseResponse;
     return NextResponse.redirect(new URL('/signup?complete=true', request.url));
   }
 
-  // Check role-based access
-  const userRole = profile.role as string;
+  // Super admin and admin can access everything
+  if (role === 'super_admin' || role === 'admin') return supabaseResponse;
 
-  // Root redirect to appropriate dashboard
-  if (pathname === '/') {
-    const dashboardPath = getDashboardPath(userRole);
-    return NextResponse.redirect(new URL(dashboardPath, request.url));
+  // Check role prefix match
+  const allowedPrefix = ROLE_PREFIXES[role];
+  const settingsOk = pathname.startsWith('/settings') || pathname.startsWith('/messages');
+
+  if (allowedPrefix && (pathname.startsWith(allowedPrefix) || settingsOk)) {
+    return supabaseResponse;
   }
 
-  // Check if user can access the requested route
-  const allowedPrefixes = ROLE_ROUTES[userRole] || [];
-  const isAllowed =
-    userRole === 'super_admin' || // Super admin can access everything
-    userRole === 'admin' || // Admin can access everything
-    allowedPrefixes.some((prefix) => pathname.startsWith(prefix));
-
-  if (!isAllowed) {
-    // Redirect to user's dashboard
-    const dashboardPath = getDashboardPath(userRole);
-    return NextResponse.redirect(new URL(dashboardPath, request.url));
-  }
-
-  return supabaseResponse;
-}
-
-function getDashboardPath(role: string): string {
-  switch (role) {
-    case 'super_admin':
-      return '/admin';  // Super admins use admin dashboard with elevated access
-    case 'admin':
-      return '/admin';
-    case 'tutor':
-      return '/tutor';
-    case 'parent':
-      return '/parent';
-    case 'student':
-      return '/student';
-    default:
-      // Default to student dashboard instead of login to prevent redirect loops
-      return '/student';
-  }
+  // Wrong role — redirect to their dashboard
+  const dest = ROLE_PREFIXES[role] ?? '/student';
+  return NextResponse.redirect(new URL(dest, request.url));
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes (handled separately)
-     */
     '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
+

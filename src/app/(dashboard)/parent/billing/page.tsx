@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -14,8 +13,9 @@ const STATUS_COLORS: Record<PurchaseStatus, 'warning' | 'success' | 'danger' | '
 };
 
 export default async function ParentBillingPage() {
-  const user = await requireRole('parent');
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get family info
   const { data: familyMember } = await supabase

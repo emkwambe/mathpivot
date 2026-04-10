@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 
 export default async function StudentCareerPathwaysPage() {
-  const user = await requireRole('student');
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get all active career pathways
   const { data: pathways } = await supabase

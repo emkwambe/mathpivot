@@ -1,8 +1,10 @@
-import { requireRole } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 import { MathWhiteboard } from '@/components/MathWhiteboard';
 
 export default async function TutorWhiteboardsPage() {
-  await requireRole(['tutor', 'admin']);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   return (
     <div className="space-y-6">

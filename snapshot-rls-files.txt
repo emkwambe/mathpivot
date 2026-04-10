@@ -1,0 +1,9 @@
+﻿
+FullName                                                                   
+--------                                                                   
+C:\Users\HP\Documents\mathpivot\snapshot-rls-files.txt                     
+C:\Users\HP\Documents\mathpivot\src\lib\auth\__tests__\rls-policies.test.ts
+C:\Users\HP\Documents\mathpivot\supabase\migrations\00002_rls_policies.sql 
+C:\Users\HP\Documents\mathpivot\supabase\migrations\00011_enable_rls_sec...
+
+

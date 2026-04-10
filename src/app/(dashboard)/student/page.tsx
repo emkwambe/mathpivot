@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 
 export default async function StudentDashboardPage() {
-  const user = await requireRole(['student']);
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get student profile
   const { data: studentProfile } = await supabase
@@ -72,7 +72,7 @@ export default async function StudentDashboardPage() {
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white">
         <h1 className="text-2xl font-bold">
-          Welcome back, {user.fullName?.split(' ')[0]}!
+          Welcome back, {(user.user_metadata?.full_name || 'Student').split(' ')[0]}!
         </h1>
         <p className="text-indigo-100 mt-1">
           {studentProfile?.grade

@@ -1,28 +1,19 @@
-import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getDashboardPath } from '@/lib/auth';
+import LandingPageClient from './landing-page-client';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'MathPivot – The Operating System for Tutoring Centers',
+  description: 'Schedule sessions, track mastery, bill parents, and power AI-assisted learning — all in one platform for math and CS education.',
+  openGraph: {
+    images: ['/og-image.png'],
+  },
+};
 
 export default async function HomePage() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Get user role and redirect to appropriate dashboard
-  const { data: profile } = await supabase
-    .from('users_profile')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  const dashboardPath = getDashboardPath(
-    (profile?.role as 'admin' | 'tutor' | 'parent' | 'student') || 'parent'
-  );
-
-  redirect(dashboardPath);
+  return <LandingPageClient isLoggedIn={isLoggedIn} />;
 }

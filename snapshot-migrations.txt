@@ -1,0 +1,5009 @@
+﻿=== 00001_initial_schema.sql ===
+-- ============================================================================
+-- MATHPIVOT TUTOROS - INITIAL DATABASE SCHEMA
+-- Migration 00001: Core tables, RLS policies, and functions
+-- ============================================================================
+
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "btree_gist";
+
+-- ============================================================================
+-- CUSTOM TYPES (ENUMS)
+-- ============================================================================
+
+CREATE TYPE user_role AS ENUM ('admin', 'tutor', 'parent', 'student');
+CREATE TYPE booking_status AS ENUM ('pending', 'confirmed', 'in_progress', 'completed', 'canceled', 'no_show');
+CREATE TYPE session_status AS ENUM ('scheduled', 'in_progress', 'completed', 'canceled');
+CREATE TYPE attendance_status AS ENUM ('present', 'absent', 'late', 'no_show');
+CREATE TYPE mastery_level AS ENUM ('not_started', 'developing', 'proficient', 'mastered');
+CREATE TYPE skill_exposure AS ENUM ('introduced', 'practiced', 'assessed');
+CREATE TYPE homework_status AS ENUM ('assigned', 'submitted', 'reviewed');
+CREATE TYPE product_type AS ENUM ('package', 'subscription');
+CREATE TYPE purchase_status AS ENUM ('pending', 'completed', 'failed', 'refunded');
+CREATE TYPE credit_transaction_type AS ENUM ('purchase', 'session_debit', 'refund', 'adjustment', 'expiry');
+CREATE TYPE notification_channel AS ENUM ('email', 'sms', 'push', 'in_app');
+CREATE TYPE notification_status AS ENUM ('pending', 'sent', 'failed', 'canceled');
+CREATE TYPE modality AS ENUM ('online', 'in_person');
+CREATE TYPE course_track AS ENUM ('math_1', 'math_2', 'math_3', 'pre_calc', 'ap_calc_ab', 'ap_calc_bc', 'ap_stats');
+CREATE TYPE waitlist_status AS ENUM ('waiting', 'notified', 'booked', 'expired');
+CREATE TYPE family_member_role AS ENUM ('parent', 'student');
+
+-- ============================================================================
+-- CORE TABLES
+-- ============================================================================
+
+-- Users Profile (extends auth.users)
+CREATE TABLE users_profile (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    role user_role NOT NULL DEFAULT 'parent',
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    avatar_url TEXT,
+    timezone TEXT NOT NULL DEFAULT 'America/New_York',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Families
+CREATE TABLE families (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    primary_parent_user_id UUID NOT NULL REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Family Members (junction table)
+CREATE TABLE family_members (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    member_role family_member_role NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(family_id, user_id)
+);
+
+-- Students Profile
+CREATE TABLE students_profile (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    grade INTEGER NOT NULL CHECK (grade >= 1 AND grade <= 12),
+    course_track course_track NOT NULL,
+    goals TEXT,
+    notes TEXT,
+    baseline_diagnostic_id UUID,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Tutors Profile
+CREATE TABLE tutors_profile (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    bio TEXT,
+    specialties TEXT[] DEFAULT '{}',
+    timezone TEXT NOT NULL DEFAULT 'America/New_York',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    hourly_rate INTEGER, -- in cents
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- SCHEDULING TABLES
+-- ============================================================================
+
+-- Tutor Availability Rules (recurring)
+CREATE TABLE availability_rules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tutor_user_id UUID NOT NULL REFERENCES tutors_profile(user_id) ON DELETE CASCADE,
+    day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CHECK (start_time < end_time)
+);
+
+-- Tutor Availability Exceptions (one-off)
+CREATE TABLE availability_exceptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tutor_user_id UUID NOT NULL REFERENCES tutors_profile(user_id) ON DELETE CASCADE,
+    exception_date DATE NOT NULL,
+    is_available BOOLEAN NOT NULL,
+    start_time TIME,
+    end_time TIME,
+    reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(tutor_user_id, exception_date),
+    CHECK (
+        (is_available = false) OR
+        (is_available = true AND start_time IS NOT NULL AND end_time IS NOT NULL AND start_time < end_time)
+    )
+);
+
+-- Bookings
+CREATE TABLE bookings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    family_id UUID NOT NULL REFERENCES families(id),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id),
+    parent_user_id UUID NOT NULL REFERENCES auth.users(id),
+    tutor_user_id UUID NOT NULL REFERENCES tutors_profile(user_id),
+    start_at TIMESTAMPTZ NOT NULL,
+    end_at TIMESTAMPTZ NOT NULL,
+    modality modality NOT NULL DEFAULT 'online',
+    status booking_status NOT NULL DEFAULT 'pending',
+    notes TEXT,
+    canceled_at TIMESTAMPTZ,
+    canceled_by UUID REFERENCES auth.users(id),
+    cancel_reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CHECK (start_at < end_at)
+);
+
+-- Prevent overlapping bookings for the same tutor
+-- Using EXCLUDE constraint with tstzrange for atomicity
+CREATE INDEX idx_bookings_tutor_time ON bookings (tutor_user_id, start_at, end_at) WHERE status NOT IN ('canceled');
+ALTER TABLE bookings ADD CONSTRAINT no_overlapping_bookings
+    EXCLUDE USING gist (
+        tutor_user_id WITH =,
+        tstzrange(start_at, end_at) WITH &&
+    )
+    WHERE (status NOT IN ('canceled'));
+
+-- Waitlist
+CREATE TABLE waitlist (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    family_id UUID NOT NULL REFERENCES families(id),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id),
+    parent_user_id UUID NOT NULL REFERENCES auth.users(id),
+    tutor_user_id UUID REFERENCES tutors_profile(user_id),
+    preferred_date DATE NOT NULL,
+    preferred_start_time TIME NOT NULL,
+    preferred_end_time TIME NOT NULL,
+    modality modality NOT NULL DEFAULT 'online',
+    status waitlist_status NOT NULL DEFAULT 'waiting',
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- SESSION TABLES
+-- ============================================================================
+
+-- Sessions
+CREATE TABLE sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    booking_id UUID NOT NULL UNIQUE REFERENCES bookings(id) ON DELETE CASCADE,
+    status session_status NOT NULL DEFAULT 'scheduled',
+    attendance_status attendance_status,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    internal_notes TEXT,
+    parent_summary TEXT,
+    next_steps TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Session Attachments
+CREATE TABLE session_attachments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    file_name TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    file_size INTEGER NOT NULL,
+    mime_type TEXT NOT NULL,
+    uploaded_by UUID NOT NULL REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- SKILLS & MASTERY TABLES
+-- ============================================================================
+
+-- Skills Library
+CREATE TABLE skills (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    course_track course_track NOT NULL,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    order_index INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Skills Tagged in Session
+CREATE TABLE session_skills (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    skill_id UUID NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+    exposure_level skill_exposure NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(session_id, skill_id)
+);
+
+-- Student Skill Mastery
+CREATE TABLE student_skill_mastery (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    skill_id UUID NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+    mastery_level mastery_level NOT NULL DEFAULT 'not_started',
+    last_practiced_at TIMESTAMPTZ,
+    updated_by_user_id UUID NOT NULL REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(student_user_id, skill_id)
+);
+
+-- Diagnostics
+CREATE TABLE diagnostics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    administered_by_user_id UUID NOT NULL REFERENCES auth.users(id),
+    administered_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    course_track course_track NOT NULL,
+    score INTEGER,
+    max_score INTEGER,
+    results_json JSONB,
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- HOMEWORK TABLES
+-- ============================================================================
+
+-- Homework Items
+CREATE TABLE homework_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    due_date DATE,
+    status homework_status NOT NULL DEFAULT 'assigned',
+    submission_text TEXT,
+    submission_file_path TEXT,
+    submitted_at TIMESTAMPTZ,
+    review_notes TEXT,
+    reviewed_at TIMESTAMPTZ,
+    reviewed_by UUID REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- PAYMENT & CREDITS TABLES
+-- ============================================================================
+
+-- Products
+CREATE TABLE products (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    description TEXT,
+    product_type product_type NOT NULL,
+    credits INTEGER NOT NULL CHECK (credits > 0),
+    price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
+    currency TEXT NOT NULL DEFAULT 'USD',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    stripe_product_id TEXT,
+    stripe_price_id TEXT,
+    metadata JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Purchases
+CREATE TABLE purchases (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    family_id UUID NOT NULL REFERENCES families(id),
+    parent_user_id UUID NOT NULL REFERENCES auth.users(id),
+    product_id UUID NOT NULL REFERENCES products(id),
+    amount_cents INTEGER NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    status purchase_status NOT NULL DEFAULT 'pending',
+    stripe_payment_intent_id TEXT,
+    stripe_checkout_session_id TEXT,
+    paid_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Credit Ledger
+CREATE TABLE credit_ledger (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    family_id UUID NOT NULL REFERENCES families(id),
+    transaction_type credit_transaction_type NOT NULL,
+    amount INTEGER NOT NULL, -- positive for credit, negative for debit
+    balance_after INTEGER NOT NULL,
+    reference_type TEXT, -- 'purchase', 'session', etc.
+    reference_id UUID,
+    description TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- NOTIFICATIONS TABLES
+-- ============================================================================
+
+-- Notification Preferences
+CREATE TABLE notification_preferences (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    channel notification_channel NOT NULL,
+    notification_type TEXT NOT NULL,
+    is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(user_id, channel, notification_type)
+);
+
+-- Notifications Queue
+CREATE TABLE notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id),
+    channel notification_channel NOT NULL,
+    template_key TEXT NOT NULL,
+    payload_json JSONB NOT NULL DEFAULT '{}',
+    status notification_status NOT NULL DEFAULT 'pending',
+    scheduled_for TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    sent_at TIMESTAMPTZ,
+    error_message TEXT,
+    retry_count INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- EVENT & AUDIT TABLES
+-- ============================================================================
+
+-- Events (append-only event store)
+CREATE TABLE events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    type TEXT NOT NULL,
+    actor_user_id UUID REFERENCES auth.users(id),
+    subject_type TEXT NOT NULL,
+    subject_id UUID NOT NULL,
+    data JSONB NOT NULL DEFAULT '{}',
+    occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Stripe Webhook Events (for idempotency)
+CREATE TABLE stripe_webhook_events (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    stripe_event_id TEXT NOT NULL UNIQUE,
+    event_type TEXT NOT NULL,
+    payload_json JSONB NOT NULL,
+    processed_at TIMESTAMPTZ,
+    error_message TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Weekly Reports
+CREATE TABLE weekly_reports (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id),
+    family_id UUID NOT NULL REFERENCES families(id),
+    week_start DATE NOT NULL,
+    week_end DATE NOT NULL,
+    sessions_count INTEGER NOT NULL DEFAULT 0,
+    attendance_rate DECIMAL(5,4),
+    skills_practiced TEXT[] DEFAULT '{}',
+    mastery_changes JSONB DEFAULT '[]',
+    summary_text TEXT,
+    recommendations TEXT,
+    is_at_risk BOOLEAN NOT NULL DEFAULT FALSE,
+    at_risk_reasons TEXT[] DEFAULT '{}',
+    generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    sent_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(student_user_id, week_start)
+);
+
+-- ============================================================================
+-- INDEXES
+-- ============================================================================
+
+CREATE INDEX idx_users_profile_role ON users_profile(role);
+CREATE INDEX idx_users_profile_email ON users_profile(email);
+CREATE INDEX idx_family_members_user_id ON family_members(user_id);
+CREATE INDEX idx_family_members_family_id ON family_members(family_id);
+CREATE INDEX idx_students_profile_family_id ON students_profile(family_id);
+CREATE INDEX idx_bookings_family_id ON bookings(family_id);
+CREATE INDEX idx_bookings_student_user_id ON bookings(student_user_id);
+CREATE INDEX idx_bookings_tutor_user_id ON bookings(tutor_user_id);
+CREATE INDEX idx_bookings_start_at ON bookings(start_at);
+CREATE INDEX idx_bookings_status ON bookings(status);
+CREATE INDEX idx_sessions_booking_id ON sessions(booking_id);
+CREATE INDEX idx_sessions_status ON sessions(status);
+CREATE INDEX idx_session_skills_session_id ON session_skills(session_id);
+CREATE INDEX idx_session_skills_skill_id ON session_skills(skill_id);
+CREATE INDEX idx_student_skill_mastery_student_id ON student_skill_mastery(student_user_id);
+CREATE INDEX idx_skills_course_track ON skills(course_track);
+CREATE INDEX idx_credit_ledger_family_id ON credit_ledger(family_id);
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_status ON notifications(status);
+CREATE INDEX idx_notifications_scheduled_for ON notifications(scheduled_for);
+CREATE INDEX idx_events_type ON events(type);
+CREATE INDEX idx_events_subject ON events(subject_type, subject_id);
+CREATE INDEX idx_events_occurred_at ON events(occurred_at);
+CREATE INDEX idx_weekly_reports_student_id ON weekly_reports(student_user_id);
+
+-- ============================================================================
+-- UPDATED_AT TRIGGERS
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_users_profile_updated_at BEFORE UPDATE ON users_profile FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_families_updated_at BEFORE UPDATE ON families FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_students_profile_updated_at BEFORE UPDATE ON students_profile FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_tutors_profile_updated_at BEFORE UPDATE ON tutors_profile FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_availability_rules_updated_at BEFORE UPDATE ON availability_rules FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_bookings_updated_at BEFORE UPDATE ON bookings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_waitlist_updated_at BEFORE UPDATE ON waitlist FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_sessions_updated_at BEFORE UPDATE ON sessions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_student_skill_mastery_updated_at BEFORE UPDATE ON student_skill_mastery FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_homework_items_updated_at BEFORE UPDATE ON homework_items FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_purchases_updated_at BEFORE UPDATE ON purchases FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_notification_preferences_updated_at BEFORE UPDATE ON notification_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_notifications_updated_at BEFORE UPDATE ON notifications FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_skills_updated_at BEFORE UPDATE ON skills FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================================================
+-- AUTO-CREATE USER PROFILE ON AUTH.USERS INSERT
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.users_profile (id, role, full_name, email, timezone)
+    VALUES (
+        NEW.id,
+        COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'parent'),
+        COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
+        NEW.email,
+        'America/New_York'
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+=== 00002_rls_policies.sql ===
+-- ============================================================================
+-- MATHPIVOT TUTOROS - ROW LEVEL SECURITY POLICIES
+-- Migration 00002: RLS policies for all tables
+-- DENY by default, ALLOW via policies
+-- ============================================================================
+
+-- ============================================================================
+-- HELPER FUNCTIONS (Security Definer)
+-- ============================================================================
+
+-- Get current user's role
+CREATE OR REPLACE FUNCTION public.current_role()
+RETURNS user_role
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT up.role
+  FROM public.users_profile up
+  WHERE up.id = auth.uid()
+$$;
+
+-- Check if current user is admin
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(public.current_role() = 'admin', false)
+$$;
+
+-- Check if current user is tutor
+CREATE OR REPLACE FUNCTION public.is_tutor()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(public.current_role() = 'tutor', false)
+$$;
+
+-- Check if current user is parent
+CREATE OR REPLACE FUNCTION public.is_parent()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(public.current_role() = 'parent', false)
+$$;
+
+-- Check if current user is student
+CREATE OR REPLACE FUNCTION public.is_student()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE(public.current_role() = 'student', false)
+$$;
+
+-- Check if current user is a parent in a given family
+CREATE OR REPLACE FUNCTION public.is_parent_in_family(p_family_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.family_members fm
+    WHERE fm.family_id = p_family_id
+      AND fm.user_id = auth.uid()
+      AND fm.member_role = 'parent'
+  )
+$$;
+
+-- Check if current user is the student
+CREATE OR REPLACE FUNCTION public.is_self_student(p_student_user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT auth.uid() = p_student_user_id
+$$;
+
+-- Check if current user can access a student's data
+CREATE OR REPLACE FUNCTION public.can_access_student(p_student_user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    public.is_admin()
+    OR public.is_self_student(p_student_user_id)
+    OR EXISTS (
+      SELECT 1
+      FROM public.students_profile sp
+      WHERE sp.user_id = p_student_user_id
+        AND public.is_parent_in_family(sp.family_id)
+    )
+$$;
+
+-- Check if current user is the tutor for a booking
+CREATE OR REPLACE FUNCTION public.is_booking_tutor(p_booking_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.bookings b
+    WHERE b.id = p_booking_id
+      AND b.tutor_user_id = auth.uid()
+  )
+$$;
+
+-- Check if current user can access a booking
+CREATE OR REPLACE FUNCTION public.can_access_booking(p_booking_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    public.is_admin()
+    OR public.is_booking_tutor(p_booking_id)
+    OR EXISTS (
+      SELECT 1
+      FROM public.bookings b
+      WHERE b.id = p_booking_id
+        AND (
+          b.parent_user_id = auth.uid()
+          OR b.student_user_id = auth.uid()
+          OR public.is_parent_in_family(b.family_id)
+        )
+    )
+$$;
+
+-- Check if current user can access a session
+CREATE OR REPLACE FUNCTION public.can_access_session(p_session_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    public.is_admin()
+    OR EXISTS (
+      SELECT 1
+      FROM public.sessions s
+      JOIN public.bookings b ON b.id = s.booking_id
+      WHERE s.id = p_session_id
+        AND (
+          b.tutor_user_id = auth.uid()
+          OR b.parent_user_id = auth.uid()
+          OR b.student_user_id = auth.uid()
+          OR public.is_parent_in_family(b.family_id)
+        )
+    )
+$$;
+
+-- ============================================================================
+-- ENABLE RLS ON ALL TABLES
+-- ============================================================================
+
+ALTER TABLE public.users_profile ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.families ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.family_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.students_profile ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tutors_profile ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.availability_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.availability_exceptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.session_attachments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.session_skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.student_skill_mastery ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.diagnostics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.homework_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.purchases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.credit_ledger ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notification_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stripe_webhook_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.weekly_reports ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- USERS PROFILE POLICIES
+-- ============================================================================
+
+-- Users can read/update their own profile; admin can read/update all
+DROP POLICY IF EXISTS "users_profile_select" ON public.users_profile;
+CREATE POLICY "users_profile_select"
+ON public.users_profile FOR SELECT
+USING (public.is_admin() OR id = auth.uid());
+
+DROP POLICY IF EXISTS "users_profile_update" ON public.users_profile;
+CREATE POLICY "users_profile_update"
+ON public.users_profile FOR UPDATE
+USING (public.is_admin() OR id = auth.uid())
+WITH CHECK (public.is_admin() OR id = auth.uid());
+
+-- ============================================================================
+-- FAMILIES POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "families_select" ON public.families;
+CREATE POLICY "families_select"
+ON public.families FOR SELECT
+USING (
+  public.is_admin()
+  OR public.is_parent_in_family(id)
+  OR EXISTS (
+    SELECT 1 FROM public.family_members fm
+    WHERE fm.family_id = families.id AND fm.user_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "families_insert" ON public.families;
+CREATE POLICY "families_insert"
+ON public.families FOR INSERT
+WITH CHECK (public.is_admin() OR public.is_parent());
+
+DROP POLICY IF EXISTS "families_update" ON public.families;
+CREATE POLICY "families_update"
+ON public.families FOR UPDATE
+USING (public.is_admin() OR public.is_parent_in_family(id))
+WITH CHECK (public.is_admin() OR public.is_parent_in_family(id));
+
+-- ============================================================================
+-- FAMILY MEMBERS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "family_members_select" ON public.family_members;
+CREATE POLICY "family_members_select"
+ON public.family_members FOR SELECT
+USING (
+  public.is_admin()
+  OR user_id = auth.uid()
+  OR public.is_parent_in_family(family_id)
+);
+
+DROP POLICY IF EXISTS "family_members_insert" ON public.family_members;
+CREATE POLICY "family_members_insert"
+ON public.family_members FOR INSERT
+WITH CHECK (public.is_admin() OR public.is_parent_in_family(family_id));
+
+DROP POLICY IF EXISTS "family_members_delete" ON public.family_members;
+CREATE POLICY "family_members_delete"
+ON public.family_members FOR DELETE
+USING (public.is_admin() OR public.is_parent_in_family(family_id));
+
+-- ============================================================================
+-- STUDENTS PROFILE POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "students_profile_select" ON public.students_profile;
+CREATE POLICY "students_profile_select"
+ON public.students_profile FOR SELECT
+USING (
+  public.is_admin()
+  OR user_id = auth.uid()
+  OR public.is_parent_in_family(family_id)
+);
+
+DROP POLICY IF EXISTS "students_profile_insert" ON public.students_profile;
+CREATE POLICY "students_profile_insert"
+ON public.students_profile FOR INSERT
+WITH CHECK (public.is_admin() OR public.is_parent_in_family(family_id));
+
+DROP POLICY IF EXISTS "students_profile_update" ON public.students_profile;
+CREATE POLICY "students_profile_update"
+ON public.students_profile FOR UPDATE
+USING (
+  public.is_admin()
+  OR public.is_parent_in_family(family_id)
+  OR user_id = auth.uid()
+)
+WITH CHECK (
+  public.is_admin()
+  OR public.is_parent_in_family(family_id)
+  OR user_id = auth.uid()
+);
+
+-- ============================================================================
+-- TUTORS PROFILE POLICIES
+-- ============================================================================
+
+-- Public read (so parents/students can see tutor bios)
+DROP POLICY IF EXISTS "tutors_profile_select" ON public.tutors_profile;
+CREATE POLICY "tutors_profile_select"
+ON public.tutors_profile FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "tutors_profile_insert" ON public.tutors_profile;
+CREATE POLICY "tutors_profile_insert"
+ON public.tutors_profile FOR INSERT
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "tutors_profile_update" ON public.tutors_profile;
+CREATE POLICY "tutors_profile_update"
+ON public.tutors_profile FOR UPDATE
+USING (public.is_admin() OR user_id = auth.uid())
+WITH CHECK (public.is_admin() OR user_id = auth.uid());
+
+-- ============================================================================
+-- AVAILABILITY RULES POLICIES
+-- ============================================================================
+
+-- Tutors manage their own; admin can manage all; others can read (for booking)
+DROP POLICY IF EXISTS "availability_rules_select" ON public.availability_rules;
+CREATE POLICY "availability_rules_select"
+ON public.availability_rules FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "availability_rules_insert" ON public.availability_rules;
+CREATE POLICY "availability_rules_insert"
+ON public.availability_rules FOR INSERT
+WITH CHECK (public.is_admin() OR tutor_user_id = auth.uid());
+
+DROP POLICY IF EXISTS "availability_rules_update" ON public.availability_rules;
+CREATE POLICY "availability_rules_update"
+ON public.availability_rules FOR UPDATE
+USING (public.is_admin() OR tutor_user_id = auth.uid())
+WITH CHECK (public.is_admin() OR tutor_user_id = auth.uid());
+
+DROP POLICY IF EXISTS "availability_rules_delete" ON public.availability_rules;
+CREATE POLICY "availability_rules_delete"
+ON public.availability_rules FOR DELETE
+USING (public.is_admin() OR tutor_user_id = auth.uid());
+
+-- ============================================================================
+-- AVAILABILITY EXCEPTIONS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "availability_exceptions_select" ON public.availability_exceptions;
+CREATE POLICY "availability_exceptions_select"
+ON public.availability_exceptions FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "availability_exceptions_insert" ON public.availability_exceptions;
+CREATE POLICY "availability_exceptions_insert"
+ON public.availability_exceptions FOR INSERT
+WITH CHECK (public.is_admin() OR tutor_user_id = auth.uid());
+
+DROP POLICY IF EXISTS "availability_exceptions_update" ON public.availability_exceptions;
+CREATE POLICY "availability_exceptions_update"
+ON public.availability_exceptions FOR UPDATE
+USING (public.is_admin() OR tutor_user_id = auth.uid())
+WITH CHECK (public.is_admin() OR tutor_user_id = auth.uid());
+
+DROP POLICY IF EXISTS "availability_exceptions_delete" ON public.availability_exceptions;
+CREATE POLICY "availability_exceptions_delete"
+ON public.availability_exceptions FOR DELETE
+USING (public.is_admin() OR tutor_user_id = auth.uid());
+
+-- ============================================================================
+-- BOOKINGS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "bookings_select" ON public.bookings;
+CREATE POLICY "bookings_select"
+ON public.bookings FOR SELECT
+USING (
+  public.is_admin()
+  OR tutor_user_id = auth.uid()
+  OR student_user_id = auth.uid()
+  OR parent_user_id = auth.uid()
+  OR public.is_parent_in_family(family_id)
+);
+
+DROP POLICY IF EXISTS "bookings_insert" ON public.bookings;
+CREATE POLICY "bookings_insert"
+ON public.bookings FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR (public.is_parent_in_family(family_id) AND parent_user_id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "bookings_update" ON public.bookings;
+CREATE POLICY "bookings_update"
+ON public.bookings FOR UPDATE
+USING (
+  public.is_admin()
+  OR tutor_user_id = auth.uid()
+  OR public.is_parent_in_family(family_id)
+)
+WITH CHECK (
+  public.is_admin()
+  OR tutor_user_id = auth.uid()
+  OR public.is_parent_in_family(family_id)
+);
+
+DROP POLICY IF EXISTS "bookings_delete" ON public.bookings;
+CREATE POLICY "bookings_delete"
+ON public.bookings FOR DELETE
+USING (public.is_admin());
+
+-- ============================================================================
+-- WAITLIST POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "waitlist_select" ON public.waitlist;
+CREATE POLICY "waitlist_select"
+ON public.waitlist FOR SELECT
+USING (
+  public.is_admin()
+  OR parent_user_id = auth.uid()
+  OR public.is_parent_in_family(family_id)
+);
+
+DROP POLICY IF EXISTS "waitlist_insert" ON public.waitlist;
+CREATE POLICY "waitlist_insert"
+ON public.waitlist FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR (public.is_parent_in_family(family_id) AND parent_user_id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "waitlist_update" ON public.waitlist;
+CREATE POLICY "waitlist_update"
+ON public.waitlist FOR UPDATE
+USING (public.is_admin() OR public.is_parent_in_family(family_id))
+WITH CHECK (public.is_admin() OR public.is_parent_in_family(family_id));
+
+DROP POLICY IF EXISTS "waitlist_delete" ON public.waitlist;
+CREATE POLICY "waitlist_delete"
+ON public.waitlist FOR DELETE
+USING (public.is_admin() OR public.is_parent_in_family(family_id));
+
+-- ============================================================================
+-- SESSIONS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "sessions_select" ON public.sessions;
+CREATE POLICY "sessions_select"
+ON public.sessions FOR SELECT
+USING (public.is_admin() OR public.can_access_booking(booking_id));
+
+DROP POLICY IF EXISTS "sessions_insert" ON public.sessions;
+CREATE POLICY "sessions_insert"
+ON public.sessions FOR INSERT
+WITH CHECK (public.is_admin() OR public.is_booking_tutor(booking_id));
+
+DROP POLICY IF EXISTS "sessions_update" ON public.sessions;
+CREATE POLICY "sessions_update"
+ON public.sessions FOR UPDATE
+USING (public.is_admin() OR public.is_booking_tutor(booking_id))
+WITH CHECK (public.is_admin() OR public.is_booking_tutor(booking_id));
+
+DROP POLICY IF EXISTS "sessions_delete" ON public.sessions;
+CREATE POLICY "sessions_delete"
+ON public.sessions FOR DELETE
+USING (public.is_admin());
+
+-- ============================================================================
+-- SESSION ATTACHMENTS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "session_attachments_select" ON public.session_attachments;
+CREATE POLICY "session_attachments_select"
+ON public.session_attachments FOR SELECT
+USING (public.is_admin() OR public.can_access_session(session_id));
+
+DROP POLICY IF EXISTS "session_attachments_insert" ON public.session_attachments;
+CREATE POLICY "session_attachments_insert"
+ON public.session_attachments FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE s.id = session_attachments.session_id
+      AND (b.tutor_user_id = auth.uid() OR b.student_user_id = auth.uid())
+  )
+);
+
+DROP POLICY IF EXISTS "session_attachments_delete" ON public.session_attachments;
+CREATE POLICY "session_attachments_delete"
+ON public.session_attachments FOR DELETE
+USING (public.is_admin() OR uploaded_by = auth.uid());
+
+-- ============================================================================
+-- SKILLS POLICIES
+-- ============================================================================
+
+-- Everyone can read skills; admin can manage
+DROP POLICY IF EXISTS "skills_select" ON public.skills;
+CREATE POLICY "skills_select"
+ON public.skills FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "skills_insert" ON public.skills;
+CREATE POLICY "skills_insert"
+ON public.skills FOR INSERT
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "skills_update" ON public.skills;
+CREATE POLICY "skills_update"
+ON public.skills FOR UPDATE
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "skills_delete" ON public.skills;
+CREATE POLICY "skills_delete"
+ON public.skills FOR DELETE
+USING (public.is_admin());
+
+-- ============================================================================
+-- SESSION SKILLS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "session_skills_select" ON public.session_skills;
+CREATE POLICY "session_skills_select"
+ON public.session_skills FOR SELECT
+USING (public.is_admin() OR public.can_access_session(session_id));
+
+DROP POLICY IF EXISTS "session_skills_insert" ON public.session_skills;
+CREATE POLICY "session_skills_insert"
+ON public.session_skills FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE s.id = session_skills.session_id
+      AND b.tutor_user_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "session_skills_delete" ON public.session_skills;
+CREATE POLICY "session_skills_delete"
+ON public.session_skills FOR DELETE
+USING (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE s.id = session_skills.session_id
+      AND b.tutor_user_id = auth.uid()
+  )
+);
+
+-- ============================================================================
+-- STUDENT SKILL MASTERY POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "student_skill_mastery_select" ON public.student_skill_mastery;
+CREATE POLICY "student_skill_mastery_select"
+ON public.student_skill_mastery FOR SELECT
+USING (public.is_admin() OR public.can_access_student(student_user_id));
+
+DROP POLICY IF EXISTS "student_skill_mastery_insert" ON public.student_skill_mastery;
+CREATE POLICY "student_skill_mastery_insert"
+ON public.student_skill_mastery FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE b.student_user_id = student_skill_mastery.student_user_id
+      AND b.tutor_user_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "student_skill_mastery_update" ON public.student_skill_mastery;
+CREATE POLICY "student_skill_mastery_update"
+ON public.student_skill_mastery FOR UPDATE
+USING (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE b.student_user_id = student_skill_mastery.student_user_id
+      AND b.tutor_user_id = auth.uid()
+  )
+)
+WITH CHECK (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE b.student_user_id = student_skill_mastery.student_user_id
+      AND b.tutor_user_id = auth.uid()
+  )
+);
+
+-- ============================================================================
+-- DIAGNOSTICS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "diagnostics_select" ON public.diagnostics;
+CREATE POLICY "diagnostics_select"
+ON public.diagnostics FOR SELECT
+USING (public.is_admin() OR public.can_access_student(student_user_id));
+
+DROP POLICY IF EXISTS "diagnostics_insert" ON public.diagnostics;
+CREATE POLICY "diagnostics_insert"
+ON public.diagnostics FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE b.student_user_id = diagnostics.student_user_id
+      AND b.tutor_user_id = auth.uid()
+  )
+);
+
+-- ============================================================================
+-- HOMEWORK ITEMS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "homework_items_select" ON public.homework_items;
+CREATE POLICY "homework_items_select"
+ON public.homework_items FOR SELECT
+USING (public.is_admin() OR public.can_access_session(session_id));
+
+DROP POLICY IF EXISTS "homework_items_insert" ON public.homework_items;
+CREATE POLICY "homework_items_insert"
+ON public.homework_items FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE s.id = homework_items.session_id
+      AND b.tutor_user_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "homework_items_update" ON public.homework_items;
+CREATE POLICY "homework_items_update"
+ON public.homework_items FOR UPDATE
+USING (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE s.id = homework_items.session_id
+      AND (b.tutor_user_id = auth.uid() OR b.student_user_id = auth.uid())
+  )
+)
+WITH CHECK (
+  public.is_admin()
+  OR EXISTS (
+    SELECT 1 FROM public.sessions s
+    JOIN public.bookings b ON b.id = s.booking_id
+    WHERE s.id = homework_items.session_id
+      AND (b.tutor_user_id = auth.uid() OR b.student_user_id = auth.uid())
+  )
+);
+
+-- ============================================================================
+-- PRODUCTS POLICIES
+-- ============================================================================
+
+-- Public read; admin manage
+DROP POLICY IF EXISTS "products_select" ON public.products;
+CREATE POLICY "products_select"
+ON public.products FOR SELECT
+USING (true);
+
+DROP POLICY IF EXISTS "products_insert" ON public.products;
+CREATE POLICY "products_insert"
+ON public.products FOR INSERT
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "products_update" ON public.products;
+CREATE POLICY "products_update"
+ON public.products FOR UPDATE
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "products_delete" ON public.products;
+CREATE POLICY "products_delete"
+ON public.products FOR DELETE
+USING (public.is_admin());
+
+-- ============================================================================
+-- PURCHASES POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "purchases_select" ON public.purchases;
+CREATE POLICY "purchases_select"
+ON public.purchases FOR SELECT
+USING (
+  public.is_admin()
+  OR parent_user_id = auth.uid()
+  OR public.is_parent_in_family(family_id)
+);
+
+DROP POLICY IF EXISTS "purchases_insert" ON public.purchases;
+CREATE POLICY "purchases_insert"
+ON public.purchases FOR INSERT
+WITH CHECK (
+  public.is_admin()
+  OR (public.is_parent_in_family(family_id) AND parent_user_id = auth.uid())
+);
+
+-- ============================================================================
+-- CREDIT LEDGER POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "credit_ledger_select" ON public.credit_ledger;
+CREATE POLICY "credit_ledger_select"
+ON public.credit_ledger FOR SELECT
+USING (public.is_admin() OR public.is_parent_in_family(family_id));
+
+-- Only admin/service role can insert (handled by server)
+DROP POLICY IF EXISTS "credit_ledger_insert" ON public.credit_ledger;
+CREATE POLICY "credit_ledger_insert"
+ON public.credit_ledger FOR INSERT
+WITH CHECK (public.is_admin());
+
+-- ============================================================================
+-- NOTIFICATION PREFERENCES POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "notification_preferences_select" ON public.notification_preferences;
+CREATE POLICY "notification_preferences_select"
+ON public.notification_preferences FOR SELECT
+USING (public.is_admin() OR user_id = auth.uid());
+
+DROP POLICY IF EXISTS "notification_preferences_insert" ON public.notification_preferences;
+CREATE POLICY "notification_preferences_insert"
+ON public.notification_preferences FOR INSERT
+WITH CHECK (public.is_admin() OR user_id = auth.uid());
+
+DROP POLICY IF EXISTS "notification_preferences_update" ON public.notification_preferences;
+CREATE POLICY "notification_preferences_update"
+ON public.notification_preferences FOR UPDATE
+USING (public.is_admin() OR user_id = auth.uid())
+WITH CHECK (public.is_admin() OR user_id = auth.uid());
+
+-- ============================================================================
+-- NOTIFICATIONS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "notifications_select" ON public.notifications;
+CREATE POLICY "notifications_select"
+ON public.notifications FOR SELECT
+USING (public.is_admin() OR user_id = auth.uid());
+
+-- Only admin/service role can manage notifications (handled by server)
+DROP POLICY IF EXISTS "notifications_insert" ON public.notifications;
+CREATE POLICY "notifications_insert"
+ON public.notifications FOR INSERT
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "notifications_update" ON public.notifications;
+CREATE POLICY "notifications_update"
+ON public.notifications FOR UPDATE
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+
+-- ============================================================================
+-- EVENTS POLICIES
+-- ============================================================================
+
+-- Only admin can read events (service role for writes)
+DROP POLICY IF EXISTS "events_select" ON public.events;
+CREATE POLICY "events_select"
+ON public.events FOR SELECT
+USING (public.is_admin());
+
+DROP POLICY IF EXISTS "events_insert" ON public.events;
+CREATE POLICY "events_insert"
+ON public.events FOR INSERT
+WITH CHECK (public.is_admin());
+
+-- ============================================================================
+-- STRIPE WEBHOOK EVENTS POLICIES
+-- ============================================================================
+
+-- Only admin/service role
+DROP POLICY IF EXISTS "stripe_webhook_events_select" ON public.stripe_webhook_events;
+CREATE POLICY "stripe_webhook_events_select"
+ON public.stripe_webhook_events FOR SELECT
+USING (public.is_admin());
+
+DROP POLICY IF EXISTS "stripe_webhook_events_insert" ON public.stripe_webhook_events;
+CREATE POLICY "stripe_webhook_events_insert"
+ON public.stripe_webhook_events FOR INSERT
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "stripe_webhook_events_update" ON public.stripe_webhook_events;
+CREATE POLICY "stripe_webhook_events_update"
+ON public.stripe_webhook_events FOR UPDATE
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+
+-- ============================================================================
+-- WEEKLY REPORTS POLICIES
+-- ============================================================================
+
+DROP POLICY IF EXISTS "weekly_reports_select" ON public.weekly_reports;
+CREATE POLICY "weekly_reports_select"
+ON public.weekly_reports FOR SELECT
+USING (
+  public.is_admin()
+  OR public.can_access_student(student_user_id)
+);
+
+-- Only admin/service role can manage weekly reports (handled by server)
+DROP POLICY IF EXISTS "weekly_reports_insert" ON public.weekly_reports;
+CREATE POLICY "weekly_reports_insert"
+ON public.weekly_reports FOR INSERT
+WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "weekly_reports_update" ON public.weekly_reports;
+CREATE POLICY "weekly_reports_update"
+ON public.weekly_reports FOR UPDATE
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
+=== 00003_storage.sql ===
+-- ============================================================================
+-- MATHPIVOT TUTOROS - STORAGE CONFIGURATION
+-- Migration 00003: Storage buckets and policies
+-- ============================================================================
+
+-- Create the session-attachments bucket
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'session-attachments',
+    'session-attachments',
+    false,
+    10485760, -- 10MB limit
+    ARRAY['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage RLS policies for session-attachments bucket
+
+-- Allow authenticated users to upload to session-attachments
+CREATE POLICY "session_attachments_insert"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+    bucket_id = 'session-attachments'
+    AND (
+        public.is_admin()
+        OR EXISTS (
+            SELECT 1 FROM public.sessions s
+            JOIN public.bookings b ON b.id = s.booking_id
+            WHERE s.id = (storage.foldername(name))[1]::uuid
+              AND (b.tutor_user_id = auth.uid() OR b.student_user_id = auth.uid())
+        )
+    )
+);
+
+-- Allow access to own session attachments
+CREATE POLICY "session_attachments_select"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (
+    bucket_id = 'session-attachments'
+    AND (
+        public.is_admin()
+        OR EXISTS (
+            SELECT 1 FROM public.sessions s
+            JOIN public.bookings b ON b.id = s.booking_id
+            WHERE s.id = (storage.foldername(name))[1]::uuid
+              AND (
+                  b.tutor_user_id = auth.uid()
+                  OR b.student_user_id = auth.uid()
+                  OR b.parent_user_id = auth.uid()
+                  OR public.is_parent_in_family(b.family_id)
+              )
+        )
+    )
+);
+
+-- Allow deletion by uploader or admin
+CREATE POLICY "session_attachments_delete"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+    bucket_id = 'session-attachments'
+    AND (
+        public.is_admin()
+        OR owner = auth.uid()
+    )
+);
+=== 00004_functions.sql ===
+-- Function to decrement family credits (used after session completion)
+CREATE OR REPLACE FUNCTION decrement_family_credits(p_family_id uuid, p_amount integer)
+RETURNS void AS $$
+BEGIN
+  UPDATE families
+  SET credit_balance = GREATEST(0, credit_balance - p_amount)
+  WHERE id = p_family_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to generate weekly report for a student
+CREATE OR REPLACE FUNCTION generate_weekly_report(
+  p_student_user_id uuid,
+  p_week_start date,
+  p_week_end date
+)
+RETURNS uuid AS $$
+DECLARE
+  v_report_id uuid;
+  v_session_count integer;
+  v_skills_worked jsonb;
+  v_homework_completion_rate numeric;
+  v_is_at_risk boolean := false;
+  v_at_risk_reasons text[] := '{}';
+BEGIN
+  -- Count sessions this week
+  SELECT COUNT(*) INTO v_session_count
+  FROM sessions
+  WHERE student_user_id = p_student_user_id
+    AND started_at >= p_week_start
+    AND started_at < p_week_end + interval '1 day'
+    AND ended_at IS NOT NULL;
+
+  -- Get skills worked on
+  SELECT COALESCE(jsonb_agg(DISTINCT skill_id), '[]'::jsonb) INTO v_skills_worked
+  FROM sessions s, unnest(s.skills_covered) AS skill_id
+  WHERE s.student_user_id = p_student_user_id
+    AND s.started_at >= p_week_start
+    AND s.started_at < p_week_end + interval '1 day';
+
+  -- Calculate homework completion (simplified - would need homework table in production)
+  v_homework_completion_rate := 1.0;
+
+  -- Determine at-risk status
+  IF v_session_count = 0 THEN
+    v_is_at_risk := true;
+    v_at_risk_reasons := array_append(v_at_risk_reasons, 'No sessions completed this week');
+  END IF;
+
+  -- Check for no-shows
+  IF EXISTS (
+    SELECT 1 FROM bookings
+    WHERE student_user_id = p_student_user_id
+      AND status = 'no_show'
+      AND start_at >= p_week_start
+      AND start_at < p_week_end + interval '1 day'
+  ) THEN
+    v_is_at_risk := true;
+    v_at_risk_reasons := array_append(v_at_risk_reasons, 'Had no-show(s) this week');
+  END IF;
+
+  -- Insert the report
+  INSERT INTO weekly_reports (
+    student_user_id,
+    week_start,
+    week_end,
+    session_count,
+    skills_worked,
+    homework_completion_rate,
+    is_at_risk,
+    at_risk_reasons
+  ) VALUES (
+    p_student_user_id,
+    p_week_start,
+    p_week_end,
+    v_session_count,
+    v_skills_worked,
+    v_homework_completion_rate,
+    v_is_at_risk,
+    v_at_risk_reasons
+  )
+  RETURNING id INTO v_report_id;
+
+  RETURN v_report_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permissions
+GRANT EXECUTE ON FUNCTION decrement_family_credits(uuid, integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION generate_weekly_report(uuid, date, date) TO authenticated;
+=== 00005_video_links.sql ===
+-- Migration: Add video link support to bookings
+-- This allows storing video conference links (Zoom, Google Meet, etc.)
+
+-- Add video_link column to bookings
+ALTER TABLE bookings
+ADD COLUMN IF NOT EXISTS video_link TEXT;
+
+-- Add index for quick lookup of online sessions
+CREATE INDEX IF NOT EXISTS idx_bookings_modality ON bookings(modality) WHERE modality = 'online';
+
+-- Add a column to track if calendar invite was sent
+ALTER TABLE bookings
+ADD COLUMN IF NOT EXISTS calendar_invite_sent BOOLEAN DEFAULT FALSE;
+
+-- Comment for documentation
+COMMENT ON COLUMN bookings.video_link IS 'Video conference link for online sessions (Zoom, Google Meet, etc.)';
+COMMENT ON COLUMN bookings.calendar_invite_sent IS 'Whether a calendar invite has been sent to participants';
+=== 00006_integrations.sql ===
+-- Migration: Add integrations support
+-- Stores OAuth tokens and integration settings for external services
+
+-- User integrations table (Google, Zoom, etc.)
+CREATE TABLE IF NOT EXISTS user_integrations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL, -- 'google', 'zoom', etc.
+  access_token TEXT,
+  refresh_token TEXT,
+  token_expiry TIMESTAMPTZ,
+  email VARCHAR(255), -- Connected account email
+  scopes TEXT, -- Comma-separated list of granted scopes
+  metadata JSONB DEFAULT '{}', -- Provider-specific data
+  connected_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(user_id, provider)
+);
+
+-- Google Calendar sync table
+CREATE TABLE IF NOT EXISTS calendar_sync (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  provider VARCHAR(50) NOT NULL DEFAULT 'google',
+  external_event_id VARCHAR(255) NOT NULL,
+  sync_status VARCHAR(50) DEFAULT 'synced', -- 'synced', 'pending', 'failed'
+  last_synced_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(booking_id, user_id, provider)
+);
+
+-- Zoom meeting links table
+CREATE TABLE IF NOT EXISTS zoom_meetings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+  zoom_meeting_id VARCHAR(255) NOT NULL,
+  join_url TEXT NOT NULL,
+  start_url TEXT,
+  password VARCHAR(50),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(booking_id)
+);
+
+-- Google Classroom sync table
+CREATE TABLE IF NOT EXISTS classroom_sync (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  student_user_id UUID REFERENCES users_profile(id) ON DELETE CASCADE,
+  course_id VARCHAR(255) NOT NULL,
+  course_name VARCHAR(255),
+  sync_enabled BOOLEAN DEFAULT TRUE,
+  last_synced_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(user_id, course_id)
+);
+
+-- Desmos saved states table
+CREATE TABLE IF NOT EXISTS desmos_states (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
+  skill_id UUID REFERENCES skills(id) ON DELETE SET NULL,
+  student_user_id UUID REFERENCES users_profile(id) ON DELETE CASCADE,
+  tutor_user_id UUID REFERENCES users_profile(id) ON DELETE SET NULL,
+  name VARCHAR(255),
+  state_json JSONB NOT NULL, -- Desmos calculator state
+  screenshot_url TEXT, -- Optional screenshot
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_user_integrations_user ON user_integrations(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_integrations_provider ON user_integrations(provider);
+CREATE INDEX IF NOT EXISTS idx_calendar_sync_booking ON calendar_sync(booking_id);
+CREATE INDEX IF NOT EXISTS idx_zoom_meetings_booking ON zoom_meetings(booking_id);
+CREATE INDEX IF NOT EXISTS idx_desmos_states_session ON desmos_states(session_id);
+CREATE INDEX IF NOT EXISTS idx_desmos_states_student ON desmos_states(student_user_id);
+
+-- RLS Policies
+ALTER TABLE user_integrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE calendar_sync ENABLE ROW LEVEL SECURITY;
+ALTER TABLE zoom_meetings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE classroom_sync ENABLE ROW LEVEL SECURITY;
+ALTER TABLE desmos_states ENABLE ROW LEVEL SECURITY;
+
+-- Users can only see their own integrations
+CREATE POLICY user_integrations_select ON user_integrations
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY user_integrations_insert ON user_integrations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY user_integrations_update ON user_integrations
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY user_integrations_delete ON user_integrations
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Calendar sync accessible by booking participants
+CREATE POLICY calendar_sync_select ON calendar_sync
+  FOR SELECT USING (
+    auth.uid() = user_id OR
+    EXISTS (
+      SELECT 1 FROM bookings b
+      WHERE b.id = booking_id
+      AND (b.student_user_id = auth.uid() OR b.tutor_user_id = auth.uid() OR b.parent_user_id = auth.uid())
+    )
+  );
+
+-- Zoom meetings accessible by booking participants
+CREATE POLICY zoom_meetings_select ON zoom_meetings
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM bookings b
+      WHERE b.id = booking_id
+      AND (b.student_user_id = auth.uid() OR b.tutor_user_id = auth.uid() OR b.parent_user_id = auth.uid())
+    )
+  );
+
+-- Desmos states accessible by session participants and admins
+CREATE POLICY desmos_states_select ON desmos_states
+  FOR SELECT USING (
+    student_user_id = auth.uid() OR
+    tutor_user_id = auth.uid() OR
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+CREATE POLICY desmos_states_insert ON desmos_states
+  FOR INSERT WITH CHECK (
+    tutor_user_id = auth.uid() OR
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- Updated at trigger
+CREATE OR REPLACE FUNCTION update_integrations_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_integrations_updated_at
+  BEFORE UPDATE ON user_integrations
+  FOR EACH ROW EXECUTE FUNCTION update_integrations_updated_at();
+
+CREATE TRIGGER desmos_states_updated_at
+  BEFORE UPDATE ON desmos_states
+  FOR EACH ROW EXECUTE FUNCTION update_integrations_updated_at();
+
+-- Comments
+COMMENT ON TABLE user_integrations IS 'OAuth tokens and settings for external service integrations';
+COMMENT ON TABLE calendar_sync IS 'Tracks Google Calendar event IDs synced with bookings';
+COMMENT ON TABLE zoom_meetings IS 'Zoom meeting links associated with bookings';
+COMMENT ON TABLE classroom_sync IS 'Google Classroom courses linked to students';
+COMMENT ON TABLE desmos_states IS 'Saved Desmos calculator states from tutoring sessions';
+=== 00007_programs_competitions.sql ===
+-- Migration: Add Programs, Camps, Competitions, and Career Tracks
+-- Extends MathPivot beyond tutoring to clinics, camps, and career math readiness
+
+-- =============================================================================
+-- CAREER TRACKS - Applied math pathways
+-- =============================================================================
+
+-- Extend course_track enum with career-focused tracks
+ALTER TYPE course_track ADD VALUE IF NOT EXISTS 'actuarial';
+ALTER TYPE course_track ADD VALUE IF NOT EXISTS 'data_science';
+ALTER TYPE course_track ADD VALUE IF NOT EXISTS 'epidemiology';
+ALTER TYPE course_track ADD VALUE IF NOT EXISTS 'robotics';
+ALTER TYPE course_track ADD VALUE IF NOT EXISTS 'financial_math';
+ALTER TYPE course_track ADD VALUE IF NOT EXISTS 'competition_math';
+
+-- Career pathways with prerequisites and outcomes
+CREATE TABLE IF NOT EXISTS career_pathways (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code VARCHAR(50) UNIQUE NOT NULL, -- 'actuarial', 'data_science', etc.
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  icon_url TEXT,
+  color VARCHAR(7), -- Hex color for UI
+  target_grades INT[] DEFAULT ARRAY[9,10,11,12], -- Target grade levels
+  prerequisite_tracks course_track[], -- Required school math tracks
+  career_outcomes TEXT[], -- Example careers
+  certifications TEXT[], -- Related certifications (e.g., SOA exams)
+  is_active BOOLEAN DEFAULT TRUE,
+  order_index INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
+-- PROGRAMS - Clinics, Camps, Workshops
+-- =============================================================================
+
+CREATE TYPE program_type AS ENUM (
+  'clinic',        -- Single or multi-session focused training
+  'workshop',      -- Short hands-on learning session
+  'camp',          -- Multi-day intensive program
+  'bootcamp',      -- Intensive short-term program
+  'competition',   -- Math competition or olympiad
+  'hackathon'      -- Project-based competition
+);
+
+CREATE TYPE program_status AS ENUM (
+  'draft',
+  'published',
+  'registration_open',
+  'registration_closed',
+  'in_progress',
+  'completed',
+  'canceled'
+);
+
+CREATE TABLE IF NOT EXISTS programs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
+  program_type program_type NOT NULL,
+  career_pathway_id UUID REFERENCES career_pathways(id),
+
+  -- Scheduling
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  schedule_details JSONB, -- Detailed schedule (times, breaks, etc.)
+  timezone VARCHAR(50) DEFAULT 'America/New_York',
+
+  -- Capacity
+  min_participants INT DEFAULT 5,
+  max_participants INT NOT NULL,
+  current_enrollment INT DEFAULT 0,
+  waitlist_enabled BOOLEAN DEFAULT TRUE,
+
+  -- Pricing
+  price_cents INT NOT NULL,
+  early_bird_price_cents INT,
+  early_bird_deadline DATE,
+  member_discount_percent INT DEFAULT 0,
+
+  -- Requirements
+  min_grade INT,
+  max_grade INT,
+  prerequisite_skills UUID[], -- Required skills
+  prerequisite_programs UUID[], -- Required prior programs
+
+  -- Location
+  modality VARCHAR(50) DEFAULT 'in_person', -- 'in_person', 'online', 'hybrid'
+  location_name VARCHAR(255),
+  location_address TEXT,
+  video_platform VARCHAR(50), -- 'zoom', 'google_meet', etc.
+
+  -- Content
+  syllabus_url TEXT,
+  materials_included TEXT[],
+  equipment_required TEXT[], -- e.g., 'Arduino Uno kit', 'laptop'
+
+  -- Staff
+  lead_instructor_id UUID REFERENCES users_profile(id),
+  assistant_instructor_ids UUID[],
+
+  -- Media
+  cover_image_url TEXT,
+  gallery_urls TEXT[],
+
+  -- Metadata
+  status program_status DEFAULT 'draft',
+  featured BOOLEAN DEFAULT FALSE,
+  tags TEXT[],
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Program sessions (individual days/sessions within a program)
+CREATE TABLE IF NOT EXISTS program_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+  session_number INT NOT NULL,
+  title VARCHAR(255),
+  description TEXT,
+
+  -- Timing
+  start_at TIMESTAMPTZ NOT NULL,
+  end_at TIMESTAMPTZ NOT NULL,
+
+  -- Location override
+  location_name VARCHAR(255),
+  video_link TEXT,
+
+  -- Content
+  topics TEXT[],
+  materials_url TEXT,
+  homework_description TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(program_id, session_number)
+);
+
+-- =============================================================================
+-- REGISTRATIONS
+-- =============================================================================
+
+CREATE TYPE registration_status AS ENUM (
+  'pending',
+  'confirmed',
+  'waitlisted',
+  'canceled',
+  'no_show',
+  'completed'
+);
+
+CREATE TABLE IF NOT EXISTS program_registrations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+  student_user_id UUID NOT NULL REFERENCES users_profile(id),
+  parent_user_id UUID REFERENCES users_profile(id),
+  family_id UUID REFERENCES families(id),
+
+  -- Status
+  status registration_status DEFAULT 'pending',
+  waitlist_position INT,
+
+  -- Payment
+  amount_paid_cents INT DEFAULT 0,
+  payment_status VARCHAR(50) DEFAULT 'pending',
+  stripe_payment_intent_id VARCHAR(255),
+
+  -- Consent & Waivers
+  consent_signed BOOLEAN DEFAULT FALSE,
+  consent_signed_at TIMESTAMPTZ,
+  consent_signed_by UUID REFERENCES users_profile(id),
+  emergency_contact_name VARCHAR(255),
+  emergency_contact_phone VARCHAR(50),
+  medical_notes TEXT,
+
+  -- Equipment
+  equipment_assigned JSONB, -- Kit assignments
+  equipment_returned BOOLEAN DEFAULT FALSE,
+
+  -- Attendance tracking
+  sessions_attended INT DEFAULT 0,
+
+  registered_at TIMESTAMPTZ DEFAULT NOW(),
+  confirmed_at TIMESTAMPTZ,
+  canceled_at TIMESTAMPTZ,
+  cancel_reason TEXT,
+
+  UNIQUE(program_id, student_user_id)
+);
+
+-- Session attendance for programs
+CREATE TABLE IF NOT EXISTS program_attendance (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  program_session_id UUID NOT NULL REFERENCES program_sessions(id) ON DELETE CASCADE,
+  registration_id UUID NOT NULL REFERENCES program_registrations(id) ON DELETE CASCADE,
+  student_user_id UUID NOT NULL REFERENCES users_profile(id),
+
+  status VARCHAR(50) DEFAULT 'present', -- 'present', 'absent', 'late', 'excused'
+  check_in_at TIMESTAMPTZ,
+  check_out_at TIMESTAMPTZ,
+  notes TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(program_session_id, student_user_id)
+);
+
+-- =============================================================================
+-- COMPETITIONS
+-- =============================================================================
+
+CREATE TYPE competition_format AS ENUM (
+  'individual',
+  'team',
+  'mixed'
+);
+
+CREATE TABLE IF NOT EXISTS competitions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+
+  -- Competition details
+  format competition_format DEFAULT 'individual',
+  team_size_min INT,
+  team_size_max INT,
+
+  -- Rounds
+  num_rounds INT DEFAULT 1,
+  time_limit_minutes INT,
+
+  -- Scoring
+  max_score INT,
+  scoring_rules JSONB,
+  tiebreaker_rules TEXT,
+
+  -- Prizes
+  prizes JSONB, -- [{place: 1, prize: "...", value_cents: ...}]
+
+  -- Rules
+  rules_url TEXT,
+  allowed_resources TEXT[],
+  prohibited_items TEXT[],
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Competition teams
+CREATE TABLE IF NOT EXISTS competition_teams (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  competition_id UUID NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  captain_user_id UUID REFERENCES users_profile(id),
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Team members
+CREATE TABLE IF NOT EXISTS competition_team_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  team_id UUID NOT NULL REFERENCES competition_teams(id) ON DELETE CASCADE,
+  student_user_id UUID NOT NULL REFERENCES users_profile(id),
+  role VARCHAR(50) DEFAULT 'member', -- 'captain', 'member'
+
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(team_id, student_user_id)
+);
+
+-- Competition results/scores
+CREATE TABLE IF NOT EXISTS competition_results (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  competition_id UUID NOT NULL REFERENCES competitions(id) ON DELETE CASCADE,
+  round_number INT DEFAULT 1,
+
+  -- Participant (either individual or team)
+  student_user_id UUID REFERENCES users_profile(id),
+  team_id UUID REFERENCES competition_teams(id),
+
+  -- Scores
+  score DECIMAL(10,2),
+  max_possible_score DECIMAL(10,2),
+  time_taken_seconds INT,
+
+  -- Ranking
+  rank INT,
+  percentile DECIMAL(5,2),
+
+  -- Details
+  problem_scores JSONB, -- Individual problem scores
+  feedback TEXT,
+
+  submitted_at TIMESTAMPTZ,
+  graded_at TIMESTAMPTZ,
+  graded_by UUID REFERENCES users_profile(id),
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  CHECK (student_user_id IS NOT NULL OR team_id IS NOT NULL)
+);
+
+-- =============================================================================
+-- EQUIPMENT & KITS (for Robotics)
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS equipment_types (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  manufacturer VARCHAR(255),
+  model_number VARCHAR(255),
+  category VARCHAR(100), -- 'microcontroller', 'sensor', 'motor', 'kit', etc.
+
+  -- Kit contents (for bundled items)
+  is_kit BOOLEAN DEFAULT FALSE,
+  kit_contents JSONB, -- List of items included
+
+  -- Pricing
+  purchase_price_cents INT,
+  rental_price_cents INT,
+  deposit_cents INT,
+
+  -- Media
+  image_url TEXT,
+  manual_url TEXT,
+
+  -- Inventory
+  total_quantity INT DEFAULT 0,
+  available_quantity INT DEFAULT 0,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Individual equipment items
+CREATE TABLE IF NOT EXISTS equipment_inventory (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  equipment_type_id UUID NOT NULL REFERENCES equipment_types(id),
+
+  serial_number VARCHAR(255),
+  asset_tag VARCHAR(100) UNIQUE,
+
+  status VARCHAR(50) DEFAULT 'available', -- 'available', 'assigned', 'maintenance', 'retired'
+  condition VARCHAR(50) DEFAULT 'good', -- 'new', 'good', 'fair', 'poor'
+  condition_notes TEXT,
+
+  purchase_date DATE,
+  warranty_expiry DATE,
+  last_maintenance_date DATE,
+
+  current_location VARCHAR(255),
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Equipment assignments
+CREATE TABLE IF NOT EXISTS equipment_assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  equipment_id UUID NOT NULL REFERENCES equipment_inventory(id),
+
+  -- Who has it
+  student_user_id UUID REFERENCES users_profile(id),
+  program_id UUID REFERENCES programs(id),
+  registration_id UUID REFERENCES program_registrations(id),
+
+  -- Assignment details
+  assigned_at TIMESTAMPTZ DEFAULT NOW(),
+  due_date DATE,
+  returned_at TIMESTAMPTZ,
+
+  -- Condition
+  condition_at_checkout VARCHAR(50),
+  condition_at_return VARCHAR(50),
+  damage_notes TEXT,
+
+  -- Deposit
+  deposit_collected BOOLEAN DEFAULT FALSE,
+  deposit_returned BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
+-- CAREER-SPECIFIC SKILLS
+-- =============================================================================
+
+-- Insert career pathway skills (extends existing skills table)
+-- These will be inserted via seed data
+
+-- =============================================================================
+-- INDEXES
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_programs_type ON programs(program_type);
+CREATE INDEX IF NOT EXISTS idx_programs_status ON programs(status);
+CREATE INDEX IF NOT EXISTS idx_programs_dates ON programs(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_programs_career ON programs(career_pathway_id);
+CREATE INDEX IF NOT EXISTS idx_program_sessions_program ON program_sessions(program_id);
+CREATE INDEX IF NOT EXISTS idx_program_sessions_time ON program_sessions(start_at);
+CREATE INDEX IF NOT EXISTS idx_registrations_program ON program_registrations(program_id);
+CREATE INDEX IF NOT EXISTS idx_registrations_student ON program_registrations(student_user_id);
+CREATE INDEX IF NOT EXISTS idx_registrations_status ON program_registrations(status);
+CREATE INDEX IF NOT EXISTS idx_competition_results_competition ON competition_results(competition_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_type ON equipment_inventory(equipment_type_id);
+CREATE INDEX IF NOT EXISTS idx_equipment_status ON equipment_inventory(status);
+CREATE INDEX IF NOT EXISTS idx_equipment_assignments_student ON equipment_assignments(student_user_id);
+
+-- =============================================================================
+-- RLS POLICIES
+-- =============================================================================
+
+ALTER TABLE career_pathways ENABLE ROW LEVEL SECURITY;
+ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE program_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE program_registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE program_attendance ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competitions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competition_teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competition_team_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE competition_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE equipment_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE equipment_inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE equipment_assignments ENABLE ROW LEVEL SECURITY;
+
+-- Public read for published programs
+CREATE POLICY programs_select ON programs
+  FOR SELECT USING (status != 'draft' OR EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor')
+  ));
+
+-- Admin/tutor can manage programs
+CREATE POLICY programs_manage ON programs
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor')
+  ));
+
+-- Registration policies
+CREATE POLICY registrations_select ON program_registrations
+  FOR SELECT USING (
+    student_user_id = auth.uid() OR
+    parent_user_id = auth.uid() OR
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor'))
+  );
+
+CREATE POLICY registrations_insert ON program_registrations
+  FOR INSERT WITH CHECK (
+    parent_user_id = auth.uid() OR
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- Equipment visible to all, manageable by admin
+CREATE POLICY equipment_types_select ON equipment_types FOR SELECT USING (TRUE);
+CREATE POLICY equipment_inventory_select ON equipment_inventory FOR SELECT USING (TRUE);
+
+CREATE POLICY equipment_manage ON equipment_inventory
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+-- =============================================================================
+-- COMMENTS
+-- =============================================================================
+
+COMMENT ON TABLE career_pathways IS 'Career-focused math tracks (actuarial, data science, etc.)';
+COMMENT ON TABLE programs IS 'Clinics, camps, workshops, and competitions';
+COMMENT ON TABLE program_sessions IS 'Individual sessions within a multi-day program';
+COMMENT ON TABLE program_registrations IS 'Student registrations for programs';
+COMMENT ON TABLE competitions IS 'Competition-specific details';
+COMMENT ON TABLE competition_results IS 'Scores and rankings for competition participants';
+COMMENT ON TABLE equipment_types IS 'Types of equipment (Arduino kits, sensors, etc.)';
+COMMENT ON TABLE equipment_inventory IS 'Individual equipment items with tracking';
+COMMENT ON TABLE equipment_assignments IS 'Equipment loans to students/programs';
+=== 00008_auth_access_control.sql ===
+-- Migration: Enhanced Authentication & Access Control
+-- COPPA/FERPA compliance, parental consent, tutor verification, audit logging, SSO
+
+-- =============================================================================
+-- PARENTAL CONSENT (COPPA/FERPA Compliance)
+-- =============================================================================
+
+-- Consent types
+CREATE TYPE consent_type AS ENUM (
+  'account_creation',      -- Consent to create student account
+  'data_collection',       -- Consent to collect student data
+  'photo_video',           -- Consent for photos/videos
+  'marketing',             -- Consent for marketing communications
+  'third_party_sharing',   -- Consent to share with integrations
+  'competition_participation', -- Consent for competitions
+  'field_trip',            -- Consent for in-person events
+  'medical_treatment'      -- Emergency medical consent
+);
+
+CREATE TYPE consent_status AS ENUM (
+  'pending',
+  'granted',
+  'denied',
+  'revoked',
+  'expired'
+);
+
+-- Parental consent records
+CREATE TABLE IF NOT EXISTS parental_consents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Who is consenting for whom
+  student_user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  parent_user_id UUID NOT NULL REFERENCES users_profile(id),
+  family_id UUID REFERENCES families(id),
+
+  -- Consent details
+  consent_type consent_type NOT NULL,
+  status consent_status DEFAULT 'pending',
+
+  -- Legal information
+  student_age_at_consent INT,
+  is_coppa_applicable BOOLEAN DEFAULT FALSE, -- Under 13
+  is_ferpa_applicable BOOLEAN DEFAULT FALSE, -- Educational records
+
+  -- Consent document
+  consent_version VARCHAR(20) NOT NULL, -- e.g., "2024.1"
+  consent_text_hash VARCHAR(64), -- SHA-256 of consent text shown
+  ip_address INET,
+  user_agent TEXT,
+
+  -- Timestamps
+  requested_at TIMESTAMPTZ DEFAULT NOW(),
+  responded_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ, -- Some consents may need renewal
+  revoked_at TIMESTAMPTZ,
+  revoked_reason TEXT,
+
+  -- Signature (for legal compliance)
+  signature_data JSONB, -- Could include e-signature, checkbox confirmations
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(student_user_id, consent_type, consent_version)
+);
+
+-- Consent templates (what users see)
+CREATE TABLE IF NOT EXISTS consent_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  consent_type consent_type NOT NULL,
+  version VARCHAR(20) NOT NULL,
+
+  title VARCHAR(255) NOT NULL,
+  summary TEXT, -- Plain language summary
+  full_text TEXT NOT NULL, -- Legal text
+
+  -- Requirements
+  requires_signature BOOLEAN DEFAULT FALSE,
+  requires_checkbox BOOLEAN DEFAULT TRUE,
+  min_age_without_parent INT DEFAULT 18,
+
+  -- Validity
+  is_active BOOLEAN DEFAULT TRUE,
+  effective_date DATE NOT NULL,
+  expiry_days INT, -- How long consent is valid (NULL = forever)
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(consent_type, version)
+);
+
+-- =============================================================================
+-- PARENT-CHILD ACCOUNT LINKING
+-- =============================================================================
+
+-- Enhanced permissions for parent-child relationships
+CREATE TYPE parent_permission AS ENUM (
+  'view_profile',
+  'edit_profile',
+  'view_progress',
+  'view_sessions',
+  'book_sessions',
+  'cancel_sessions',
+  'view_messages',
+  'send_messages',
+  'manage_homework',
+  'view_reports',
+  'manage_integrations',
+  'manage_payments'
+);
+
+-- Parent-child permission matrix
+CREATE TABLE IF NOT EXISTS parent_child_permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  parent_user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  student_user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+
+  -- Permissions (array allows flexible permission sets)
+  permissions parent_permission[] DEFAULT ARRAY[
+    'view_profile', 'view_progress', 'view_sessions',
+    'book_sessions', 'view_reports'
+  ]::parent_permission[],
+
+  -- Relationship type
+  relationship VARCHAR(50) DEFAULT 'parent', -- 'parent', 'guardian', 'authorized_adult'
+  is_primary_guardian BOOLEAN DEFAULT FALSE,
+
+  -- Access restrictions
+  can_login_as_student BOOLEAN DEFAULT FALSE, -- For younger children
+  requires_student_approval BOOLEAN DEFAULT FALSE, -- For older teens
+
+  -- Validity
+  granted_at TIMESTAMPTZ DEFAULT NOW(),
+  granted_by UUID REFERENCES users_profile(id),
+  expires_at TIMESTAMPTZ,
+  revoked_at TIMESTAMPTZ,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(parent_user_id, student_user_id)
+);
+
+-- Student age tracking (for permission logic)
+ALTER TABLE students_profile
+ADD COLUMN IF NOT EXISTS date_of_birth DATE,
+ADD COLUMN IF NOT EXISTS age_verified BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS age_verified_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS age_verified_by UUID REFERENCES users_profile(id);
+
+-- =============================================================================
+-- TUTOR VERIFICATION PIPELINE
+-- =============================================================================
+
+CREATE TYPE verification_status AS ENUM (
+  'not_started',
+  'pending',
+  'in_review',
+  'approved',
+  'rejected',
+  'expired',
+  'suspended'
+);
+
+CREATE TYPE verification_type AS ENUM (
+  'identity',           -- Government ID verification
+  'background_check',   -- Criminal background check
+  'education',          -- Degree/credential verification
+  'certification',      -- Teaching certifications
+  'reference',          -- Professional references
+  'interview',          -- Interview completed
+  'demo_lesson',        -- Demo lesson evaluation
+  'training'            -- Platform training completed
+);
+
+-- Tutor verification records
+CREATE TABLE IF NOT EXISTS tutor_verifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tutor_user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+
+  verification_type verification_type NOT NULL,
+  status verification_status DEFAULT 'not_started',
+
+  -- Verification details
+  provider VARCHAR(100), -- e.g., 'Checkr', 'Sterling', 'manual'
+  external_id VARCHAR(255), -- ID from verification provider
+
+  -- Documents
+  document_urls TEXT[],
+  document_names TEXT[],
+
+  -- Results
+  result_data JSONB, -- Provider-specific result data
+  passed BOOLEAN,
+  score INT, -- For scored verifications (demo lesson, interview)
+
+  -- Review
+  reviewed_by UUID REFERENCES users_profile(id),
+  reviewed_at TIMESTAMPTZ,
+  review_notes TEXT,
+  rejection_reason TEXT,
+
+  -- Validity
+  verified_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ,
+
+  -- Timestamps
+  submitted_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(tutor_user_id, verification_type)
+);
+
+-- Overall tutor verification status
+ALTER TABLE tutors_profile
+ADD COLUMN IF NOT EXISTS verification_status verification_status DEFAULT 'not_started',
+ADD COLUMN IF NOT EXISTS verification_completed_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS can_teach_minors BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS background_check_clear BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS background_check_date DATE,
+ADD COLUMN IF NOT EXISTS identity_verified BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS credentials_verified BOOLEAN DEFAULT FALSE;
+
+-- Tutor certifications
+CREATE TABLE IF NOT EXISTS tutor_certifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tutor_user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+
+  name VARCHAR(255) NOT NULL,
+  issuing_organization VARCHAR(255),
+  credential_id VARCHAR(255),
+
+  issue_date DATE,
+  expiry_date DATE,
+
+  document_url TEXT,
+  verified BOOLEAN DEFAULT FALSE,
+  verified_at TIMESTAMPTZ,
+  verified_by UUID REFERENCES users_profile(id),
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
+-- AUDIT LOGGING
+-- =============================================================================
+
+CREATE TYPE audit_action AS ENUM (
+  -- Authentication
+  'login',
+  'logout',
+  'login_failed',
+  'password_change',
+  'password_reset',
+  'mfa_enabled',
+  'mfa_disabled',
+
+  -- Data access
+  'view',
+  'create',
+  'update',
+  'delete',
+  'export',
+  'import',
+
+  -- Sensitive actions
+  'consent_granted',
+  'consent_revoked',
+  'permission_changed',
+  'role_changed',
+
+  -- Admin actions
+  'impersonate_start',
+  'impersonate_end',
+  'user_suspended',
+  'user_activated',
+
+  -- Financial
+  'payment_initiated',
+  'refund_issued'
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Who
+  actor_user_id UUID REFERENCES users_profile(id), -- NULL for system actions
+  actor_role VARCHAR(50),
+  impersonator_user_id UUID REFERENCES users_profile(id), -- If acting as another user
+
+  -- What
+  action audit_action NOT NULL,
+  resource_type VARCHAR(100) NOT NULL, -- 'student', 'booking', 'session', etc.
+  resource_id UUID,
+
+  -- Details
+  description TEXT,
+  old_values JSONB, -- Previous state for updates
+  new_values JSONB, -- New state for updates/creates
+  metadata JSONB, -- Additional context
+
+  -- Where
+  ip_address INET,
+  user_agent TEXT,
+  request_id VARCHAR(100), -- Correlation ID
+
+  -- When
+  occurred_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Compliance
+  is_sensitive BOOLEAN DEFAULT FALSE, -- PII/PHI access
+  data_categories TEXT[], -- e.g., ['pii', 'educational_record', 'financial']
+  retention_days INT DEFAULT 2555 -- 7 years default for compliance
+);
+
+-- Partition audit logs by month for performance
+CREATE INDEX IF NOT EXISTS idx_audit_logs_occurred ON audit_logs(occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_actor ON audit_logs(actor_user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource_type, resource_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+
+-- =============================================================================
+-- SCHOOL SSO (Organizations & Single Sign-On)
+-- =============================================================================
+
+CREATE TYPE organization_type AS ENUM (
+  'school',
+  'district',
+  'tutoring_center',
+  'homeschool_coop',
+  'nonprofit',
+  'corporate'
+);
+
+CREATE TYPE sso_provider AS ENUM (
+  'google_workspace',
+  'microsoft_entra',  -- Azure AD
+  'clever',
+  'classlink',
+  'saml',
+  'oidc'
+);
+
+-- Organizations (schools, districts, etc.)
+CREATE TABLE IF NOT EXISTS organizations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  type organization_type NOT NULL,
+
+  -- Contact
+  email VARCHAR(255),
+  phone VARCHAR(50),
+  website VARCHAR(255),
+
+  -- Address
+  address_line1 VARCHAR(255),
+  address_line2 VARCHAR(255),
+  city VARCHAR(100),
+  state VARCHAR(50),
+  postal_code VARCHAR(20),
+  country VARCHAR(2) DEFAULT 'US',
+
+  -- SSO Configuration
+  sso_enabled BOOLEAN DEFAULT FALSE,
+  sso_provider sso_provider,
+  sso_config JSONB, -- Provider-specific configuration
+  sso_domain VARCHAR(255), -- e.g., 'school.edu' for email domain matching
+  sso_auto_provision BOOLEAN DEFAULT FALSE, -- Auto-create accounts on first login
+
+  -- Branding
+  logo_url TEXT,
+  primary_color VARCHAR(7),
+
+  -- Billing
+  billing_email VARCHAR(255),
+  stripe_customer_id VARCHAR(255),
+  subscription_tier VARCHAR(50), -- 'free', 'basic', 'premium', 'enterprise'
+
+  -- Limits
+  max_students INT,
+  max_tutors INT,
+
+  -- Status
+  is_active BOOLEAN DEFAULT TRUE,
+  onboarded_at TIMESTAMPTZ,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Organization members
+CREATE TABLE IF NOT EXISTS organization_members (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+
+  -- Role within organization
+  org_role VARCHAR(50) DEFAULT 'member', -- 'admin', 'teacher', 'student', 'parent', 'member'
+
+  -- External IDs (from SSO)
+  external_id VARCHAR(255), -- User ID in external system
+  external_email VARCHAR(255),
+
+  -- Status
+  is_active BOOLEAN DEFAULT TRUE,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  invited_by UUID REFERENCES users_profile(id),
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(organization_id, user_id)
+);
+
+-- SSO sessions (track SSO-initiated sessions)
+CREATE TABLE IF NOT EXISTS sso_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+
+  provider sso_provider NOT NULL,
+  external_session_id VARCHAR(255),
+
+  -- Tokens (encrypted in production)
+  access_token TEXT,
+  refresh_token TEXT,
+  token_expires_at TIMESTAMPTZ,
+
+  -- Session info
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  last_activity_at TIMESTAMPTZ DEFAULT NOW(),
+  ended_at TIMESTAMPTZ,
+
+  ip_address INET,
+  user_agent TEXT
+);
+
+-- =============================================================================
+-- ADMIN IMPERSONATION
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS admin_impersonation_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  admin_user_id UUID NOT NULL REFERENCES users_profile(id),
+  target_user_id UUID NOT NULL REFERENCES users_profile(id),
+
+  reason TEXT NOT NULL, -- Required justification
+  ticket_id VARCHAR(100), -- Support ticket reference
+
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  ended_at TIMESTAMPTZ,
+
+  -- What was accessed
+  pages_visited TEXT[],
+  actions_taken JSONB,
+
+  ip_address INET,
+  user_agent TEXT
+);
+
+-- =============================================================================
+-- FINE-GRAINED PERMISSIONS
+-- =============================================================================
+
+-- Permission definitions
+CREATE TABLE IF NOT EXISTS permissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  code VARCHAR(100) UNIQUE NOT NULL, -- e.g., 'students.view', 'reports.export'
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  category VARCHAR(50), -- 'students', 'reports', 'billing', etc.
+
+  -- Default role assignments
+  default_for_roles VARCHAR(50)[], -- ['admin', 'tutor']
+
+  is_sensitive BOOLEAN DEFAULT FALSE,
+  requires_audit BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Custom role definitions (beyond basic roles)
+CREATE TABLE IF NOT EXISTS custom_roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+
+  organization_id UUID REFERENCES organizations(id), -- NULL for system-wide roles
+
+  permissions TEXT[], -- Array of permission codes
+
+  is_system BOOLEAN DEFAULT FALSE, -- System-defined vs custom
+  is_active BOOLEAN DEFAULT TRUE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES users_profile(id),
+
+  UNIQUE(name, organization_id)
+);
+
+-- User custom role assignments
+CREATE TABLE IF NOT EXISTS user_role_assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  role_id UUID NOT NULL REFERENCES custom_roles(id) ON DELETE CASCADE,
+
+  organization_id UUID REFERENCES organizations(id),
+
+  granted_at TIMESTAMPTZ DEFAULT NOW(),
+  granted_by UUID REFERENCES users_profile(id),
+  expires_at TIMESTAMPTZ,
+
+  UNIQUE(user_id, role_id, organization_id)
+);
+
+-- =============================================================================
+-- API KEYS
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS api_keys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Owner
+  user_id UUID REFERENCES users_profile(id) ON DELETE CASCADE,
+  organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+
+  -- Key (store hash, not plain text)
+  key_prefix VARCHAR(8) NOT NULL, -- First 8 chars for identification
+  key_hash VARCHAR(64) NOT NULL, -- SHA-256 hash
+
+  -- Permissions
+  scopes TEXT[], -- e.g., ['read:students', 'write:bookings']
+
+  -- Limits
+  rate_limit_per_minute INT DEFAULT 60,
+  allowed_ips INET[],
+
+  -- Status
+  is_active BOOLEAN DEFAULT TRUE,
+  last_used_at TIMESTAMPTZ,
+  usage_count INT DEFAULT 0,
+
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
+-- INDEXES
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_parental_consents_student ON parental_consents(student_user_id);
+CREATE INDEX IF NOT EXISTS idx_parental_consents_parent ON parental_consents(parent_user_id);
+CREATE INDEX IF NOT EXISTS idx_parental_consents_status ON parental_consents(status);
+CREATE INDEX IF NOT EXISTS idx_parent_child_perms_parent ON parent_child_permissions(parent_user_id);
+CREATE INDEX IF NOT EXISTS idx_parent_child_perms_student ON parent_child_permissions(student_user_id);
+CREATE INDEX IF NOT EXISTS idx_tutor_verifications_tutor ON tutor_verifications(tutor_user_id);
+CREATE INDEX IF NOT EXISTS idx_tutor_verifications_status ON tutor_verifications(status);
+CREATE INDEX IF NOT EXISTS idx_org_members_org ON organization_members(organization_id);
+CREATE INDEX IF NOT EXISTS idx_org_members_user ON organization_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_sso_sessions_user ON sso_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON api_keys(key_prefix);
+
+-- =============================================================================
+-- RLS POLICIES
+-- =============================================================================
+
+ALTER TABLE parental_consents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE consent_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE parent_child_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tutor_verifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tutor_certifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE organization_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sso_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_impersonation_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_keys ENABLE ROW LEVEL SECURITY;
+
+-- Parents can see consents for their children
+CREATE POLICY consents_parent_access ON parental_consents
+  FOR SELECT USING (parent_user_id = auth.uid());
+
+-- Students can see their own consents (if old enough)
+CREATE POLICY consents_student_access ON parental_consents
+  FOR SELECT USING (
+    student_user_id = auth.uid() AND
+    EXISTS (
+      SELECT 1 FROM students_profile sp
+      WHERE sp.user_id = auth.uid()
+      AND sp.date_of_birth <= CURRENT_DATE - INTERVAL '13 years'
+    )
+  );
+
+-- Admins can see all consents
+CREATE POLICY consents_admin_access ON parental_consents
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+-- Consent templates are public read
+CREATE POLICY consent_templates_read ON consent_templates
+  FOR SELECT USING (is_active = TRUE);
+
+-- Tutors can see their own verification status
+CREATE POLICY tutor_verifications_self ON tutor_verifications
+  FOR SELECT USING (tutor_user_id = auth.uid());
+
+-- Admins can manage verifications
+CREATE POLICY tutor_verifications_admin ON tutor_verifications
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+-- Audit logs: only admins can read
+CREATE POLICY audit_logs_admin ON audit_logs
+  FOR SELECT USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+-- Organizations visible to members
+CREATE POLICY organizations_member_access ON organizations
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM organization_members
+      WHERE organization_id = organizations.id AND user_id = auth.uid()
+    ) OR
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- API keys: users see their own
+CREATE POLICY api_keys_owner ON api_keys
+  FOR ALL USING (user_id = auth.uid());
+
+-- =============================================================================
+-- FUNCTIONS
+-- =============================================================================
+
+-- Function to check if user has permission
+CREATE OR REPLACE FUNCTION has_permission(
+  p_user_id UUID,
+  p_permission_code TEXT,
+  p_resource_type TEXT DEFAULT NULL,
+  p_resource_id UUID DEFAULT NULL
+) RETURNS BOOLEAN AS $$
+DECLARE
+  v_user_role VARCHAR(50);
+  v_has_permission BOOLEAN := FALSE;
+BEGIN
+  -- Get user's base role
+  SELECT role INTO v_user_role FROM users_profile WHERE id = p_user_id;
+
+  -- Admins have all permissions
+  IF v_user_role = 'admin' THEN
+    RETURN TRUE;
+  END IF;
+
+  -- Check custom role assignments
+  SELECT TRUE INTO v_has_permission
+  FROM user_role_assignments ura
+  JOIN custom_roles cr ON cr.id = ura.role_id
+  WHERE ura.user_id = p_user_id
+    AND p_permission_code = ANY(cr.permissions)
+    AND (ura.expires_at IS NULL OR ura.expires_at > NOW());
+
+  IF v_has_permission THEN
+    RETURN TRUE;
+  END IF;
+
+  -- Check default permissions for role
+  SELECT TRUE INTO v_has_permission
+  FROM permissions
+  WHERE code = p_permission_code
+    AND v_user_role = ANY(default_for_roles);
+
+  RETURN COALESCE(v_has_permission, FALSE);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to log audit event
+CREATE OR REPLACE FUNCTION log_audit_event(
+  p_actor_user_id UUID,
+  p_action audit_action,
+  p_resource_type TEXT,
+  p_resource_id UUID DEFAULT NULL,
+  p_description TEXT DEFAULT NULL,
+  p_old_values JSONB DEFAULT NULL,
+  p_new_values JSONB DEFAULT NULL,
+  p_metadata JSONB DEFAULT NULL,
+  p_is_sensitive BOOLEAN DEFAULT FALSE
+) RETURNS UUID AS $$
+DECLARE
+  v_audit_id UUID;
+  v_actor_role VARCHAR(50);
+BEGIN
+  SELECT role INTO v_actor_role FROM users_profile WHERE id = p_actor_user_id;
+
+  INSERT INTO audit_logs (
+    actor_user_id, actor_role, action, resource_type, resource_id,
+    description, old_values, new_values, metadata, is_sensitive
+  ) VALUES (
+    p_actor_user_id, v_actor_role, p_action, p_resource_type, p_resource_id,
+    p_description, p_old_values, p_new_values, p_metadata, p_is_sensitive
+  ) RETURNING id INTO v_audit_id;
+
+  RETURN v_audit_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to check parental consent
+CREATE OR REPLACE FUNCTION check_parental_consent(
+  p_student_user_id UUID,
+  p_consent_type consent_type
+) RETURNS BOOLEAN AS $$
+DECLARE
+  v_has_consent BOOLEAN;
+  v_student_age INT;
+BEGIN
+  -- Calculate student age
+  SELECT EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth))
+  INTO v_student_age
+  FROM students_profile
+  WHERE user_id = p_student_user_id;
+
+  -- If 18 or older, no parental consent needed
+  IF v_student_age >= 18 THEN
+    RETURN TRUE;
+  END IF;
+
+  -- Check for valid consent
+  SELECT TRUE INTO v_has_consent
+  FROM parental_consents
+  WHERE student_user_id = p_student_user_id
+    AND consent_type = p_consent_type
+    AND status = 'granted'
+    AND (expires_at IS NULL OR expires_at > NOW());
+
+  RETURN COALESCE(v_has_consent, FALSE);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================================================
+-- SEED DEFAULT PERMISSIONS
+-- =============================================================================
+
+INSERT INTO permissions (code, name, description, category, default_for_roles, is_sensitive, requires_audit) VALUES
+-- Student permissions
+('students.view', 'View Students', 'View student profiles and basic info', 'students', ARRAY['admin', 'tutor'], FALSE, FALSE),
+('students.view_progress', 'View Student Progress', 'View mastery levels and learning progress', 'students', ARRAY['admin', 'tutor'], FALSE, FALSE),
+('students.edit', 'Edit Students', 'Edit student profiles', 'students', ARRAY['admin'], TRUE, TRUE),
+('students.view_pii', 'View Student PII', 'View sensitive student information', 'students', ARRAY['admin'], TRUE, TRUE),
+
+-- Session permissions
+('sessions.view', 'View Sessions', 'View session details', 'sessions', ARRAY['admin', 'tutor', 'parent'], FALSE, FALSE),
+('sessions.create', 'Create Sessions', 'Book new sessions', 'sessions', ARRAY['admin', 'tutor', 'parent'], FALSE, FALSE),
+('sessions.edit', 'Edit Sessions', 'Modify session details', 'sessions', ARRAY['admin', 'tutor'], FALSE, TRUE),
+('sessions.cancel', 'Cancel Sessions', 'Cancel existing sessions', 'sessions', ARRAY['admin', 'tutor', 'parent'], FALSE, TRUE),
+
+-- Report permissions
+('reports.view', 'View Reports', 'View analytics and reports', 'reports', ARRAY['admin', 'tutor'], FALSE, FALSE),
+('reports.export', 'Export Reports', 'Export data from reports', 'reports', ARRAY['admin'], TRUE, TRUE),
+
+-- Billing permissions
+('billing.view', 'View Billing', 'View payment history', 'billing', ARRAY['admin', 'parent'], TRUE, FALSE),
+('billing.manage', 'Manage Billing', 'Process payments and refunds', 'billing', ARRAY['admin'], TRUE, TRUE),
+
+-- Admin permissions
+('admin.users', 'Manage Users', 'Create and manage user accounts', 'admin', ARRAY['admin'], TRUE, TRUE),
+('admin.impersonate', 'Impersonate Users', 'Log in as another user', 'admin', ARRAY['admin'], TRUE, TRUE),
+('admin.audit', 'View Audit Logs', 'Access audit trail', 'admin', ARRAY['admin'], TRUE, FALSE),
+('admin.settings', 'Manage Settings', 'Configure system settings', 'admin', ARRAY['admin'], TRUE, TRUE)
+
+ON CONFLICT (code) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  default_for_roles = EXCLUDED.default_for_roles;
+
+-- =============================================================================
+-- SEED CONSENT TEMPLATES
+-- =============================================================================
+
+INSERT INTO consent_templates (consent_type, version, title, summary, full_text, requires_signature, min_age_without_parent, effective_date, expiry_days) VALUES
+(
+  'account_creation',
+  '2024.1',
+  'Student Account Creation Consent',
+  'I consent to create a MathPivot account for my child and agree to the Terms of Service and Privacy Policy.',
+  E'PARENTAL CONSENT FOR STUDENT ACCOUNT CREATION\n\nBy signing below, I, the parent or legal guardian of the minor student named in this form, hereby consent to:\n\n1. The creation of a MathPivot student account for my child\n2. The collection of educational records as described in our Privacy Policy\n3. Communication between MathPivot tutors and my child during tutoring sessions\n\nI understand that:\n- I can review my child''s educational records at any time\n- I can revoke this consent at any time by contacting support@mathpivot.com\n- MathPivot complies with COPPA and FERPA regulations\n\nThis consent is valid until revoked or until my child reaches the age of 18.',
+  TRUE,
+  18,
+  '2024-01-01',
+  NULL
+),
+(
+  'data_collection',
+  '2024.1',
+  'Data Collection Consent',
+  'I consent to MathPivot collecting and processing my child''s educational data to provide tutoring services.',
+  E'CONSENT FOR DATA COLLECTION AND PROCESSING\n\nI consent to MathPivot collecting the following data about my child:\n\n- Name, grade level, and school information\n- Learning progress and assessment results\n- Session recordings (if enabled) for quality assurance\n- Communication logs with tutors\n\nThis data will be used to:\n- Provide personalized tutoring services\n- Track learning progress\n- Generate progress reports\n- Improve our educational content\n\nData retention: Educational records are retained for 7 years after the last session, or until deletion is requested.',
+  FALSE,
+  18,
+  '2024-01-01',
+  365
+),
+(
+  'photo_video',
+  '2024.1',
+  'Photo/Video Release',
+  'I consent to MathPivot using photos or videos of my child for educational and promotional purposes.',
+  E'PHOTO AND VIDEO RELEASE\n\nI grant permission to MathPivot to:\n\n1. Record tutoring sessions for quality assurance purposes\n2. Use photos or videos of my child in educational materials\n3. Feature my child in promotional materials (website, social media, brochures)\n\nI understand that:\n- I can opt out of promotional use while still allowing session recordings\n- Recordings are stored securely and not shared with third parties\n- I can request deletion of any recordings',
+  FALSE,
+  18,
+  '2024-01-01',
+  365
+)
+ON CONFLICT (consent_type, version) DO NOTHING;
+
+-- =============================================================================
+-- COMMENTS
+-- =============================================================================
+
+COMMENT ON TABLE parental_consents IS 'COPPA/FERPA compliant parental consent records';
+COMMENT ON TABLE consent_templates IS 'Legal consent text templates with versioning';
+COMMENT ON TABLE parent_child_permissions IS 'Fine-grained parent access to student data';
+COMMENT ON TABLE tutor_verifications IS 'Background check and credential verification status';
+COMMENT ON TABLE audit_logs IS 'Comprehensive audit trail for compliance';
+COMMENT ON TABLE organizations IS 'Schools and organizations for B2B/SSO';
+COMMENT ON TABLE organization_members IS 'User membership in organizations';
+COMMENT ON TABLE sso_sessions IS 'SSO-initiated authentication sessions';
+COMMENT ON TABLE api_keys IS 'API keys for programmatic access';
+COMMENT ON FUNCTION has_permission IS 'Check if user has specific permission';
+COMMENT ON FUNCTION log_audit_event IS 'Create audit log entry';
+COMMENT ON FUNCTION check_parental_consent IS 'Verify parental consent for student';
+=== 00009_certifications.sql ===
+-- ============================================================================
+-- CERTIFICATION ENGINE FOR MATHPIVOT
+-- Comprehensive certification system for students and tutors
+-- ============================================================================
+
+-- Certification program types
+CREATE TYPE certification_type AS ENUM (
+  'skill_mastery',      -- Based on skill completion
+  'career_pathway',     -- Career-focused (actuarial, data science, etc.)
+  'competition_prep',   -- Competition readiness
+  'tutor_qualification', -- For tutors
+  'course_completion',  -- Complete a course/program
+  'external_validated'  -- Based on external exam scores
+);
+
+-- Certification levels
+CREATE TYPE certification_level AS ENUM (
+  'foundation',
+  'bronze',
+  'silver',
+  'gold',
+  'platinum',
+  'expert'
+);
+
+-- Requirement types for certifications
+CREATE TYPE requirement_type AS ENUM (
+  'skills_mastered',     -- Must master specific skills
+  'skill_count',         -- Must master N skills in category
+  'hours_logged',        -- Tutoring hours completed
+  'sessions_completed',  -- Number of sessions
+  'assessment_passed',   -- Pass an assessment
+  'project_submitted',   -- Submit a project
+  'tutor_signoff',       -- Tutor verification
+  'prerequisite_cert',   -- Must have another certification
+  'external_score',      -- External exam score (SAT, AP, etc.)
+  'attendance',          -- Attended camps/events
+  'competition_score'    -- Competition placement
+);
+
+-- Assessment types
+CREATE TYPE assessment_type AS ENUM (
+  'quiz',                -- Multiple choice / short answer
+  'timed_challenge',     -- Time-limited problems
+  'project',             -- Project submission with rubric
+  'demonstration',       -- Live demo observed by tutor
+  'portfolio',           -- Collection of work
+  'oral_exam',           -- Verbal examination
+  'practical'            -- Hands-on (robotics, etc.)
+);
+
+-- Question types for quizzes
+CREATE TYPE question_type AS ENUM (
+  'multiple_choice',
+  'multiple_select',
+  'true_false',
+  'numeric',
+  'short_answer',
+  'essay',
+  'math_expression',
+  'graphing',
+  'code'
+);
+
+-- ============================================================================
+-- CERTIFICATION PROGRAMS
+-- ============================================================================
+
+CREATE TABLE certification_programs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+  -- Basic info
+  code VARCHAR(50) UNIQUE NOT NULL, -- e.g., 'ALG1-GOLD', 'ACT-PREP-1'
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  short_description VARCHAR(500),
+
+  -- Classification
+  cert_type certification_type NOT NULL,
+  level certification_level DEFAULT 'foundation',
+  category VARCHAR(100), -- 'algebra', 'actuarial', 'robotics', etc.
+
+  -- Visual
+  icon_url TEXT,
+  badge_image_url TEXT,
+  badge_color VARCHAR(7) DEFAULT '#3B82F6', -- Hex color
+
+  -- Requirements summary
+  estimated_hours INTEGER, -- Estimated time to complete
+  difficulty_rating INTEGER CHECK (difficulty_rating BETWEEN 1 AND 5),
+
+  -- Targeting
+  target_audience VARCHAR(50) DEFAULT 'student', -- 'student', 'tutor', 'both'
+  min_age INTEGER,
+  max_age INTEGER,
+  grade_level_min INTEGER,
+  grade_level_max INTEGER,
+
+  -- Validity
+  validity_months INTEGER, -- NULL = never expires
+  recertification_program_id UUID REFERENCES certification_programs(id),
+
+  -- Relationships
+  career_pathway_id UUID, -- Links to career pathways if applicable
+  prerequisite_program_ids UUID[] DEFAULT '{}',
+
+  -- Pricing
+  is_free BOOLEAN DEFAULT true,
+  price_cents INTEGER DEFAULT 0,
+
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+  is_featured BOOLEAN DEFAULT false,
+  display_order INTEGER DEFAULT 0,
+
+  -- Metadata
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- CERTIFICATION REQUIREMENTS
+-- ============================================================================
+
+CREATE TABLE certification_requirements (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  program_id UUID NOT NULL REFERENCES certification_programs(id) ON DELETE CASCADE,
+
+  -- Requirement definition
+  requirement_type requirement_type NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+
+  -- Requirement parameters (varies by type)
+  -- For skills_mastered: { "skill_ids": ["uuid1", "uuid2"] }
+  -- For skill_count: { "category": "algebra", "min_count": 5, "min_level": 3 }
+  -- For hours_logged: { "min_hours": 10, "category": "tutoring" }
+  -- For sessions_completed: { "min_sessions": 5, "session_type": "one_on_one" }
+  -- For assessment_passed: { "assessment_id": "uuid", "min_score": 80 }
+  -- For external_score: { "exam_type": "SAT_MATH", "min_score": 700 }
+  parameters JSONB NOT NULL DEFAULT '{}',
+
+  -- Logic
+  is_required BOOLEAN DEFAULT true, -- false = optional/bonus
+  group_id VARCHAR(50), -- For OR grouping (any in group satisfies)
+  weight NUMERIC(3,2) DEFAULT 1.0, -- For partial completion
+
+  -- Order
+  display_order INTEGER DEFAULT 0,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- ASSESSMENTS
+-- ============================================================================
+
+CREATE TABLE certification_assessments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  program_id UUID REFERENCES certification_programs(id) ON DELETE SET NULL,
+
+  -- Basic info
+  code VARCHAR(50) UNIQUE NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  instructions TEXT,
+
+  -- Type and settings
+  assessment_type assessment_type NOT NULL,
+
+  -- Timing
+  time_limit_minutes INTEGER, -- NULL = untimed
+  available_from TIMESTAMPTZ,
+  available_until TIMESTAMPTZ,
+
+  -- Attempts
+  max_attempts INTEGER DEFAULT 3,
+  cooldown_hours INTEGER DEFAULT 24, -- Time between attempts
+
+  -- Scoring
+  passing_score NUMERIC(5,2) NOT NULL DEFAULT 70.00,
+  max_score NUMERIC(7,2) DEFAULT 100.00,
+
+  -- Question settings
+  question_count INTEGER, -- NULL = use all questions
+  randomize_questions BOOLEAN DEFAULT true,
+  randomize_options BOOLEAN DEFAULT true,
+  show_correct_answers BOOLEAN DEFAULT false,
+  show_explanations BOOLEAN DEFAULT true,
+
+  -- Proctoring
+  requires_proctoring BOOLEAN DEFAULT false,
+  requires_webcam BOOLEAN DEFAULT false,
+  allows_calculator BOOLEAN DEFAULT true,
+  allows_notes BOOLEAN DEFAULT false,
+
+  -- Rubric (for projects/demos)
+  rubric JSONB, -- { "criteria": [{ "name": "...", "max_points": 10 }] }
+
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+
+  -- Metadata
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- ASSESSMENT QUESTIONS
+-- ============================================================================
+
+CREATE TABLE assessment_questions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  assessment_id UUID NOT NULL REFERENCES certification_assessments(id) ON DELETE CASCADE,
+
+  -- Question content
+  question_type question_type NOT NULL,
+  question_text TEXT NOT NULL,
+  question_html TEXT, -- Rich formatted version
+  question_image_url TEXT,
+
+  -- For math expressions
+  latex_content TEXT,
+  desmos_state JSONB, -- For graphing questions
+
+  -- Options (for multiple choice)
+  options JSONB, -- [{ "id": "a", "text": "...", "image_url": null }]
+
+  -- Correct answer(s)
+  correct_answer JSONB NOT NULL, -- Format varies by question type
+  -- multiple_choice: "a"
+  -- multiple_select: ["a", "c"]
+  -- numeric: { "value": 42, "tolerance": 0.01 }
+  -- math_expression: { "expression": "x^2 + 2x + 1", "equivalents": [...] }
+
+  -- Scoring
+  points NUMERIC(5,2) DEFAULT 1.00,
+  partial_credit BOOLEAN DEFAULT false,
+  partial_credit_rules JSONB, -- How to award partial credit
+
+  -- Hints and explanations
+  hint TEXT,
+  explanation TEXT,
+  explanation_video_url TEXT,
+
+  -- Categorization
+  difficulty INTEGER CHECK (difficulty BETWEEN 1 AND 5) DEFAULT 3,
+  skill_ids UUID[] DEFAULT '{}', -- Related skills
+  tags VARCHAR(100)[] DEFAULT '{}',
+
+  -- Order and grouping
+  display_order INTEGER DEFAULT 0,
+  question_group VARCHAR(50), -- For grouping related questions
+
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- ASSESSMENT ATTEMPTS
+-- ============================================================================
+
+CREATE TABLE assessment_attempts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  assessment_id UUID NOT NULL REFERENCES certification_assessments(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+
+  -- Attempt info
+  attempt_number INTEGER NOT NULL DEFAULT 1,
+
+  -- Timing
+  started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  submitted_at TIMESTAMPTZ,
+  time_spent_seconds INTEGER,
+
+  -- Questions presented (if randomized)
+  question_order UUID[] DEFAULT '{}',
+
+  -- Scoring
+  raw_score NUMERIC(7,2),
+  max_possible_score NUMERIC(7,2),
+  percentage_score NUMERIC(5,2),
+  passed BOOLEAN,
+
+  -- Proctoring
+  proctor_user_id UUID REFERENCES auth.users(id),
+  proctoring_notes TEXT,
+  proctoring_flags JSONB DEFAULT '[]', -- Any suspicious activity
+
+  -- Status
+  status VARCHAR(20) DEFAULT 'in_progress', -- 'in_progress', 'submitted', 'graded', 'expired', 'voided'
+
+  -- Grading (for manual grading)
+  graded_by UUID REFERENCES auth.users(id),
+  graded_at TIMESTAMPTZ,
+  grading_notes TEXT,
+
+  -- Browser/device info
+  user_agent TEXT,
+  ip_address INET,
+
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- ASSESSMENT RESPONSES
+-- ============================================================================
+
+CREATE TABLE assessment_responses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  attempt_id UUID NOT NULL REFERENCES assessment_attempts(id) ON DELETE CASCADE,
+  question_id UUID NOT NULL REFERENCES assessment_questions(id),
+
+  -- Response
+  response JSONB, -- User's answer in same format as correct_answer
+  response_text TEXT, -- For essay/short answer
+  response_file_urls TEXT[], -- For project submissions
+
+  -- Timing
+  started_at TIMESTAMPTZ,
+  answered_at TIMESTAMPTZ,
+  time_spent_seconds INTEGER,
+
+  -- Scoring
+  is_correct BOOLEAN,
+  points_earned NUMERIC(5,2),
+  max_points NUMERIC(5,2),
+
+  -- Feedback
+  auto_feedback TEXT,
+  manual_feedback TEXT,
+  graded_by UUID REFERENCES auth.users(id),
+
+  -- Flags
+  flagged_for_review BOOLEAN DEFAULT false,
+  flag_reason TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(attempt_id, question_id)
+);
+
+-- ============================================================================
+-- USER CERTIFICATIONS (ISSUED CREDENTIALS)
+-- ============================================================================
+
+CREATE TABLE user_certifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  program_id UUID NOT NULL REFERENCES certification_programs(id),
+
+  -- Credential info
+  credential_number VARCHAR(100) UNIQUE NOT NULL, -- e.g., 'MP-ALG1-2024-00001'
+
+  -- Achievement
+  earned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  score NUMERIC(5,2), -- Final score if applicable
+
+  -- Validity
+  valid_from TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  valid_until TIMESTAMPTZ, -- NULL = never expires
+
+  -- Status
+  status VARCHAR(20) DEFAULT 'active', -- 'active', 'expired', 'revoked', 'suspended'
+  revoked_at TIMESTAMPTZ,
+  revoked_reason TEXT,
+  revoked_by UUID REFERENCES auth.users(id),
+
+  -- Verification
+  verification_token VARCHAR(64) UNIQUE NOT NULL,
+  verification_url TEXT GENERATED ALWAYS AS (
+    'https://mathpivot.com/verify/' || verification_token
+  ) STORED,
+
+  -- Digital badge
+  badge_assertion_id VARCHAR(255), -- Open Badges 2.0
+  badge_image_url TEXT,
+
+  -- PDF Certificate
+  certificate_pdf_url TEXT,
+  certificate_generated_at TIMESTAMPTZ,
+
+  -- Sharing
+  is_public BOOLEAN DEFAULT true,
+  shared_to_linkedin BOOLEAN DEFAULT false,
+
+  -- Related records
+  final_assessment_attempt_id UUID REFERENCES assessment_attempts(id),
+
+  -- Metadata
+  achievement_details JSONB DEFAULT '{}', -- Requirements completed, etc.
+  metadata JSONB DEFAULT '{}',
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- USER CERTIFICATION PROGRESS
+-- ============================================================================
+
+CREATE TABLE user_certification_progress (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  program_id UUID NOT NULL REFERENCES certification_programs(id),
+
+  -- Progress tracking
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  last_activity_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Completion
+  requirements_completed JSONB DEFAULT '{}', -- { "req_id": { "completed": true, "completed_at": "..." } }
+  completion_percentage NUMERIC(5,2) DEFAULT 0,
+
+  -- Status
+  status VARCHAR(20) DEFAULT 'in_progress', -- 'not_started', 'in_progress', 'ready_for_cert', 'completed'
+
+  metadata JSONB DEFAULT '{}',
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(user_id, program_id)
+);
+
+-- ============================================================================
+-- CERTIFICATION VERIFICATIONS (PUBLIC LOG)
+-- ============================================================================
+
+CREATE TABLE certification_verifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_certification_id UUID NOT NULL REFERENCES user_certifications(id),
+
+  -- Verification details
+  verified_at TIMESTAMPTZ DEFAULT NOW(),
+  verifier_name VARCHAR(255),
+  verifier_email VARCHAR(255),
+  verifier_organization VARCHAR(255),
+
+  -- Request info
+  ip_address INET,
+  user_agent TEXT,
+
+  -- Result
+  was_valid BOOLEAN NOT NULL
+);
+
+-- ============================================================================
+-- EXTERNAL EXAM SCORES
+-- ============================================================================
+
+CREATE TABLE external_exam_scores (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+
+  -- Exam info
+  exam_type VARCHAR(50) NOT NULL, -- 'SAT_MATH', 'ACT_MATH', 'AP_CALC_AB', etc.
+  exam_date DATE,
+
+  -- Score
+  score NUMERIC(7,2) NOT NULL,
+  max_score NUMERIC(7,2),
+  percentile INTEGER,
+
+  -- Verification
+  verified BOOLEAN DEFAULT false,
+  verified_at TIMESTAMPTZ,
+  verified_by UUID REFERENCES auth.users(id),
+  verification_document_url TEXT,
+
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- QUESTION BANK CATEGORIES
+-- ============================================================================
+
+CREATE TABLE question_bank_categories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  parent_id UUID REFERENCES question_bank_categories(id),
+
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  description TEXT,
+
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================================
+-- INDEXES
+-- ============================================================================
+
+-- Certification programs
+CREATE INDEX idx_cert_programs_type ON certification_programs(cert_type);
+CREATE INDEX idx_cert_programs_category ON certification_programs(category);
+CREATE INDEX idx_cert_programs_active ON certification_programs(is_active, is_featured);
+CREATE INDEX idx_cert_programs_career ON certification_programs(career_pathway_id) WHERE career_pathway_id IS NOT NULL;
+
+-- Requirements
+CREATE INDEX idx_cert_requirements_program ON certification_requirements(program_id);
+CREATE INDEX idx_cert_requirements_type ON certification_requirements(requirement_type);
+
+-- Assessments
+CREATE INDEX idx_assessments_program ON certification_assessments(program_id);
+CREATE INDEX idx_assessments_type ON certification_assessments(assessment_type);
+CREATE INDEX idx_assessments_active ON certification_assessments(is_active);
+
+-- Questions
+CREATE INDEX idx_questions_assessment ON assessment_questions(assessment_id);
+CREATE INDEX idx_questions_type ON assessment_questions(question_type);
+CREATE INDEX idx_questions_difficulty ON assessment_questions(difficulty);
+CREATE INDEX idx_questions_skills ON assessment_questions USING GIN(skill_ids);
+CREATE INDEX idx_questions_tags ON assessment_questions USING GIN(tags);
+
+-- Attempts
+CREATE INDEX idx_attempts_assessment ON assessment_attempts(assessment_id);
+CREATE INDEX idx_attempts_user ON assessment_attempts(user_id);
+CREATE INDEX idx_attempts_status ON assessment_attempts(status);
+CREATE INDEX idx_attempts_user_assessment ON assessment_attempts(user_id, assessment_id);
+
+-- Responses
+CREATE INDEX idx_responses_attempt ON assessment_responses(attempt_id);
+CREATE INDEX idx_responses_question ON assessment_responses(question_id);
+
+-- User certifications
+CREATE INDEX idx_user_certs_user ON user_certifications(user_id);
+CREATE INDEX idx_user_certs_program ON user_certifications(program_id);
+CREATE INDEX idx_user_certs_status ON user_certifications(status);
+CREATE INDEX idx_user_certs_token ON user_certifications(verification_token);
+CREATE INDEX idx_user_certs_credential ON user_certifications(credential_number);
+
+-- Progress
+CREATE INDEX idx_cert_progress_user ON user_certification_progress(user_id);
+CREATE INDEX idx_cert_progress_program ON user_certification_progress(program_id);
+CREATE INDEX idx_cert_progress_status ON user_certification_progress(status);
+
+-- Verifications
+CREATE INDEX idx_verifications_cert ON certification_verifications(user_certification_id);
+
+-- External scores
+CREATE INDEX idx_external_scores_user ON external_exam_scores(user_id);
+CREATE INDEX idx_external_scores_type ON external_exam_scores(exam_type);
+
+-- ============================================================================
+-- ROW LEVEL SECURITY
+-- ============================================================================
+
+ALTER TABLE certification_programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE certification_requirements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE certification_assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE assessment_questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE assessment_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE assessment_responses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_certifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_certification_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE certification_verifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE external_exam_scores ENABLE ROW LEVEL SECURITY;
+
+-- Programs: everyone can view active programs
+CREATE POLICY "Anyone can view active certification programs"
+  ON certification_programs FOR SELECT
+  USING (is_active = true);
+
+CREATE POLICY "Admins can manage certification programs"
+  ON certification_programs FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- Requirements: everyone can view
+CREATE POLICY "Anyone can view certification requirements"
+  ON certification_requirements FOR SELECT
+  USING (true);
+
+-- Assessments: view if active
+CREATE POLICY "Anyone can view active assessments"
+  ON certification_assessments FOR SELECT
+  USING (is_active = true);
+
+-- Questions: only see during active attempt (handled in application layer for security)
+CREATE POLICY "Admins can manage questions"
+  ON assessment_questions FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- Attempts: users see own
+CREATE POLICY "Users can view own attempts"
+  ON assessment_attempts FOR SELECT
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Users can create own attempts"
+  ON assessment_attempts FOR INSERT
+  WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can update own in-progress attempts"
+  ON assessment_attempts FOR UPDATE
+  USING (user_id = auth.uid() AND status = 'in_progress');
+
+-- Responses: users see own
+CREATE POLICY "Users can manage own responses"
+  ON assessment_responses FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM assessment_attempts WHERE id = attempt_id AND user_id = auth.uid()
+    )
+  );
+
+-- User certifications: users see own, public ones visible to all
+CREATE POLICY "Users can view own certifications"
+  ON user_certifications FOR SELECT
+  USING (user_id = auth.uid() OR is_public = true);
+
+-- Progress: users see own
+CREATE POLICY "Users can view own progress"
+  ON user_certification_progress FOR SELECT
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Users can update own progress"
+  ON user_certification_progress FOR ALL
+  USING (user_id = auth.uid());
+
+-- Verifications: anyone can create (public verification)
+CREATE POLICY "Anyone can create verification records"
+  ON certification_verifications FOR INSERT
+  WITH CHECK (true);
+
+-- External scores: users see own
+CREATE POLICY "Users can manage own external scores"
+  ON external_exam_scores FOR ALL
+  USING (user_id = auth.uid());
+
+-- ============================================================================
+-- FUNCTIONS
+-- ============================================================================
+
+-- Generate unique credential number
+CREATE OR REPLACE FUNCTION generate_credential_number(program_code VARCHAR)
+RETURNS VARCHAR AS $$
+DECLARE
+  year_part VARCHAR(4);
+  sequence_num INTEGER;
+  credential VARCHAR(100);
+BEGIN
+  year_part := TO_CHAR(NOW(), 'YYYY');
+
+  SELECT COALESCE(MAX(
+    NULLIF(REGEXP_REPLACE(credential_number, '^.*-(\d+)$', '\1'), credential_number)::INTEGER
+  ), 0) + 1
+  INTO sequence_num
+  FROM user_certifications
+  WHERE credential_number LIKE 'MP-' || program_code || '-' || year_part || '-%';
+
+  credential := 'MP-' || program_code || '-' || year_part || '-' || LPAD(sequence_num::TEXT, 5, '0');
+
+  RETURN credential;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Generate verification token
+CREATE OR REPLACE FUNCTION generate_verification_token()
+RETURNS VARCHAR AS $$
+BEGIN
+  RETURN encode(gen_random_bytes(32), 'hex');
+END;
+$$ LANGUAGE plpgsql;
+
+-- Auto-update progress percentage
+CREATE OR REPLACE FUNCTION update_certification_progress()
+RETURNS TRIGGER AS $$
+DECLARE
+  total_reqs INTEGER;
+  completed_reqs INTEGER;
+  new_percentage NUMERIC(5,2);
+BEGIN
+  -- Count total required requirements
+  SELECT COUNT(*) INTO total_reqs
+  FROM certification_requirements
+  WHERE program_id = NEW.program_id AND is_required = true;
+
+  -- Count completed requirements
+  SELECT COUNT(*) INTO completed_reqs
+  FROM jsonb_each(NEW.requirements_completed) AS r
+  WHERE (r.value->>'completed')::boolean = true;
+
+  -- Calculate percentage
+  IF total_reqs > 0 THEN
+    new_percentage := (completed_reqs::NUMERIC / total_reqs::NUMERIC) * 100;
+  ELSE
+    new_percentage := 0;
+  END IF;
+
+  NEW.completion_percentage := new_percentage;
+  NEW.last_activity_at := NOW();
+  NEW.updated_at := NOW();
+
+  -- Update status
+  IF new_percentage >= 100 THEN
+    NEW.status := 'ready_for_cert';
+  ELSIF new_percentage > 0 THEN
+    NEW.status := 'in_progress';
+  ELSE
+    NEW.status := 'not_started';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_certification_progress
+  BEFORE UPDATE ON user_certification_progress
+  FOR EACH ROW
+  EXECUTE FUNCTION update_certification_progress();
+
+-- Auto-grade assessment attempt
+CREATE OR REPLACE FUNCTION calculate_attempt_score(attempt_uuid UUID)
+RETURNS TABLE(raw_score NUMERIC, max_score NUMERIC, percentage NUMERIC, passed BOOLEAN) AS $$
+DECLARE
+  assessment_record RECORD;
+  score_data RECORD;
+BEGIN
+  -- Get assessment info
+  SELECT ca.* INTO assessment_record
+  FROM certification_assessments ca
+  JOIN assessment_attempts aa ON aa.assessment_id = ca.id
+  WHERE aa.id = attempt_uuid;
+
+  -- Calculate scores
+  SELECT
+    COALESCE(SUM(ar.points_earned), 0) as total_earned,
+    COALESCE(SUM(ar.max_points), 0) as total_max
+  INTO score_data
+  FROM assessment_responses ar
+  WHERE ar.attempt_id = attempt_uuid;
+
+  raw_score := score_data.total_earned;
+  max_score := score_data.total_max;
+
+  IF max_score > 0 THEN
+    percentage := (raw_score / max_score) * 100;
+  ELSE
+    percentage := 0;
+  END IF;
+
+  passed := percentage >= assessment_record.passing_score;
+
+  RETURN NEXT;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- TRIGGERS FOR TIMESTAMPS
+-- ============================================================================
+
+CREATE TRIGGER update_cert_programs_timestamp
+  BEFORE UPDATE ON certification_programs
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_assessments_timestamp
+  BEFORE UPDATE ON certification_assessments
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_questions_timestamp
+  BEFORE UPDATE ON assessment_questions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_responses_timestamp
+  BEFORE UPDATE ON assessment_responses
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_user_certs_timestamp
+  BEFORE UPDATE ON user_certifications
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+=== 00010_ai_chat.sql ===
+-- ============================================================================
+-- MATHPIVOT TUTOROS - AI CHAT SYSTEM
+-- Migration 00010: AI tutor chat conversations and messages
+-- ============================================================================
+
+-- Chat conversation status
+CREATE TYPE chat_status AS ENUM ('active', 'archived', 'flagged');
+
+-- AI Chat Conversations
+CREATE TABLE ai_chat_conversations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    title TEXT,
+    skill_context UUID REFERENCES skills(id),
+    session_context UUID REFERENCES sessions(id),
+    status chat_status NOT NULL DEFAULT 'active',
+    message_count INTEGER NOT NULL DEFAULT 0,
+    last_message_at TIMESTAMPTZ,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- AI Chat Messages
+CREATE TABLE ai_chat_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    conversation_id UUID NOT NULL REFERENCES ai_chat_conversations(id) ON DELETE CASCADE,
+    role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+    content TEXT NOT NULL,
+    skill_references UUID[] DEFAULT '{}',
+    metadata JSONB DEFAULT '{}',
+    tokens_used INTEGER,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Scheduling Suggestions (for intelligent scheduling)
+CREATE TABLE scheduling_suggestions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    tutor_user_id UUID REFERENCES tutors_profile(user_id),
+    suggested_date DATE NOT NULL,
+    suggested_start_time TIME NOT NULL,
+    suggested_end_time TIME NOT NULL,
+    reason TEXT NOT NULL,
+    score DECIMAL(3,2) NOT NULL DEFAULT 0.5, -- 0-1 confidence score
+    is_accepted BOOLEAN,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '7 days'
+);
+
+-- Learning Analytics (for AI recommendations)
+CREATE TABLE learning_analytics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    metric_type TEXT NOT NULL, -- 'session_frequency', 'skill_progress', 'engagement', etc.
+    metric_value DECIMAL(10,2) NOT NULL,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    details JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX idx_ai_chat_conversations_student ON ai_chat_conversations(student_user_id);
+CREATE INDEX idx_ai_chat_conversations_status ON ai_chat_conversations(status);
+CREATE INDEX idx_ai_chat_messages_conversation ON ai_chat_messages(conversation_id);
+CREATE INDEX idx_ai_chat_messages_created ON ai_chat_messages(created_at);
+CREATE INDEX idx_scheduling_suggestions_student ON scheduling_suggestions(student_user_id);
+CREATE INDEX idx_scheduling_suggestions_expires ON scheduling_suggestions(expires_at);
+CREATE INDEX idx_learning_analytics_student ON learning_analytics(student_user_id);
+CREATE INDEX idx_learning_analytics_type ON learning_analytics(metric_type);
+
+-- Update triggers
+CREATE TRIGGER update_ai_chat_conversations_updated_at
+    BEFORE UPDATE ON ai_chat_conversations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Function to update conversation stats after new message
+CREATE OR REPLACE FUNCTION update_conversation_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE ai_chat_conversations
+    SET
+        message_count = message_count + 1,
+        last_message_at = NEW.created_at
+    WHERE id = NEW.conversation_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_chat_message_insert
+    AFTER INSERT ON ai_chat_messages
+    FOR EACH ROW EXECUTE FUNCTION update_conversation_stats();
+
+-- RLS Policies
+ALTER TABLE ai_chat_conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_chat_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE scheduling_suggestions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE learning_analytics ENABLE ROW LEVEL SECURITY;
+
+-- Students can only see their own conversations
+CREATE POLICY "Students view own conversations" ON ai_chat_conversations
+    FOR SELECT USING (auth.uid() = student_user_id);
+
+CREATE POLICY "Students create own conversations" ON ai_chat_conversations
+    FOR INSERT WITH CHECK (auth.uid() = student_user_id);
+
+CREATE POLICY "Students update own conversations" ON ai_chat_conversations
+    FOR UPDATE USING (auth.uid() = student_user_id);
+
+-- Messages follow conversation access
+CREATE POLICY "Users view messages in own conversations" ON ai_chat_messages
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM ai_chat_conversations c
+            WHERE c.id = conversation_id AND c.student_user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users create messages in own conversations" ON ai_chat_messages
+    FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM ai_chat_conversations c
+            WHERE c.id = conversation_id AND c.student_user_id = auth.uid()
+        )
+    );
+
+-- Parents can see their children's conversations
+CREATE POLICY "Parents view children conversations" ON ai_chat_conversations
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM family_members fm1
+            JOIN family_members fm2 ON fm1.family_id = fm2.family_id
+            WHERE fm1.user_id = auth.uid()
+            AND fm1.member_role = 'parent'
+            AND fm2.user_id = student_user_id
+        )
+    );
+
+-- Admins and tutors can view all conversations
+CREATE POLICY "Admins view all conversations" ON ai_chat_conversations
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM users_profile
+            WHERE id = auth.uid() AND role IN ('admin', 'tutor')
+        )
+    );
+
+-- Scheduling suggestions policies
+CREATE POLICY "Users view own scheduling suggestions" ON scheduling_suggestions
+    FOR SELECT USING (
+        student_user_id = auth.uid() OR
+        EXISTS (
+            SELECT 1 FROM family_members fm
+            WHERE fm.user_id = auth.uid()
+            AND fm.family_id = scheduling_suggestions.family_id
+        )
+    );
+
+-- Learning analytics policies
+CREATE POLICY "Students view own analytics" ON learning_analytics
+    FOR SELECT USING (auth.uid() = student_user_id);
+
+CREATE POLICY "Parents view children analytics" ON learning_analytics
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM family_members fm1
+            JOIN family_members fm2 ON fm1.family_id = fm2.family_id
+            WHERE fm1.user_id = auth.uid()
+            AND fm1.member_role = 'parent'
+            AND fm2.user_id = student_user_id
+        )
+    );
+
+CREATE POLICY "Admins view all analytics" ON learning_analytics
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM users_profile
+            WHERE id = auth.uid() AND role IN ('admin', 'tutor')
+        )
+    );
+=== 00011_enable_rls_security.sql ===
+-- ============================================================================
+-- ENABLE RLS ON TABLES FLAGGED BY SECURITY ADVISOR
+-- Migration 00011: Fix RLS security issues
+-- ============================================================================
+
+-- Enable RLS on permissions table
+ALTER TABLE IF EXISTS public.permissions ENABLE ROW LEVEL SECURITY;
+
+-- Enable RLS on custom_roles table
+ALTER TABLE IF EXISTS public.custom_roles ENABLE ROW LEVEL SECURITY;
+
+-- Enable RLS on user_role_assignments table
+ALTER TABLE IF EXISTS public.user_role_assignments ENABLE ROW LEVEL SECURITY;
+
+-- Enable RLS on question_bank_categories table
+ALTER TABLE IF EXISTS public.question_bank_categories ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- RLS POLICIES FOR PERMISSIONS TABLE
+-- ============================================================================
+
+-- Admin can manage all permissions
+DROP POLICY IF EXISTS permissions_admin_all ON public.permissions;
+CREATE POLICY permissions_admin_all ON public.permissions
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- All authenticated users can read permissions
+DROP POLICY IF EXISTS permissions_read ON public.permissions;
+CREATE POLICY permissions_read ON public.permissions
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+-- ============================================================================
+-- RLS POLICIES FOR CUSTOM_ROLES TABLE
+-- ============================================================================
+
+-- Admin can manage all custom roles
+DROP POLICY IF EXISTS custom_roles_admin_all ON public.custom_roles;
+CREATE POLICY custom_roles_admin_all ON public.custom_roles
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- All authenticated users can read custom roles
+DROP POLICY IF EXISTS custom_roles_read ON public.custom_roles;
+CREATE POLICY custom_roles_read ON public.custom_roles
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+-- ============================================================================
+-- RLS POLICIES FOR USER_ROLE_ASSIGNMENTS TABLE
+-- ============================================================================
+
+-- Admin can manage all role assignments
+DROP POLICY IF EXISTS user_role_assignments_admin_all ON public.user_role_assignments;
+CREATE POLICY user_role_assignments_admin_all ON public.user_role_assignments
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- Users can see their own role assignments
+DROP POLICY IF EXISTS user_role_assignments_own ON public.user_role_assignments;
+CREATE POLICY user_role_assignments_own ON public.user_role_assignments
+  FOR SELECT USING (user_id = auth.uid());
+
+-- ============================================================================
+-- RLS POLICIES FOR QUESTION_BANK_CATEGORIES TABLE
+-- ============================================================================
+
+-- Admin and tutors can manage question categories
+DROP POLICY IF EXISTS question_bank_categories_manage ON public.question_bank_categories;
+CREATE POLICY question_bank_categories_manage ON public.question_bank_categories
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor'))
+  );
+
+-- All authenticated users can read question categories
+DROP POLICY IF EXISTS question_bank_categories_read ON public.question_bank_categories;
+CREATE POLICY question_bank_categories_read ON public.question_bank_categories
+  FOR SELECT USING (auth.role() = 'authenticated');
+=== 00012_session_whiteboards.sql ===
+-- Session Whiteboards table for persisting Excalidraw whiteboard data
+-- Migration: 00012_session_whiteboards.sql
+
+-- Create the session_whiteboards table
+CREATE TABLE session_whiteboards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+    elements JSONB NOT NULL DEFAULT '[]'::jsonb,
+    version INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT unique_session_whiteboard UNIQUE (session_id)
+);
+
+-- Create index for fast lookups by session_id
+CREATE INDEX idx_session_whiteboards_session_id ON session_whiteboards(session_id);
+
+-- Add updated_at trigger
+CREATE TRIGGER set_session_whiteboards_updated_at
+    BEFORE UPDATE ON session_whiteboards
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Enable Row Level Security
+ALTER TABLE session_whiteboards ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies
+
+-- Tutors can view and update whiteboards for sessions they're assigned to
+CREATE POLICY "Tutors can manage their session whiteboards"
+    ON session_whiteboards
+    FOR ALL
+    TO authenticated
+    USING (
+        public.is_tutor() AND
+        EXISTS (
+            SELECT 1 FROM sessions s
+            JOIN bookings b ON b.id = s.booking_id
+            WHERE s.id = session_whiteboards.session_id
+            AND b.tutor_user_id = auth.uid()
+        )
+    )
+    WITH CHECK (
+        public.is_tutor() AND
+        EXISTS (
+            SELECT 1 FROM sessions s
+            JOIN bookings b ON b.id = s.booking_id
+            WHERE s.id = session_whiteboards.session_id
+            AND b.tutor_user_id = auth.uid()
+        )
+    );
+
+-- Students can view and update whiteboards for their own sessions
+CREATE POLICY "Students can manage their session whiteboards"
+    ON session_whiteboards
+    FOR ALL
+    TO authenticated
+    USING (
+        public.is_student() AND
+        EXISTS (
+            SELECT 1 FROM sessions s
+            JOIN bookings b ON b.id = s.booking_id
+            WHERE s.id = session_whiteboards.session_id
+            AND b.student_user_id = auth.uid()
+        )
+    )
+    WITH CHECK (
+        public.is_student() AND
+        EXISTS (
+            SELECT 1 FROM sessions s
+            JOIN bookings b ON b.id = s.booking_id
+            WHERE s.id = session_whiteboards.session_id
+            AND b.student_user_id = auth.uid()
+        )
+    );
+
+-- Parents can view whiteboards for their children's sessions (read-only)
+CREATE POLICY "Parents can view their children's session whiteboards"
+    ON session_whiteboards
+    FOR SELECT
+    TO authenticated
+    USING (
+        public.is_parent() AND
+        EXISTS (
+            SELECT 1 FROM sessions s
+            JOIN bookings b ON b.id = s.booking_id
+            JOIN family_members fm ON fm.family_id = b.family_id
+            WHERE s.id = session_whiteboards.session_id
+            AND fm.user_id = auth.uid()
+            AND fm.member_role = 'parent'
+        )
+    );
+
+-- Admins can manage all whiteboards
+CREATE POLICY "Admins can manage all session whiteboards"
+    ON session_whiteboards
+    FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+-- Add comment for documentation
+COMMENT ON TABLE session_whiteboards IS 'Stores Excalidraw whiteboard data for tutoring sessions';
+COMMENT ON COLUMN session_whiteboards.elements IS 'JSON array of Excalidraw elements';
+COMMENT ON COLUMN session_whiteboards.version IS 'Version counter for optimistic concurrency control';
+=== 00013_whiteboards.sql ===
+-- ============================================================================
+-- WHITEBOARDS TABLE - Standalone whiteboard library for tutors
+-- Migration: 00013_whiteboards.sql
+-- ============================================================================
+
+-- Create the whiteboards table
+CREATE TABLE whiteboards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tutor_user_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    elements JSONB NOT NULL DEFAULT '[]'::jsonb,
+    is_public BOOLEAN NOT NULL DEFAULT FALSE,
+    tags TEXT[] DEFAULT '{}',
+    version INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Indexes for performance
+CREATE INDEX idx_whiteboards_tutor_user_id ON whiteboards(tutor_user_id);
+CREATE INDEX idx_whiteboards_category ON whiteboards(category);
+CREATE INDEX idx_whiteboards_is_public ON whiteboards(is_public) WHERE is_public = TRUE;
+CREATE INDEX idx_whiteboards_tags ON whiteboards USING GIN(tags);
+CREATE INDEX idx_whiteboards_name ON whiteboards(name);
+CREATE INDEX idx_whiteboards_created_at ON whiteboards(created_at DESC);
+
+-- Updated_at trigger
+CREATE TRIGGER set_whiteboards_updated_at
+    BEFORE UPDATE ON whiteboards
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Enable Row Level Security
+ALTER TABLE whiteboards ENABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- RLS POLICIES
+-- ============================================================================
+
+-- Tutors can manage (CRUD) their own whiteboards
+CREATE POLICY "Tutors can manage their own whiteboards"
+    ON whiteboards
+    FOR ALL
+    TO authenticated
+    USING (
+        public.is_tutor() AND tutor_user_id = auth.uid()
+    )
+    WITH CHECK (
+        public.is_tutor() AND tutor_user_id = auth.uid()
+    );
+
+-- Tutors can view public whiteboards from other tutors
+CREATE POLICY "Tutors can view public whiteboards"
+    ON whiteboards
+    FOR SELECT
+    TO authenticated
+    USING (
+        public.is_tutor() AND is_public = TRUE
+    );
+
+-- Admins can manage all whiteboards
+CREATE POLICY "Admins can manage all whiteboards"
+    ON whiteboards
+    FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+-- ============================================================================
+-- DOCUMENTATION
+-- ============================================================================
+
+COMMENT ON TABLE whiteboards IS 'Standalone whiteboard library for tutors to create and reuse content';
+COMMENT ON COLUMN whiteboards.elements IS 'JSON array of Excalidraw elements';
+COMMENT ON COLUMN whiteboards.is_public IS 'If true, other tutors can view and copy this whiteboard';
+COMMENT ON COLUMN whiteboards.tags IS 'Array of tags for filtering and organization';
+COMMENT ON COLUMN whiteboards.version IS 'Version counter for tracking changes';
+=== 00014_guide_model.sql ===
+-- ============================================================================
+-- Migration: Guide Model - Merged Coach/Mentor Role System
+--
+-- Implements the unified "Math Development Guide" model with:
+-- - Guide Levels (I, II, III, Specialist)
+-- - Student Eligibility Tiers
+-- - Tiered Programs and Products
+-- - Guide Compensation Plans
+-- ============================================================================
+
+-- =============================================================================
+-- ENUMS
+-- =============================================================================
+
+-- Guide level enum (the merged coach/mentor role)
+CREATE TYPE guide_level AS ENUM (
+  'Guide I',      -- 80% coach, 20% mentor (entry-level, skill-focused)
+  'Guide II',     -- 50% coach, 50% mentor (balanced)
+  'Guide III'     -- 20% coach, 80% mentor (advanced, mentorship-focused)
+);
+
+-- Eligibility tier enum (based on 5-factor assessment)
+CREATE TYPE eligibility_tier AS ENUM (
+  'TIER_1_EXPLORER',     -- Score 16-19: Foundation building
+  'TIER_2_DEVELOPER',    -- Score 20-22: Skill development
+  'TIER_3_ACCELERATOR',  -- Score 23-25: Advanced/elite
+  'NOT_ELIGIBLE'         -- Score <16: Needs foundational support
+);
+
+-- Extend program_type enum with new program tiers
+ALTER TYPE program_type ADD VALUE IF NOT EXISTS 'cohort';
+ALTER TYPE program_type ADD VALUE IF NOT EXISTS 'accelerator';
+ALTER TYPE program_type ADD VALUE IF NOT EXISTS 'fellowship';
+ALTER TYPE program_type ADD VALUE IF NOT EXISTS 'elite';
+
+-- =============================================================================
+-- GUIDE LEVELS TABLE
+-- Defines the characteristics of each guide level
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS guide_levels (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  level_code VARCHAR(20) UNIQUE NOT NULL,  -- 'GUIDE_I', 'GUIDE_II', 'GUIDE_III', 'GUIDE_SPECIALIST'
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+
+  -- Role balance (must sum to 100)
+  coach_focus_percent INTEGER NOT NULL CHECK (coach_focus_percent >= 0 AND coach_focus_percent <= 100),
+  mentor_focus_percent INTEGER NOT NULL CHECK (mentor_focus_percent >= 0 AND mentor_focus_percent <= 100),
+
+  -- Requirements
+  min_experience_years INTEGER DEFAULT 0,
+  required_certifications TEXT[],
+
+  -- Compensation
+  hourly_rate_min NUMERIC(10,2),
+  hourly_rate_max NUMERIC(10,2),
+
+  -- Capacity
+  max_students INTEGER,
+  training_hours_required INTEGER,
+
+  -- Display
+  is_active BOOLEAN DEFAULT TRUE,
+  display_order INTEGER DEFAULT 0,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  CONSTRAINT coach_mentor_sum CHECK (coach_focus_percent + mentor_focus_percent = 100)
+);
+
+-- =============================================================================
+-- CAREER PATHWAYS - Add guide specialization columns
+-- =============================================================================
+
+-- Add columns for guide specialization and grade eligibility
+ALTER TABLE career_pathways
+  ADD COLUMN IF NOT EXISTS guide_specializations guide_level[],
+  ADD COLUMN IF NOT EXISTS min_guide_level guide_level;
+
+-- =============================================================================
+-- PROGRAMS - Add guide and eligibility requirements
+-- =============================================================================
+
+-- Add columns for guide requirements and eligibility
+ALTER TABLE programs
+  ADD COLUMN IF NOT EXISTS guide_level_required guide_level,
+  ADD COLUMN IF NOT EXISTS min_eligibility_score INTEGER CHECK (min_eligibility_score >= 0 AND min_eligibility_score <= 25),
+  ADD COLUMN IF NOT EXISTS target_grades INTEGER[];
+
+-- =============================================================================
+-- PRODUCTS - Add guide and eligibility tier requirements
+-- =============================================================================
+
+-- Add columns to products for tiered access
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS guide_level_required VARCHAR(20),  -- References guide_levels.level_code
+  ADD COLUMN IF NOT EXISTS eligibility_tier_required eligibility_tier;
+
+-- =============================================================================
+-- STUDENT ELIGIBILITY PROFILES
+-- Tracks student assessment scores and tier placement
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS student_eligibility_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  assessment_date DATE NOT NULL DEFAULT CURRENT_DATE,
+
+  -- 5-Factor Assessment Scores (1-5 each)
+  academic_performance INTEGER CHECK (academic_performance >= 1 AND academic_performance <= 5),
+  math_passion INTEGER CHECK (math_passion >= 1 AND math_passion <= 5),
+  achievement_level INTEGER CHECK (achievement_level >= 1 AND achievement_level <= 5),
+  career_direction INTEGER CHECK (career_direction >= 1 AND career_direction <= 5),
+  personal_qualities INTEGER CHECK (personal_qualities >= 1 AND personal_qualities <= 5),
+
+  -- Computed total score (stored for performance)
+  total_score INTEGER GENERATED ALWAYS AS (
+    COALESCE(academic_performance, 0) +
+    COALESCE(math_passion, 0) +
+    COALESCE(achievement_level, 0) +
+    COALESCE(career_direction, 0) +
+    COALESCE(personal_qualities, 0)
+  ) STORED,
+
+  -- Assessment notes
+  notes TEXT,
+  assessed_by UUID REFERENCES users_profile(id),
+  next_assessment_date DATE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Function to compute eligibility tier
+CREATE OR REPLACE FUNCTION get_eligibility_tier(score INTEGER)
+RETURNS eligibility_tier AS $$
+BEGIN
+  IF score >= 23 THEN
+    RETURN 'TIER_3_ACCELERATOR';
+  ELSIF score >= 20 THEN
+    RETURN 'TIER_2_DEVELOPER';
+  ELSIF score >= 16 THEN
+    RETURN 'TIER_1_EXPLORER';
+  ELSE
+    RETURN 'NOT_ELIGIBLE';
+  END IF;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- =============================================================================
+-- PROGRAM GUIDES JUNCTION TABLE
+-- Links programs to required guide levels with ratios
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS program_guides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+  guide_level_code VARCHAR(20) NOT NULL REFERENCES guide_levels(level_code),
+
+  min_guides_required INTEGER DEFAULT 1,
+  max_guides_allowed INTEGER,
+  guide_student_ratio NUMERIC(3,2),  -- e.g., 1:4 = 0.25
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(program_id, guide_level_code)
+);
+
+-- =============================================================================
+-- GUIDE COMPENSATION PLANS
+-- Tracks compensation structure per guide level
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS guide_compensation_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  guide_level_code VARCHAR(20) NOT NULL REFERENCES guide_levels(level_code),
+
+  -- Base Compensation
+  base_rate_per_hour NUMERIC(10,2) NOT NULL,
+  commission_percent NUMERIC(5,2) CHECK (commission_percent >= 0 AND commission_percent <= 100),
+
+  -- Bonuses
+  session_bonus NUMERIC(10,2),          -- Bonus after N sessions/month
+  retention_bonus NUMERIC(10,2),         -- Bonus for student retention
+  outcome_bonus_rules JSONB,             -- Custom outcome-based bonuses
+
+  -- Benefits
+  health_stipend NUMERIC(10,2),
+  training_budget NUMERIC(10,2),
+  technology_allowance NUMERIC(10,2),
+
+  -- Validity
+  effective_date DATE NOT NULL,
+  expiration_date DATE,
+  is_active BOOLEAN DEFAULT TRUE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(guide_level_code, effective_date)
+);
+
+-- =============================================================================
+-- STUDENT PATHWAY RECOMMENDATIONS
+-- Personalized pathway recommendations based on eligibility
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS student_pathway_recommendations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID NOT NULL REFERENCES users_profile(id) ON DELETE CASCADE,
+  pathway_id UUID NOT NULL REFERENCES career_pathways(id) ON DELETE CASCADE,
+
+  recommended_guide_level VARCHAR(20) REFERENCES guide_levels(level_code),
+  confidence_score NUMERIC(3,2) CHECK (confidence_score >= 0 AND confidence_score <= 1),
+  reason_codes TEXT[],  -- e.g., {'academic_strength', 'interest_alignment', 'career_goals'}
+
+  suggested_programs UUID[],  -- Program IDs
+  recommended_start_date DATE,
+  estimated_completion_months INTEGER,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(student_id, pathway_id)
+);
+
+-- =============================================================================
+-- TUTOR GUIDE PROFILE EXTENSION
+-- Extends tutors_profile with guide-specific attributes
+-- =============================================================================
+
+ALTER TABLE tutors_profile
+  ADD COLUMN IF NOT EXISTS guide_level guide_level,
+  ADD COLUMN IF NOT EXISTS guide_level_code VARCHAR(20) REFERENCES guide_levels(level_code),
+  ADD COLUMN IF NOT EXISTS career_pathway_specializations UUID[],  -- References career_pathways
+  ADD COLUMN IF NOT EXISTS eligible_grades INTEGER[],
+  ADD COLUMN IF NOT EXISTS max_concurrent_students INTEGER DEFAULT 15,
+  ADD COLUMN IF NOT EXISTS guide_certified_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS guide_certification_expires_at TIMESTAMPTZ;
+
+-- =============================================================================
+-- INDEXES
+-- =============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_guide_levels_code ON guide_levels(level_code);
+CREATE INDEX IF NOT EXISTS idx_guide_levels_active ON guide_levels(is_active);
+
+CREATE INDEX IF NOT EXISTS idx_student_eligibility_student ON student_eligibility_profiles(student_id);
+CREATE INDEX IF NOT EXISTS idx_student_eligibility_score ON student_eligibility_profiles(total_score);
+CREATE INDEX IF NOT EXISTS idx_student_eligibility_date ON student_eligibility_profiles(assessment_date);
+
+CREATE INDEX IF NOT EXISTS idx_program_guides_program ON program_guides(program_id);
+CREATE INDEX IF NOT EXISTS idx_program_guides_level ON program_guides(guide_level_code);
+
+CREATE INDEX IF NOT EXISTS idx_compensation_level ON guide_compensation_plans(guide_level_code);
+CREATE INDEX IF NOT EXISTS idx_compensation_active ON guide_compensation_plans(is_active);
+
+CREATE INDEX IF NOT EXISTS idx_pathway_recs_student ON student_pathway_recommendations(student_id);
+CREATE INDEX IF NOT EXISTS idx_pathway_recs_pathway ON student_pathway_recommendations(pathway_id);
+
+CREATE INDEX IF NOT EXISTS idx_tutors_guide_level ON tutors_profile(guide_level_code);
+
+-- =============================================================================
+-- ROW LEVEL SECURITY
+-- =============================================================================
+
+ALTER TABLE guide_levels ENABLE ROW LEVEL SECURITY;
+ALTER TABLE student_eligibility_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE program_guides ENABLE ROW LEVEL SECURITY;
+ALTER TABLE guide_compensation_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE student_pathway_recommendations ENABLE ROW LEVEL SECURITY;
+
+-- Guide levels: Public read
+CREATE POLICY guide_levels_select ON guide_levels
+  FOR SELECT USING (TRUE);
+
+CREATE POLICY guide_levels_manage ON guide_levels
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+-- Student eligibility: Students see own, parents see children, staff see all
+CREATE POLICY eligibility_select ON student_eligibility_profiles
+  FOR SELECT USING (
+    student_id = auth.uid() OR
+    EXISTS (
+      SELECT 1 FROM family_members fm
+      JOIN users_profile up ON up.id = auth.uid()
+      WHERE fm.user_id = student_eligibility_profiles.student_id
+        AND fm.family_id IN (SELECT family_id FROM family_members WHERE user_id = auth.uid())
+        AND up.role = 'parent'
+    ) OR
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor'))
+  );
+
+CREATE POLICY eligibility_manage ON student_eligibility_profiles
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor')
+  ));
+
+-- Program guides: Public read, admin manage
+CREATE POLICY program_guides_select ON program_guides FOR SELECT USING (TRUE);
+
+CREATE POLICY program_guides_manage ON program_guides
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+-- Compensation plans: Admin only
+CREATE POLICY compensation_select ON guide_compensation_plans
+  FOR SELECT USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+CREATE POLICY compensation_manage ON guide_compensation_plans
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+-- Pathway recommendations: Students see own, staff see all
+CREATE POLICY pathway_recs_select ON student_pathway_recommendations
+  FOR SELECT USING (
+    student_id = auth.uid() OR
+    EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor'))
+  );
+
+CREATE POLICY pathway_recs_manage ON student_pathway_recommendations
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor')
+  ));
+
+-- =============================================================================
+-- TRIGGERS
+-- =============================================================================
+
+-- Update timestamp triggers
+CREATE TRIGGER update_guide_levels_updated_at
+  BEFORE UPDATE ON guide_levels
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_student_eligibility_updated_at
+  BEFORE UPDATE ON student_eligibility_profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_compensation_plans_updated_at
+  BEFORE UPDATE ON guide_compensation_plans
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_pathway_recs_updated_at
+  BEFORE UPDATE ON student_pathway_recommendations
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================================================
+-- COMMENTS
+-- =============================================================================
+
+COMMENT ON TABLE guide_levels IS 'Defines the Math Development Guide levels (I, II, III) with coach/mentor balance';
+COMMENT ON TABLE student_eligibility_profiles IS 'Student assessment scores determining program eligibility tier';
+COMMENT ON TABLE program_guides IS 'Links programs to required guide levels and ratios';
+COMMENT ON TABLE guide_compensation_plans IS 'Compensation structure per guide level';
+COMMENT ON TABLE student_pathway_recommendations IS 'Personalized career pathway recommendations';
+
+COMMENT ON COLUMN guide_levels.coach_focus_percent IS 'Percentage of role focused on skill coaching (0-100)';
+COMMENT ON COLUMN guide_levels.mentor_focus_percent IS 'Percentage of role focused on mentorship (0-100)';
+COMMENT ON COLUMN student_eligibility_profiles.total_score IS 'Sum of 5-factor assessment (5-25 points)';
+COMMENT ON COLUMN programs.min_eligibility_score IS 'Minimum eligibility score required (0-25)';
+=== 00015_user_preferences.sql ===
+-- ============================================================================
+-- ADD USER PREFERENCES (TIME FORMAT)
+-- Migration 00015: Add time format preference to users_profile
+-- ============================================================================
+
+-- Add time_format column (12h or 24h)
+ALTER TABLE users_profile
+ADD COLUMN IF NOT EXISTS time_format TEXT NOT NULL DEFAULT '12h'
+CHECK (time_format IN ('12h', '24h'));
+
+-- Add comment
+COMMENT ON COLUMN users_profile.time_format IS 'User preferred time format: 12h (AM/PM) or 24h';
+=== 00016_service_tiers.sql ===
+-- ============================================================================
+-- Migration 00016: Service Tiers & Diagnostic Sales Engine
+-- ZERO BREAKING CHANGES - all additions are additive.
+-- ============================================================================
+
+-- ENUMS
+CREATE TYPE service_tier AS ENUM (
+  'TIER_TUTORING',
+  'TIER_COACHING',
+  'TIER_MENTORSHIP'
+);
+
+CREATE TYPE package_billing_type AS ENUM (
+  'one_time', 'monthly', 'quarterly', 'semester', 'annual'
+);
+
+CREATE TYPE subscription_status AS ENUM (
+  'active', 'past_due', 'canceled', 'paused', 'trialing'
+);
+
+CREATE TYPE intake_diagnostic_status AS ENUM (
+  'not_started', 'in_progress', 'completed', 'expired'
+);
+
+-- =============================================================================
+-- TABLE: service_packages
+-- Connects to: guide_levels.level_code (00014), eligibility_tier enum (00014)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS service_packages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  tagline TEXT,
+  service_tier service_tier NOT NULL,
+  billing_type package_billing_type NOT NULL,
+  price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
+  currency TEXT NOT NULL DEFAULT 'USD',
+  credits_per_period INTEGER NOT NULL CHECK (credits_per_period > 0),
+  rollover_credits BOOLEAN DEFAULT FALSE,
+  max_rollover INTEGER DEFAULT 0,
+  session_duration_minutes INTEGER DEFAULT 60,
+  guide_level_required VARCHAR(20) REFERENCES guide_levels(level_code),
+  min_eligibility_tier eligibility_tier,
+  requires_diagnostic BOOLEAN DEFAULT FALSE,
+  feature_gates JSONB NOT NULL DEFAULT '{
+    "ai_tutor": false,
+    "career_pathways": false,
+    "competition_prep": false,
+    "advanced_certifications": false,
+    "weekly_reports": false,
+    "parent_meetings": false,
+    "async_support": false,
+    "priority_scheduling": false
+  }',
+  stripe_product_id TEXT,
+  stripe_price_id TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  is_featured BOOLEAN DEFAULT FALSE,
+  display_order INTEGER DEFAULT 0,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
+-- TABLE: family_subscriptions
+-- Connects to: families (00001), service_packages, tutors_profile (00001)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS family_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id UUID NOT NULL REFERENCES families(id),
+  student_user_id UUID NOT NULL REFERENCES auth.users(id),
+  package_id UUID NOT NULL REFERENCES service_packages(id),
+  status subscription_status NOT NULL DEFAULT 'active',
+  current_period_start TIMESTAMPTZ NOT NULL,
+  current_period_end TIMESTAMPTZ NOT NULL,
+  credits_remaining INTEGER NOT NULL DEFAULT 0,
+  credits_used_this_period INTEGER NOT NULL DEFAULT 0,
+  assigned_guide_id UUID REFERENCES tutors_profile(user_id),
+  stripe_subscription_id TEXT,
+  stripe_customer_id TEXT,
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  canceled_at TIMESTAMPTZ,
+  cancel_reason TEXT,
+  paused_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
+-- TABLE: intake_diagnostics
+-- Connects to: families (00001), service_packages, course_track enum (00001)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS intake_diagnostics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id UUID NOT NULL REFERENCES families(id),
+  student_user_id UUID NOT NULL REFERENCES auth.users(id),
+  initiated_by UUID NOT NULL REFERENCES auth.users(id),
+  student_grade INTEGER NOT NULL CHECK (student_grade >= 1 AND student_grade <= 12),
+  student_goals TEXT,
+  current_challenges TEXT,
+  course_track course_track,
+  status intake_diagnostic_status DEFAULT 'not_started',
+  questions_json JSONB,
+  responses_json JSONB,
+  score INTEGER,
+  max_score INTEGER,
+  gap_analysis_json JSONB,
+  strength_areas TEXT[] DEFAULT '{}',
+  weakness_areas TEXT[] DEFAULT '{}',
+  recommended_tier service_tier,
+  recommended_package_id UUID REFERENCES service_packages(id),
+  recommendation_reasoning TEXT,
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
+-- ALTERATIONS TO EXISTING TABLES
+-- =============================================================================
+ALTER TABLE families
+  ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+
+ALTER TABLE bookings
+  ADD COLUMN IF NOT EXISTS subscription_id UUID REFERENCES family_subscriptions(id),
+  ADD COLUMN IF NOT EXISTS package_session_number INTEGER;
+
+ALTER TABLE sessions
+  ADD COLUMN IF NOT EXISTS service_tier service_tier;
+
+ALTER TABLE purchases
+  ADD COLUMN IF NOT EXISTS subscription_id UUID REFERENCES family_subscriptions(id),
+  ADD COLUMN IF NOT EXISTS service_package_id UUID REFERENCES service_packages(id);
+
+ALTER TABLE students_profile
+  ADD COLUMN IF NOT EXISTS intake_diagnostic_id UUID REFERENCES intake_diagnostics(id),
+  ADD COLUMN IF NOT EXISTS current_service_tier service_tier,
+  ADD COLUMN IF NOT EXISTS active_subscription_id UUID REFERENCES family_subscriptions(id);
+
+-- =============================================================================
+-- INDEXES
+-- =============================================================================
+CREATE INDEX IF NOT EXISTS idx_service_packages_tier ON service_packages(service_tier);
+CREATE INDEX IF NOT EXISTS idx_service_packages_active ON service_packages(is_active);
+CREATE INDEX IF NOT EXISTS idx_service_packages_slug ON service_packages(slug);
+CREATE INDEX IF NOT EXISTS idx_family_subs_family ON family_subscriptions(family_id);
+CREATE INDEX IF NOT EXISTS idx_family_subs_student ON family_subscriptions(student_user_id);
+CREATE INDEX IF NOT EXISTS idx_family_subs_status ON family_subscriptions(status);
+CREATE INDEX IF NOT EXISTS idx_family_subs_package ON family_subscriptions(package_id);
+CREATE INDEX IF NOT EXISTS idx_family_subs_guide ON family_subscriptions(assigned_guide_id);
+CREATE INDEX IF NOT EXISTS idx_family_subs_stripe ON family_subscriptions(stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_intake_diag_family ON intake_diagnostics(family_id);
+CREATE INDEX IF NOT EXISTS idx_intake_diag_student ON intake_diagnostics(student_user_id);
+CREATE INDEX IF NOT EXISTS idx_intake_diag_status ON intake_diagnostics(status);
+CREATE INDEX IF NOT EXISTS idx_intake_diag_tier ON intake_diagnostics(recommended_tier);
+
+-- =============================================================================
+-- ROW LEVEL SECURITY
+-- =============================================================================
+ALTER TABLE service_packages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE family_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE intake_diagnostics ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY service_packages_select ON service_packages
+  FOR SELECT USING (is_active = true);
+
+CREATE POLICY service_packages_manage ON service_packages
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+CREATE POLICY family_subs_select ON family_subscriptions
+  FOR SELECT USING (
+    family_id IN (SELECT family_id FROM family_members WHERE user_id = auth.uid())
+    OR EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor'))
+  );
+
+CREATE POLICY family_subs_manage ON family_subscriptions
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin'
+  ));
+
+CREATE POLICY intake_diag_select ON intake_diagnostics
+  FOR SELECT USING (
+    initiated_by = auth.uid() OR student_user_id = auth.uid()
+    OR family_id IN (SELECT family_id FROM family_members WHERE user_id = auth.uid())
+    OR EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor'))
+  );
+
+CREATE POLICY intake_diag_insert ON intake_diagnostics
+  FOR INSERT WITH CHECK (
+    initiated_by = auth.uid()
+    OR EXISTS (SELECT 1 FROM users_profile WHERE id = auth.uid() AND role = 'admin')
+  );
+
+CREATE POLICY intake_diag_manage ON intake_diagnostics
+  FOR ALL USING (EXISTS (
+    SELECT 1 FROM users_profile WHERE id = auth.uid() AND role IN ('admin', 'tutor')
+  ));
+
+-- =============================================================================
+-- TRIGGERS
+-- =============================================================================
+CREATE TRIGGER update_service_packages_updated_at
+  BEFORE UPDATE ON service_packages
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_family_subscriptions_updated_at
+  BEFORE UPDATE ON family_subscriptions
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_intake_diagnostics_updated_at
+  BEFORE UPDATE ON intake_diagnostics
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================================================
+-- COMMENTS
+-- =============================================================================
+COMMENT ON TABLE service_packages IS 'Tier-aware service offerings with feature gates and Stripe integration';
+COMMENT ON TABLE family_subscriptions IS 'Active subscriptions per family+student bridging Stripe state to platform access';
+COMMENT ON TABLE intake_diagnostics IS 'Self-serve parent intake diagnostic driving tier recommendations';
+=== 00017_super_admin_role.sql ===
+-- ============================================================================
+-- Migration: Add Super Admin Role for Multi-Tenant Architecture
+-- MathPivotOS requires two admin levels:
+--   - super_admin: Platform-level admin (manages all organizations/tenants)
+--   - admin: Organization-level admin (manages their own organization)
+-- ============================================================================
+
+-- =============================================================================
+-- ADD SUPER_ADMIN TO USER_ROLE ENUM
+-- =============================================================================
+
+-- Add super_admin to the user_role enum
+ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'super_admin' BEFORE 'admin';
+
+-- =============================================================================
+-- UPDATE has_permission FUNCTION FOR SUPER_ADMIN
+-- =============================================================================
+
+-- Super admins have all permissions across all organizations
+CREATE OR REPLACE FUNCTION has_permission(
+  p_user_id UUID,
+  p_permission_code TEXT,
+  p_resource_type TEXT DEFAULT NULL,
+  p_resource_id UUID DEFAULT NULL
+) RETURNS BOOLEAN AS $$
+DECLARE
+  v_user_role VARCHAR(50);
+  v_has_permission BOOLEAN := FALSE;
+BEGIN
+  -- Get user's base role
+  SELECT role INTO v_user_role FROM users_profile WHERE id = p_user_id;
+
+  -- Super admins have ALL permissions (platform-wide)
+  IF v_user_role = 'super_admin' THEN
+    RETURN TRUE;
+  END IF;
+
+  -- Admins have all permissions (within their organization scope)
+  IF v_user_role = 'admin' THEN
+    RETURN TRUE;
+  END IF;
+
+  -- Check custom role assignments
+  SELECT TRUE INTO v_has_permission
+  FROM user_role_assignments ura
+  JOIN custom_roles cr ON cr.id = ura.role_id
+  WHERE ura.user_id = p_user_id
+    AND p_permission_code = ANY(cr.permissions)
+    AND (ura.expires_at IS NULL OR ura.expires_at > NOW());
+
+  IF v_has_permission THEN
+    RETURN TRUE;
+  END IF;
+
+  -- Check default permissions for role
+  SELECT TRUE INTO v_has_permission
+  FROM permissions
+  WHERE code = p_permission_code
+    AND v_user_role = ANY(default_for_roles);
+
+  RETURN COALESCE(v_has_permission, FALSE);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================================================
+-- HELPER FUNCTION: Check if user is super_admin
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION is_super_admin(p_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM users_profile
+    WHERE id = p_user_id AND role = 'super_admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- =============================================================================
+-- HELPER FUNCTION: Check if user is admin or super_admin
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION is_admin_or_above(p_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM users_profile
+    WHERE id = p_user_id AND role IN ('admin', 'super_admin')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- =============================================================================
+-- UPDATE current_role FUNCTION
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION public.current_role()
+RETURNS user_role
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT role FROM users_profile WHERE id = auth.uid()
+$$;
+
+-- =============================================================================
+-- UPDATE RLS POLICIES FOR SUPER_ADMIN ACCESS
+-- =============================================================================
+
+-- Organizations: Super admin can manage ALL organizations
+DROP POLICY IF EXISTS organizations_super_admin ON organizations;
+CREATE POLICY organizations_super_admin ON organizations
+  FOR ALL USING (is_super_admin());
+
+-- Audit logs: Super admin can read all
+DROP POLICY IF EXISTS audit_logs_super_admin ON audit_logs;
+CREATE POLICY audit_logs_super_admin ON audit_logs
+  FOR SELECT USING (is_super_admin());
+
+-- Users profile: Super admin can manage all users
+DROP POLICY IF EXISTS users_profile_super_admin ON users_profile;
+CREATE POLICY users_profile_super_admin ON users_profile
+  FOR ALL USING (is_super_admin());
+
+-- Parental consents: Super admin access
+DROP POLICY IF EXISTS consents_super_admin_access ON parental_consents;
+CREATE POLICY consents_super_admin_access ON parental_consents
+  FOR ALL USING (is_super_admin());
+
+-- Tutor verifications: Super admin can manage all
+DROP POLICY IF EXISTS tutor_verifications_super_admin ON tutor_verifications;
+CREATE POLICY tutor_verifications_super_admin ON tutor_verifications
+  FOR ALL USING (is_super_admin());
+
+-- Custom roles: Super admin can manage system-wide roles
+DROP POLICY IF EXISTS custom_roles_super_admin ON custom_roles;
+CREATE POLICY custom_roles_super_admin ON custom_roles
+  FOR ALL USING (is_super_admin());
+
+-- User role assignments: Super admin can manage all
+DROP POLICY IF EXISTS user_role_assignments_super_admin ON user_role_assignments;
+CREATE POLICY user_role_assignments_super_admin ON user_role_assignments
+  FOR ALL USING (is_super_admin());
+
+-- API keys: Super admin can view all
+DROP POLICY IF EXISTS api_keys_super_admin ON api_keys;
+CREATE POLICY api_keys_super_admin ON api_keys
+  FOR ALL USING (is_super_admin());
+
+-- =============================================================================
+-- ADD SUPER_ADMIN PERMISSIONS
+-- =============================================================================
+
+INSERT INTO permissions (code, name, description, category, default_for_roles, is_sensitive, requires_audit) VALUES
+-- Super admin specific permissions
+('super_admin.organizations', 'Manage Organizations', 'Create and manage all organizations', 'super_admin', ARRAY['super_admin'], TRUE, TRUE),
+('super_admin.tenants', 'Manage Tenants', 'Full tenant management', 'super_admin', ARRAY['super_admin'], TRUE, TRUE),
+('super_admin.platform_settings', 'Platform Settings', 'Configure platform-wide settings', 'super_admin', ARRAY['super_admin'], TRUE, TRUE),
+('super_admin.all_users', 'Manage All Users', 'Manage users across all organizations', 'super_admin', ARRAY['super_admin'], TRUE, TRUE),
+('super_admin.billing', 'Platform Billing', 'Manage platform-wide billing and subscriptions', 'super_admin', ARRAY['super_admin'], TRUE, TRUE)
+ON CONFLICT (code) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  default_for_roles = EXCLUDED.default_for_roles;
+
+-- Update existing admin permissions to include super_admin
+UPDATE permissions
+SET default_for_roles = array_append(default_for_roles, 'super_admin')
+WHERE 'admin' = ANY(default_for_roles)
+  AND NOT ('super_admin' = ANY(default_for_roles));
+
+-- =============================================================================
+-- COMMENTS
+-- =============================================================================
+
+COMMENT ON FUNCTION is_super_admin IS 'Check if user has super_admin role (platform-level admin)';
+COMMENT ON FUNCTION is_admin_or_above IS 'Check if user has admin or super_admin role';

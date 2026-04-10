@@ -43,16 +43,21 @@ export function NotificationCenter({ userId }: NotificationCenterProps) {
     const manager = getNotificationManager();
 
     const init = async () => {
-      await manager.subscribe(userId);
+      try {
+        // Parallelize all init calls
+        const [, recent, count] = await Promise.all([
+          manager.subscribe(userId).catch(() => {}),
+          manager.getRecent(20).catch(() => [] as RealtimeNotification[]),
+          manager.getUnreadCount().catch(() => 0),
+        ]);
 
-      // Load initial notifications
-      const recent = await manager.getRecent(20);
-      setNotifications(recent);
-
-      const count = await manager.getUnreadCount();
-      setUnreadCount(count);
-
-      setIsLoading(false);
+        setNotifications(recent);
+        setUnreadCount(count);
+      } catch (err) {
+        console.warn('[Notifications] Init failed:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     init();

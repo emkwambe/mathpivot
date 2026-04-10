@@ -1,4 +1,3 @@
-import { requireRole } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, SortDropdown, type SortOption } from '@/components/ui';
 import { createClient } from '@/lib/supabase/server';
 
@@ -61,8 +60,9 @@ interface PageProps {
 export default async function StudentCertificationsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const sort = params.sort || 'name';
-  const user = await requireRole(['student']);
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
   // Get student's earned certifications
   const { data: earnedCerts } = await supabase

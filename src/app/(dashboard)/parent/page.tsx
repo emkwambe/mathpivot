@@ -1,91 +1,65 @@
 import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
 import { formatDateTime, formatDate } from '@/lib/utils';
 
 export default async function ParentDashboardPage() {
-  const user = await requireRole(['parent', 'student']);
+  // Layout already calls requireRole — just get user + client
   const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) return null;
 
-  // Get family info
+  // Get family info (required for everything else)
   const { data: familyMember } = await supabase
     .from('family_members')
     .select('family_id')
-    .eq('user_id', user.id)
+    .eq('user_id', authUser.id)
     .single();
 
   const familyId = familyMember?.family_id;
 
-  // Get students in family
-  const { data: students } = await supabase
-    .from('students_profile')
-    .select(`
-      user_id,
-      grade,
-      course_track,
-      users_profile!inner (
-        full_name,
-        avatar_url
-      )
-    `)
-    .eq('family_id', familyId || '');
+  // PARALLEL: All family-dependent queries at once
+  const [studentsResult, creditResult, bookingsResult, sessionsResult] = await Promise.all([
+    supabase
+      .from('students_profile')
+      .select('user_id, grade, course_track, users_profile!inner (full_name, avatar_url)')
+      .eq('family_id', familyId || ''),
+    supabase
+      .from('credit_ledger')
+      .select('balance_after')
+      .eq('family_id', familyId || '')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('bookings')
+      .select('id, start_at, end_at, modality, status, student_user_id, tutors_profile!inner (users_profile!inner (full_name))')
+      .eq('family_id', familyId || '')
+      .in('status', ['pending', 'confirmed'])
+      .gte('start_at', new Date().toISOString())
+      .order('start_at', { ascending: true })
+      .limit(5),
+    supabase
+      .from('sessions')
+      .select('id, parent_summary, completed_at, booking_id')
+      .eq('status', 'completed')
+      .not('parent_summary', 'is', null)
+      .order('completed_at', { ascending: false })
+      .limit(3),
+  ]);
 
-  // Get credit balance
-  const { data: creditEntry } = await supabase
-    .from('credit_ledger')
-    .select('balance_after')
-    .eq('family_id', familyId || '')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  const students = studentsResult.data;
+  const creditBalance = creditResult.data?.balance_after || 0;
+  const upcomingBookings = bookingsResult.data;
+  const recentSessions = sessionsResult.data;
 
-  const creditBalance = creditEntry?.balance_after || 0;
-
-  // Get upcoming bookings
-  const { data: upcomingBookings } = await supabase
-    .from('bookings')
-    .select(`
-      id,
-      start_at,
-      end_at,
-      modality,
-      status,
-      student_user_id,
-      tutors_profile!inner (
-        users_profile!inner (
-          full_name
-        )
-      )
-    `)
-    .eq('family_id', familyId || '')
-    .in('status', ['pending', 'confirmed'])
-    .gte('start_at', new Date().toISOString())
-    .order('start_at', { ascending: true })
-    .limit(5);
-
-  // Get student names for bookings
+  // Single query for booking student names
   const studentIds = upcomingBookings?.map(b => b.student_user_id) || [];
-  const { data: studentNames } = await supabase
-    .from('users_profile')
-    .select('id, full_name')
-    .in('id', studentIds.length > 0 ? studentIds : ['']);
+  const { data: studentNames } = studentIds.length > 0
+    ? await supabase.from('users_profile').select('id, full_name').in('id', studentIds)
+    : { data: [] };
 
   const studentNameMap = new Map(studentNames?.map(s => [s.id, s.full_name]) || []);
-
-  // Get recent sessions with summaries
-  const { data: recentSessions } = await supabase
-    .from('sessions')
-    .select(`
-      id,
-      parent_summary,
-      completed_at,
-      booking_id
-    `)
-    .eq('status', 'completed')
-    .not('parent_summary', 'is', null)
-    .order('completed_at', { ascending: false })
-    .limit(3);
 
   return (
     <div className="space-y-6">
@@ -93,7 +67,7 @@ export default async function ParentDashboardPage() {
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">Welcome back, {user.fullName.split(' ')[0]}!</h1>
+              <h1 className="text-2xl font-bold">Welcome back, {(authUser.user_metadata?.full_name || 'Parent').split(' ')[0]}!</h1>
               <p className="text-blue-100 mt-1">Here&apos;s what&apos;s happening with your family&apos;s tutoring.</p>
             </div>
             <Link
@@ -211,7 +185,7 @@ export default async function ParentDashboardPage() {
                   </svg>
                 </div>
                 <p className="text-slate-500">No students in your family yet</p>
-                <p className="text-sm text-slate-400 mt-1">Contact support to add students</p>
+                <a href="/parent/add-student" className="text-sm text-blue-600 hover:text-blue-800 font-medium mt-2 inline-block">+ Add your first student</a>
               </div>
             )}
           </CardContent>

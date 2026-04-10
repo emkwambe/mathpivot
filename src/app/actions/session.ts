@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth';
 import { emitEvent } from '@/lib/events';
+import { sendSessionSummary } from '@/lib/notifications';
 import { z } from 'zod';
 
 const startSessionSchema = z.object({
@@ -189,6 +190,9 @@ export async function endSession(
       ),
     },
   });
+
+  // Send session summary to parent (fire and forget)
+  sendSessionSummary(sessionId).catch(err => console.error('[notifications] session summary:', err));
 
   revalidatePath('/tutor');
   revalidatePath('/parent');
