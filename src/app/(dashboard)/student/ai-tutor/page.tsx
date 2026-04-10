@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import remarkGfm from 'remark-gfm';
-import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import remarkGfm from "remark-gfm";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
 }
 
 export default function AITutorPage() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function AITutorPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
@@ -40,22 +40,22 @@ export default function AITutorPage() {
     setError(null);
     const userMessage: Message = {
       id: `user-${Date.now()}`,
-      role: 'user',
+      role: "user",
       content: input.trim(),
       timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
+    setInput("");
     setIsLoading(true);
 
     const aiMessageId = `ai-${Date.now()}`;
     let streamStarted = false;
 
     try {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMessage.content,
           conversationId,
@@ -64,34 +64,39 @@ export default function AITutorPage() {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to get response');
+        throw new Error(errorData.error || "Failed to get response");
       }
 
       // Check if response is streaming (SSE) or JSON (fallback)
-      const contentType = res.headers.get('content-type') || '';
+      const contentType = res.headers.get("content-type") || "";
 
-      if (contentType.includes('text/event-stream')) {
+      if (contentType.includes("text/event-stream")) {
         // Handle streaming response
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
 
         if (!reader) {
-          throw new Error('Failed to get response stream');
+          throw new Error("Failed to get response stream");
         }
 
-        let accumulatedContent = '';
+        let accumulatedContent = "";
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          const lines = chunk.split("\n");
 
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
+            if (line.startsWith("data: ")) {
               try {
-                const data = JSON.parse(line.slice(6));
+                const data = JSON.parse(line.slice(6)) as {
+                  error?: string;
+                  text?: string;
+                  done?: boolean;
+                  conversationId?: string;
+                };
 
                 if (data.error) {
                   throw new Error(data.error);
@@ -108,7 +113,7 @@ export default function AITutorPage() {
                       ...prev,
                       {
                         id: aiMessageId,
-                        role: 'assistant',
+                        role: "assistant",
                         content: accumulatedContent,
                         timestamp: new Date(),
                       },
@@ -119,8 +124,8 @@ export default function AITutorPage() {
                       prev.map((msg) =>
                         msg.id === aiMessageId
                           ? { ...msg, content: accumulatedContent }
-                          : msg
-                      )
+                          : msg,
+                      ),
                     );
                   }
                 }
@@ -142,23 +147,24 @@ export default function AITutorPage() {
 
         const aiMessage: Message = {
           id: aiMessageId,
-          role: 'assistant',
+          role: "assistant",
           content: data.message,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, aiMessage]);
       }
     } catch (err) {
-      console.error('Chat error:', err);
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      console.error("Chat error:", err);
+      setError(err instanceof Error ? err.message : "Something went wrong");
       setIsLoading(false);
 
       // Only add error message if stream hasn't started
       if (!streamStarted) {
         const errorMessage: Message = {
           id: `error-${Date.now()}`,
-          role: 'assistant',
-          content: "I'm having trouble connecting right now. Please try again in a moment.",
+          role: "assistant",
+          content:
+            "I'm having trouble connecting right now. Please try again in a moment.",
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
@@ -167,26 +173,28 @@ export default function AITutorPage() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
     }
   };
 
   const suggestions = [
-    'Help me understand fractions',
-    'How do I solve equations?',
-    'Explain the quadratic formula',
-    'Help with word problems',
-    'What is the Pythagorean theorem?',
-    'How do I find the area of a circle?',
+    "Help me understand fractions",
+    "How do I solve equations?",
+    "Explain the quadratic formula",
+    "Help with word problems",
+    "What is the Pythagorean theorem?",
+    "How do I find the area of a circle?",
   ];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">AI Math Tutor</h1>
-        <p className="text-slate-600">Ask me anything about math - I&apos;m here to help you learn!</p>
+        <p className="text-slate-600">
+          Ask me anything about math - I&apos;m here to help you learn!
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -196,13 +204,25 @@ export default function AITutorPage() {
             <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
                   </svg>
                 </div>
                 <div>
                   <span>AI Math Tutor</span>
-                  <p className="text-xs text-indigo-200 font-normal">Powered by AI</p>
+                  <p className="text-xs text-indigo-200 font-normal">
+                    Powered by AI
+                  </p>
                 </div>
               </CardTitle>
             </CardHeader>
@@ -212,16 +232,26 @@ export default function AITutorPage() {
                 {messages.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                      <svg
+                        className="w-10 h-10 text-indigo-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
                       </svg>
                     </div>
                     <h3 className="text-lg font-medium text-slate-900 mb-2">
                       Hi! I&apos;m your AI Math Tutor
                     </h3>
                     <p className="text-slate-500 max-w-md mx-auto">
-                      I&apos;m here to help you understand math concepts and solve problems.
-                      Ask me anything!
+                      I&apos;m here to help you understand math concepts and
+                      solve problems. Ask me anything!
                     </p>
                   </div>
                 ) : (
@@ -229,19 +259,19 @@ export default function AITutorPage() {
                     <div
                       key={msg.id}
                       className={cn(
-                        'flex',
-                        msg.role === 'user' ? 'justify-end' : 'justify-start'
+                        "flex",
+                        msg.role === "user" ? "justify-end" : "justify-start",
                       )}
                     >
                       <div
                         className={cn(
-                          'max-w-[80%] rounded-2xl px-4 py-3',
-                          msg.role === 'user'
-                            ? 'bg-indigo-600 text-white rounded-br-md'
-                            : 'bg-slate-100 text-slate-900 rounded-bl-md'
+                          "max-w-[80%] rounded-2xl px-4 py-3",
+                          msg.role === "user"
+                            ? "bg-indigo-600 text-white rounded-br-md"
+                            : "bg-slate-100 text-slate-900 rounded-bl-md",
                         )}
                       >
-                        {msg.role === 'assistant' ? (
+                        {msg.role === "assistant" ? (
                           <div className="prose prose-sm prose-slate max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-indigo-700 prose-headings:text-slate-900">
                             <ReactMarkdown
                               remarkPlugins={[remarkMath, remarkGfm]}
@@ -261,9 +291,18 @@ export default function AITutorPage() {
                   <div className="flex justify-start">
                     <div className="bg-slate-100 rounded-2xl rounded-bl-md px-4 py-3">
                       <div className="flex gap-1">
-                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <span
+                          className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0ms" }}
+                        />
+                        <span
+                          className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "150ms" }}
+                        />
+                        <span
+                          className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "300ms" }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -279,7 +318,10 @@ export default function AITutorPage() {
               )}
 
               {/* Input */}
-              <form onSubmit={handleSubmit} className="p-4 border-t border-slate-200">
+              <form
+                onSubmit={handleSubmit}
+                className="p-4 border-t border-slate-200"
+              >
                 <div className="flex gap-2">
                   <textarea
                     ref={inputRef}
@@ -295,14 +337,24 @@ export default function AITutorPage() {
                     type="submit"
                     disabled={isLoading || !input.trim()}
                     className={cn(
-                      'px-6 rounded-xl flex items-center justify-center transition-colors',
+                      "px-6 rounded-xl flex items-center justify-center transition-colors",
                       input.trim() && !isLoading
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'bg-slate-100 text-slate-400'
+                        ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                        : "bg-slate-100 text-slate-400",
                     )}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                      />
                     </svg>
                   </button>
                 </div>
