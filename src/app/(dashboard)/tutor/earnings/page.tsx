@@ -17,12 +17,12 @@ export default async function TutorEarningsPage() {
   const { payouts, rates, error } = await getMyEarnings();
 
   const totalEarned = payouts
-    .filter((p: any) => p.status === 'paid')
-    .reduce((s: number, p: any) => s + p.total_amount_cents, 0);
+    .filter((p: unknown) => p.status === 'paid')
+    .reduce((s: number, p: unknown) => s + p.total_amount_cents, 0);
   const totalPending = payouts
-    .filter((p: any) => p.status !== 'paid' && p.status !== 'rejected')
-    .reduce((s: number, p: any) => s + p.total_amount_cents, 0);
-  const totalSessions = payouts.reduce((s: number, p: any) => s + p.sessions_count, 0);
+    .filter((p: unknown) => p.status !== 'paid' && p.status !== 'rejected')
+    .reduce((s: number, p: unknown) => s + p.total_amount_cents, 0);
+  const totalSessions = payouts.reduce((s: number, p: unknown) => s + p.sessions_count, 0);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -58,7 +58,7 @@ export default async function TutorEarningsPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6">
           <h2 className="font-semibold text-slate-900 mb-3">Your Pay Rates</h2>
           <div className="space-y-2">
-            {rates.map((r: any) => (
+            {rates.map((r: unknown) => (
               <div key={r.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-900 font-medium">{r.label}</span>
@@ -98,7 +98,7 @@ export default async function TutorEarningsPage() {
                 </td>
               </tr>
             )}
-            {payouts.map((p: any) => (
+            {payouts.map((p: unknown) => (
               <tr key={p.id}>
                 <td className="px-4 py-3 text-slate-900">
                   {p.period ? (
@@ -129,3 +129,4 @@ export default async function TutorEarningsPage() {
     </div>
   );
 }
+

@@ -194,7 +194,7 @@ export async function generateSessionInvoice(
 
   // Filter to this family's sessions
   const familySessions = (sessions || []).filter(
-    (s: any) => s.booking?.family_id === familyId
+    (s: unknown) => s.booking?.family_id === familyId
   );
 
   if (familySessions.length === 0) return { success: false, error: 'No billable sessions found' };
@@ -214,7 +214,7 @@ export async function generateSessionInvoice(
   const nameMap = new Map((profiles || []).map(p => [p.id, p.full_name]));
 
   // Build line items from sessions
-  const lineItems: { description: string; quantity: number; unitPriceCents: number; lineType: string }[] = familySessions.map((s: any) => {
+  const lineItems: { description: string; quantity: number; unitPriceCents: number; lineType: string }[] = familySessions.map((s: unknown) => {
     const hours = (new Date(s.booking.end_at).getTime() - new Date(s.booking.start_at).getTime()) / 3600000;
     const tutorName = nameMap.get(s.booking.tutor_user_id) || 'Tutor';
     const studentName = nameMap.get(s.booking.student_user_id) || 'Student';
@@ -322,3 +322,4 @@ export async function voidInvoice(invoiceId: string): Promise<InvoiceResult> {
   revalidatePath('/admin/invoices');
   return { success: true, invoiceId };
 }
+

@@ -23,8 +23,8 @@ export default async function ParentReferralsPage() {
   ]);
 
   const totalEarned = referrals
-    .filter((r: any) => r.status === 'rewarded')
-    .reduce((s: number, r: any) => s + r.referrer_reward_cents, 0);
+    .filter((r: unknown) => r.status === 'rewarded')
+    .reduce((s: number, r: unknown) => s + r.referrer_reward_cents, 0);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -99,7 +99,7 @@ export default async function ParentReferralsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {referrals.map((ref: any) => (
+              {referrals.map((ref: unknown) => (
                 <tr key={ref.id}>
                   <td className="px-4 py-3 font-medium text-slate-900">{ref.referred_name}</td>
                   <td className="px-4 py-3 text-slate-600">{ref.referred_email}</td>
@@ -123,3 +123,4 @@ export default async function ParentReferralsPage() {
     </div>
   );
 }
+

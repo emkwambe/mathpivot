@@ -241,7 +241,7 @@ export async function getCalendarEvents(startDate: string, endDate: string) {
 
   if (error) return { events: [], error: error.message };
 
-  const events = (data || []).map((b: any) => ({
+  const events = (data || []).map((b: unknown) => ({
     id: b.id,
     title: b.is_group_session
       ? `Group: ${b.tutor?.full_name || 'TBD'}`
@@ -258,3 +258,4 @@ export async function getCalendarEvents(startDate: string, endDate: string) {
 
   return { events, error: null };
 }
+

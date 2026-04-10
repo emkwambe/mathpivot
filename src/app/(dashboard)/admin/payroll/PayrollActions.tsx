@@ -87,7 +87,7 @@ export function PayrollActions({
           className="border border-slate-300 rounded-lg px-3 py-2 text-sm"
         >
           {periods.length === 0 && <option value="">No periods</option>}
-          {periods.map((p: any) => (
+          {periods.map((p: unknown) => (
             <option key={p.id} value={p.id}>
               {new Date(p.period_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               {' - '}
@@ -165,7 +165,7 @@ export function PayrollActions({
                 </td>
               </tr>
             )}
-            {payouts.map((p: any) => (
+            {payouts.map((p: unknown) => (
               <tr key={p.id}>
                 <td className="px-4 py-3">
                   <p className="font-medium text-slate-900">{p.tutor?.full_name || 'Unknown'}</p>
@@ -211,3 +211,4 @@ export function PayrollActions({
     </div>
   );
 }
+

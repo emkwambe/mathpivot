@@ -69,7 +69,7 @@ export function InvoiceActions({ invoices, statusColors }: InvoiceActionsProps) 
                 </td>
               </tr>
             )}
-            {invoices.map((inv: any) => (
+            {invoices.map((inv: unknown) => (
               <tr key={inv.id}>
                 <td className="px-4 py-3 font-mono text-slate-900 text-xs">{inv.invoice_number}</td>
                 <td className="px-4 py-3">
@@ -128,3 +128,4 @@ export function InvoiceActions({ invoices, statusColors }: InvoiceActionsProps) 
     </div>
   );
 }
+

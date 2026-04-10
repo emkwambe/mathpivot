@@ -16,7 +16,7 @@ export default async function AdminLeadsPage() {
   const allLeads = Object.values(cols).flat();
   const totalLeads = allLeads.length;
   const newLeads = cols['new']?.length || 0;
-  const followUpsToday = allLeads.filter((l: any) =>
+  const followUpsToday = allLeads.filter((l: unknown) =>
     l.next_follow_up_at && new Date(l.next_follow_up_at).toDateString() === new Date().toDateString()
   ).length;
 
@@ -62,3 +62,4 @@ export default async function AdminLeadsPage() {
     </div>
   );
 }
+

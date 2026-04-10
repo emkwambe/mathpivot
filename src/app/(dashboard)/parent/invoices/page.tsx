@@ -15,8 +15,8 @@ export default async function ParentInvoicesPage() {
 
   const { invoices, error } = await getMyInvoices();
 
-  const outstanding = invoices.filter((i: any) => i.status === 'sent' || i.status === 'overdue');
-  const totalOwed = outstanding.reduce((s: number, i: any) => s + i.total_cents, 0);
+  const outstanding = invoices.filter((i: unknown) => i.status === 'sent' || i.status === 'overdue');
+  const totalOwed = outstanding.reduce((s: number, i: unknown) => s + i.total_cents, 0);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -66,7 +66,7 @@ export default async function ParentInvoicesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {invoices.map((inv: any) => (
+              {invoices.map((inv: unknown) => (
                 <tr key={inv.id}>
                   <td className="px-4 py-3 font-mono text-slate-900 text-xs">{inv.invoice_number}</td>
                   <td className="px-4 py-3 text-slate-700">
@@ -96,3 +96,4 @@ export default async function ParentInvoicesPage() {
     </div>
   );
 }
+

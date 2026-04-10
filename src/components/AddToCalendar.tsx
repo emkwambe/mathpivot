@@ -98,7 +98,7 @@ export function AddToCalendar({
       `SUMMARY:${title}`,
       `DESCRIPTION:${description.replace(/\n/g, '\\n')}`,
       location ? `LOCATION:${location}` : '',
-      `UID:${Date.now()}@mathpivot.com`,
+      `UID:${new Date().getTime()}@mathpivot.com`,
       'END:VEVENT',
       'END:VCALENDAR',
     ].filter(Boolean).join('\r\n');
@@ -206,3 +206,4 @@ export function AddToCalendar({
     </div>
   );
 }
+

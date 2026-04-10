@@ -20,13 +20,13 @@ export default async function AdminPayrollPage({
     ? await getPayoutsForPeriod(selectedPeriodId)
     : { payouts: [] };
 
-  const selectedPeriod = periods?.find((p: any) => p.id === selectedPeriodId);
+  const selectedPeriod = periods?.find((p: unknown) => p.id === selectedPeriodId);
 
   // Summary stats
-  const totalPayable = payouts.reduce((s: number, p: any) => s + p.total_amount_cents, 0);
-  const pendingCount = payouts.filter((p: any) => p.status === 'draft' || p.status === 'pending_approval').length;
-  const approvedCount = payouts.filter((p: any) => p.status === 'approved').length;
-  const paidCount = payouts.filter((p: any) => p.status === 'paid').length;
+  const totalPayable = payouts.reduce((s: number, p: unknown) => s + p.total_amount_cents, 0);
+  const pendingCount = payouts.filter((p: unknown) => p.status === 'draft' || p.status === 'pending_approval').length;
+  const approvedCount = payouts.filter((p: unknown) => p.status === 'approved').length;
+  const paidCount = payouts.filter((p: unknown) => p.status === 'paid').length;
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -79,3 +79,4 @@ export default async function AdminPayrollPage({
     </div>
   );
 }
+

@@ -65,7 +65,7 @@ export function UserActions({ users, roleColors }: UserActionsProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {users.map((u: any) => (
+            {users.map((u: unknown) => (
               <tr key={u.id} className="hover:bg-slate-50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export function UserActions({ users, roleColors }: UserActionsProps) {
 
       {/* Edit Panel */}
       {editingId && (() => {
-        const u = users.find((usr: any) => usr.id === editingId);
+        const u = users.find((usr: unknown) => usr.id === editingId);
         if (!u) return null;
         return (
           <div className="bg-white border border-slate-200 rounded-xl p-4 mt-4">
@@ -148,3 +148,4 @@ export function UserActions({ users, roleColors }: UserActionsProps) {
     </div>
   );
 }
+

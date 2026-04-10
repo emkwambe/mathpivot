@@ -51,7 +51,7 @@ export async function getProblemDetail(problemId: string) {
 
   const problem = {
     ...data,
-    test_cases: isAdmin ? data.test_cases : (data.test_cases as any[]).filter((tc: any) => !tc.is_hidden),
+    test_cases: isAdmin ? data.test_cases : (data.test_cases as any[]).filter((tc: unknown) => !tc.is_hidden),
     solution_code: isAdmin ? data.solution_code : null,
   };
 
@@ -222,3 +222,4 @@ export async function gradeSubmission(
   if (error) return { success: false, error: error.message };
   return { success: true };
 }
+

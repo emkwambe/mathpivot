@@ -1,4 +1,4 @@
-﻿// src/app/(dashboard)/admin/packages/page.tsx
+// src/app/(dashboard)/admin/packages/page.tsx
 // Purpose: Admin page for viewing and managing service packages across all tiers.
 // Connects to: actions/packages.ts server actions, service_packages table
 
@@ -39,9 +39,9 @@ export default async function AdminPackagesPage() {
     .order('display_order', { ascending: true });
 
   const grouped = {
-    TIER_TUTORING: packages?.filter((p: any) => p.service_tier === 'TIER_TUTORING') || [],
-    TIER_COACHING: packages?.filter((p: any) => p.service_tier === 'TIER_COACHING') || [],
-    TIER_MENTORSHIP: packages?.filter((p: any) => p.service_tier === 'TIER_MENTORSHIP') || [],
+    TIER_TUTORING: packages?.filter((p: unknown) => p.service_tier === 'TIER_TUTORING') || [],
+    TIER_COACHING: packages?.filter((p: unknown) => p.service_tier === 'TIER_COACHING') || [],
+    TIER_MENTORSHIP: packages?.filter((p: unknown) => p.service_tier === 'TIER_MENTORSHIP') || [],
   };
 
   return (
@@ -80,7 +80,7 @@ export default async function AdminPackagesPage() {
                 <p className="text-sm text-slate-600">{tierNames[tier]}</p>
                 <p className="text-3xl font-bold text-slate-900">{pkgs.length}</p>
                 <p className="text-xs text-slate-500">
-                  {pkgs.filter((p: any) => p.is_active).length} active
+                  {pkgs.filter((p: unknown) => p.is_active).length} active
                 </p>
               </div>
             </CardContent>
@@ -116,7 +116,7 @@ export default async function AdminPackagesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {pkgs.map((pkg: any) => {
+                    {pkgs.map((pkg: unknown) => {
                       const perSession = pkg.credits_per_period > 0
                         ? '$' + (pkg.price_cents / pkg.credits_per_period / 100).toFixed(0)
                         : '--';
@@ -186,3 +186,4 @@ export default async function AdminPackagesPage() {
     </div>
   );
 }
+

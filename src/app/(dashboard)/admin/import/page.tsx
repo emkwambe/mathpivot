@@ -53,7 +53,7 @@ export default async function AdminImportPage() {
                 <td colSpan={5} className="px-4 py-12 text-center text-slate-400">No imports yet</td>
               </tr>
             )}
-            {jobs.map((job: any) => (
+            {jobs.map((job: unknown) => (
               <tr key={job.id}>
                 <td className="px-4 py-3 font-mono text-xs text-slate-900">{job.file_name}</td>
                 <td className="px-4 py-3 text-slate-700 capitalize">{job.entity_type}</td>
@@ -78,3 +78,4 @@ export default async function AdminImportPage() {
     </div>
   );
 }
+

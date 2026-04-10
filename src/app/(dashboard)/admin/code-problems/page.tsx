@@ -47,7 +47,7 @@ export default async function AdminCodeProblemsPage() {
             {problems.length === 0 && (
               <tr><td colSpan={5} className="px-4 py-12 text-center text-slate-400">No problems yet. Create your first one above.</td></tr>
             )}
-            {problems.map((p: any) => (
+            {problems.map((p: unknown) => (
               <tr key={p.id}>
                 <td className="px-4 py-3 font-medium text-slate-900">{p.title}</td>
                 <td className="px-4 py-3">
@@ -66,3 +66,4 @@ export default async function AdminCodeProblemsPage() {
     </div>
   );
 }
+

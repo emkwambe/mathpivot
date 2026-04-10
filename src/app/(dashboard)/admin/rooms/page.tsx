@@ -10,8 +10,8 @@ export default async function AdminRoomsPage() {
 
   const { rooms, error } = await getRooms();
 
-  const activeRooms = rooms.filter((r: any) => r.is_active);
-  const totalCapacity = activeRooms.reduce((s: number, r: any) => s + r.capacity, 0);
+  const activeRooms = rooms.filter((r: unknown) => r.is_active);
+  const totalCapacity = activeRooms.reduce((s: number, r: unknown) => s + r.capacity, 0);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -41,7 +41,7 @@ export default async function AdminRoomsPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <p className="text-xs text-slate-500 uppercase tracking-wide">Virtual Rooms</p>
           <p className="text-2xl font-bold text-purple-600 mt-1">
-            {activeRooms.filter((r: any) => r.is_virtual).length}
+            {activeRooms.filter((r: unknown) => r.is_virtual).length}
           </p>
         </div>
       </div>
@@ -50,3 +50,4 @@ export default async function AdminRoomsPage() {
     </div>
   );
 }
+

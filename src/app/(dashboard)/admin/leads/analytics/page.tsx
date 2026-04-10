@@ -131,7 +131,7 @@ export default async function LeadAnalyticsPage() {
                 </td>
               </tr>
             )}
-            {stats.map((row: any) => (
+            {stats.map((row: unknown) => (
               <tr key={row.source}>
                 <td className="px-4 py-3 font-medium text-slate-900">
                   {sourceLabels[row.source] || row.source}
@@ -157,3 +157,4 @@ export default async function LeadAnalyticsPage() {
     </div>
   );
 }
+

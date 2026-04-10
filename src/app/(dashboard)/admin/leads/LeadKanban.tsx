@@ -63,7 +63,7 @@ export function LeadKanban({ columns }: LeadKanbanProps) {
 
           {/* Cards */}
           <div className="p-2 space-y-2 min-h-[200px] max-h-[600px] overflow-y-auto">
-            {(columns[col.key] || []).map((lead: any) => (
+            {(columns[col.key] || []).map((lead: unknown) => (
               <div
                 key={lead.id}
                 draggable
@@ -171,3 +171,4 @@ export function LeadKanban({ columns }: LeadKanbanProps) {
     </div>
   );
 }
+

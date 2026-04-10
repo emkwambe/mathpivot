@@ -118,7 +118,7 @@ export async function importStudentsCSV(formData: FormData): Promise<ImportResul
       }
 
       successCount++;
-    } catch (err: any) {
+    } catch (err: unknown) {
       errors.push(`Row ${i + 2}: ${err.message}`);
     }
   }
@@ -207,7 +207,7 @@ export async function importTutorsCSV(formData: FormData): Promise<ImportResult>
       }, { onConflict: 'user_id' });
 
       successCount++;
-    } catch (err: any) {
+    } catch (err: unknown) {
       errors.push(`Row ${i + 2}: ${err.message}`);
     }
   }
@@ -262,7 +262,7 @@ export async function exportTutorsCSV(): Promise<{ csv: string; error?: string }
   if (!tutors || tutors.length === 0) return { csv: '', error: 'No tutors found' };
 
   const headers = 'full_name,email,specialties,hourly_rate_cents,is_active';
-  const rows = tutors.map((t: any) => `"${t.user?.full_name || ''}","${t.user?.email || ''}","${(t.specialties || []).join(';')}",${t.hourly_rate || 0},${t.is_active}`);
+  const rows = tutors.map((t: unknown) => `"${t.user?.full_name || ''}","${t.user?.email || ''}","${(t.specialties || []).join(';')}",${t.hourly_rate || 0},${t.is_active}`);
   return { csv: [headers, ...rows].join('\n') };
 }
 
@@ -282,7 +282,7 @@ export async function exportSessionsCSV(dateFrom: string, dateTo: string): Promi
   if (!sessions || sessions.length === 0) return { csv: '', error: 'No sessions found' };
 
   const headers = 'session_id,status,attendance,start_at,end_at,modality,completed_at';
-  const rows = sessions.map((s: any) => `"${s.id}","${s.status}","${s.attendance_status || ''}","${s.booking?.start_at || ''}","${s.booking?.end_at || ''}","${s.booking?.modality || ''}","${s.completed_at || ''}"`);
+  const rows = sessions.map((s: unknown) => `"${s.id}","${s.status}","${s.attendance_status || ''}","${s.booking?.start_at || ''}","${s.booking?.end_at || ''}","${s.booking?.modality || ''}","${s.completed_at || ''}"`);
   return { csv: [headers, ...rows].join('\n') };
 }
 
@@ -301,3 +301,4 @@ export async function getImportHistory() {
   if (error) return { jobs: [], error: error.message };
   return { jobs: data || [], error: null };
 }
+

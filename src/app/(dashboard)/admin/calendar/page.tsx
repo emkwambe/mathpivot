@@ -26,7 +26,7 @@ export default async function AdminCalendarPage({
   );
 
   const { series } = await getRecurringSeries();
-  const activeSeries = series.filter((s: any) => s.is_active);
+  const activeSeries = series.filter((s: unknown) => s.is_active);
 
   return (
     <div className="p-6">
@@ -53,7 +53,7 @@ export default async function AdminCalendarPage({
         <div className="bg-white border border-slate-200 rounded-xl p-4 mb-4">
           <h3 className="text-sm font-semibold text-slate-700 mb-2">Active Recurring Series ({activeSeries.length})</h3>
           <div className="flex flex-wrap gap-2">
-            {activeSeries.map((s: any) => (
+            {activeSeries.map((s: unknown) => (
               <span key={s.id} className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg px-2.5 py-1">
                 {s.title || s.subject || 'Session'} — {s.tutor?.full_name} ({s.pattern}, {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][s.day_of_week]})
               </span>
@@ -75,3 +75,4 @@ function getMonday(date: Date): Date {
   d.setHours(0, 0, 0, 0);
   return d;
 }
+

@@ -131,7 +131,7 @@ export function RoomManager({ rooms }: RoomManagerProps) {
                 </td>
               </tr>
             )}
-            {rooms.map((room: any) => (
+            {rooms.map((room: unknown) => (
               <tr key={room.id} className={!room.is_active ? 'opacity-50' : ''}>
                 <td className="px-4 py-3">
                   <p className="font-medium text-slate-900">{room.name}</p>
@@ -170,3 +170,4 @@ export function RoomManager({ rooms }: RoomManagerProps) {
     </div>
   );
 }
+

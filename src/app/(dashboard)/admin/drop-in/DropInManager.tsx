@@ -109,7 +109,7 @@ export function DropInManager({ attendance }: DropInManagerProps) {
             {attendance.length === 0 && (
               <tr><td colSpan={5} className="px-4 py-12 text-center text-slate-400">No check-ins today</td></tr>
             )}
-            {attendance.map((a: any) => (
+            {attendance.map((a: unknown) => (
               <tr key={a.id}>
                 <td className="px-4 py-3 font-medium text-slate-900">{a.student?.full_name || 'Unknown'}</td>
                 <td className="px-4 py-3 text-slate-700">{a.slot?.title || '-'}</td>
@@ -136,3 +136,4 @@ export function DropInManager({ attendance }: DropInManagerProps) {
     </div>
   );
 }
+

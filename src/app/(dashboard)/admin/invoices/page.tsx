@@ -20,11 +20,11 @@ export default async function AdminInvoicesPage() {
   const { invoices, error } = await getInvoices();
 
   const totalOutstanding = invoices
-    .filter((i: any) => i.status === 'sent' || i.status === 'overdue')
-    .reduce((s: number, i: any) => s + i.total_cents, 0);
+    .filter((i: unknown) => i.status === 'sent' || i.status === 'overdue')
+    .reduce((s: number, i: unknown) => s + i.total_cents, 0);
   const totalPaid = invoices
-    .filter((i: any) => i.status === 'paid')
-    .reduce((s: number, i: any) => s + i.total_cents, 0);
+    .filter((i: unknown) => i.status === 'paid')
+    .reduce((s: number, i: unknown) => s + i.total_cents, 0);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -61,3 +61,4 @@ export default async function AdminInvoicesPage() {
     </div>
   );
 }
+

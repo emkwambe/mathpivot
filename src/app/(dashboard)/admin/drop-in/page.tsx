@@ -13,7 +13,7 @@ export default async function AdminDropInPage() {
   const { slots } = await getDropInSlots();
   const { attendance } = await getTodayDropInAttendance();
 
-  const checkedIn = attendance.filter((a: any) => !a.check_out_at);
+  const checkedIn = attendance.filter((a: unknown) => !a.check_out_at);
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -60,7 +60,7 @@ export default async function AdminDropInPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {slots.map((slot: any) => (
+              {slots.map((slot: unknown) => (
                 <tr key={slot.id}>
                   <td className="px-4 py-3 font-medium text-slate-900">{slot.title}</td>
                   <td className="px-4 py-3 text-slate-700">{DAYS[slot.day_of_week]}</td>
@@ -80,3 +80,4 @@ export default async function AdminDropInPage() {
     </div>
   );
 }
+
