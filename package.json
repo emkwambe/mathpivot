@@ -12,7 +12,7 @@
     "test:integration": "jest --selectProjects integration",
     "test:e2e": "npx playwright test",
     "test:all": "jest && npx playwright test",
-    "prepare": "husky"
+    "prepare": "npx husky"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
