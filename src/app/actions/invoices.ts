@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/auth";
 
 export type InvoiceResult = {
   success: boolean;
@@ -132,6 +133,11 @@ export async function createInvoiceForFamily(
   }[],
   options?: { dueDate?: string; notes?: string },
 ): Promise<InvoiceResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const admin = createAdminClient();
 
   // Generate invoice number
@@ -198,6 +204,11 @@ export async function generateSessionInvoice(
   dateFrom: string,
   dateTo: string,
 ): Promise<InvoiceResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const admin = createAdminClient();
 
   // Get family info
@@ -316,6 +327,11 @@ export async function generateSessionInvoice(
 // SEND INVOICE (admin — changes status to sent)
 // ============================================================
 export async function sendInvoice(invoiceId: string): Promise<InvoiceResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -340,6 +356,11 @@ export async function sendInvoice(invoiceId: string): Promise<InvoiceResult> {
 export async function markInvoicePaid(
   invoiceId: string,
 ): Promise<InvoiceResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -362,6 +383,11 @@ export async function markInvoicePaid(
 // VOID INVOICE (admin)
 // ============================================================
 export async function voidInvoice(invoiceId: string): Promise<InvoiceResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase
