@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
 
 export type RecurringResult = {
@@ -133,6 +134,11 @@ export async function generateRecurringBookings(
   seriesId: string,
   weeksAhead = 4,
 ): Promise<RecurringResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const admin = createAdminClient();
 
   const { data, error } = await admin.rpc("generate_recurring_bookings", {
@@ -159,6 +165,11 @@ export async function toggleRecurringSeries(
   seriesId: string,
   active: boolean,
 ): Promise<RecurringResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -202,6 +213,11 @@ const roomSchema = z.object({
 });
 
 export async function createRoom(formData: FormData): Promise<RecurringResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const parsed = roomSchema.safeParse({
@@ -239,6 +255,11 @@ export async function toggleRoom(
   roomId: string,
   active: boolean,
 ): Promise<RecurringResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase

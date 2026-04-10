@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/auth";
 
 export type ImportResult = {
   success: boolean;
@@ -66,11 +67,16 @@ function parseCSV(csvText: string): {
 export async function importStudentsCSV(
   formData: FormData,
 ): Promise<ImportResult> {
+  const currentUser = await getCurrentUser();
+  if (
+    !currentUser ||
+    (currentUser.role !== "admin" && currentUser.role !== "super_admin")
+  ) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  const user = { id: currentUser.id };
 
   const file = formData.get("file") as File;
   if (!file) return { success: false, error: "No file provided" };
@@ -208,11 +214,16 @@ export async function importStudentsCSV(
 export async function importTutorsCSV(
   formData: FormData,
 ): Promise<ImportResult> {
+  const currentUser = await getCurrentUser();
+  if (
+    !currentUser ||
+    (currentUser.role !== "admin" && currentUser.role !== "super_admin")
+  ) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  const user = { id: currentUser.id };
 
   const file = formData.get("file") as File;
   if (!file) return { success: false, error: "No file provided" };
@@ -324,6 +335,11 @@ export async function exportStudentsCSV(): Promise<{
   csv: string;
   error?: string;
 }> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { csv: "", error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { data: students } = await supabase
@@ -346,6 +362,11 @@ export async function exportTutorsCSV(): Promise<{
   csv: string;
   error?: string;
 }> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { csv: "", error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { data } = await supabase.from("tutors_profile").select(`
@@ -371,6 +392,11 @@ export async function exportSessionsCSV(
   dateFrom: string,
   dateTo: string,
 ): Promise<{ csv: string; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { csv: "", error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { data } = await supabase
@@ -401,6 +427,11 @@ export async function exportSessionsCSV(
 // GET IMPORT HISTORY
 // ============================================================
 export async function getImportHistory() {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { jobs: [], error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { data, error } = await supabase

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
+import { getCurrentUser } from "@/lib/auth";
 import type { LeadRecord } from "@/types/views";
 
 export type LeadResult = {
@@ -103,6 +104,11 @@ export async function captureLeadAction(
 // GET ALL LEADS (admin)
 // ============================================================
 export async function getLeads(filters?: { status?: string; source?: string }) {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { leads: [], error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   let query = supabase
@@ -128,6 +134,11 @@ export async function getLeads(filters?: { status?: string; source?: string }) {
 // GET LEADS GROUPED BY STATUS (for kanban)
 // ============================================================
 export async function getLeadsByStatus() {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { columns: {}, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -162,6 +173,11 @@ export async function updateLeadStatus(
   leadId: string,
   newStatus: string,
 ): Promise<LeadResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const updates: Record<string, string | null> = { status: newStatus };
@@ -188,6 +204,11 @@ export async function updateLead(
   leadId: string,
   formData: FormData,
 ): Promise<LeadResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const updates: Record<string, string | number | null> = {};
@@ -259,6 +280,16 @@ export async function addLeadNote(
 // GET LEAD DETAIL + ACTIVITIES
 // ============================================================
 export async function getLeadDetail(leadId: string) {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return {
+      lead: null,
+      activities: [],
+      trials: [],
+      error: "Admin access required",
+    };
+  }
+
   const supabase = await createClient();
 
   const [leadResult, activitiesResult, trialsResult] = await Promise.all([
@@ -305,6 +336,11 @@ const trialSchema = z.object({
 export async function scheduleTrialLesson(
   formData: FormData,
 ): Promise<LeadResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const parsed = trialSchema.safeParse({
@@ -359,6 +395,11 @@ export async function completeTrialLesson(
   trialId: string,
   formData: FormData,
 ): Promise<LeadResult> {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return { success: false, error: "Admin access required" };
+  }
+
   const supabase = await createClient();
 
   const { data: trial } = await supabase
@@ -400,6 +441,16 @@ export async function completeTrialLesson(
 // GET LEAD SOURCE ANALYTICS
 // ============================================================
 export async function getLeadAnalytics() {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
+    return {
+      stats: [],
+      funnelData: [],
+      summary: { total: 0, newThisWeek: 0, convertedThisMonth: 0, avgScore: 0 },
+      error: "Admin access required",
+    };
+  }
+
   const supabase = await createClient();
 
   // Get summary counts by source
