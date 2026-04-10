@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Brain,
   Calendar,
@@ -22,79 +22,79 @@ import {
   Building2,
   UserCheck,
   School,
-} from 'lucide-react';
+} from "lucide-react";
 
 /* ─── audience tab data ─── */
 const audiences = [
   {
-    key: 'centers',
-    label: 'Tutoring Centers',
+    key: "centers",
+    label: "Tutoring Centers",
     icon: Building2,
-    headline: 'Manage your entire center from one dashboard',
+    headline: "Manage your entire center from one dashboard",
     points: [
-      'Multi-room scheduling with tutor and student assignment',
-      'Automated billing, invoicing, and payroll tracking',
-      'Lead pipeline from inquiry to enrolled student',
-      'Real-time admin analytics across all tutors and students',
+      "Multi-room scheduling with tutor and student assignment",
+      "Automated billing, invoicing, and payroll tracking",
+      "Lead pipeline from inquiry to enrolled student",
+      "Real-time admin analytics across all tutors and students",
     ],
-    cta: 'See Center Features',
-    ctaHref: '/get-started',
+    cta: "See Center Features",
+    ctaHref: "/get-started",
   },
   {
-    key: 'testprep',
-    label: 'Test Prep Companies',
+    key: "testprep",
+    label: "Test Prep Companies",
     icon: GraduationCap,
-    headline: 'Track scores, assign practice, report results',
+    headline: "Track scores, assign practice, report results",
     points: [
-      'Diagnostic assessments tied to SAT, ACT, and AP curricula',
-      'Automated score tracking and improvement reports for parents',
-      'Practice problem assignment with AI-powered hints',
-      'Group and 1-on-1 session scheduling in one system',
+      "Diagnostic assessments tied to SAT, ACT, and AP curricula",
+      "Automated score tracking and improvement reports for parents",
+      "Practice problem assignment with AI-powered hints",
+      "Group and 1-on-1 session scheduling in one system",
     ],
-    cta: 'Explore Test Prep Tools',
-    ctaHref: '/get-started',
+    cta: "Explore Test Prep Tools",
+    ctaHref: "/get-started",
   },
   {
-    key: 'stem',
-    label: 'STEM Programs',
+    key: "stem",
+    label: "STEM Programs",
     icon: Sparkles,
-    headline: 'Math + CS curriculum in one platform',
+    headline: "Math + CS curriculum in one platform",
     points: [
-      'Cover math from Pre-Algebra through AP Calculus and beyond',
-      'Computer science tracks: Python, Data Science, discrete math',
-      'Certification paths and competition prep (AMC, MATHCOUNTS)',
-      'Progress tracking across multi-subject learning journeys',
+      "Cover math from Pre-Algebra through AP Calculus and beyond",
+      "Computer science tracks: Python, Data Science, discrete math",
+      "Certification paths and competition prep (AMC, MATHCOUNTS)",
+      "Progress tracking across multi-subject learning journeys",
     ],
-    cta: 'See STEM Features',
-    ctaHref: '/get-started',
+    cta: "See STEM Features",
+    ctaHref: "/get-started",
   },
   {
-    key: 'independent',
-    label: 'Independent Tutors',
+    key: "independent",
+    label: "Independent Tutors",
     icon: UserCheck,
-    headline: 'Run your solo practice like a pro',
+    headline: "Run your solo practice like a pro",
     points: [
-      'Professional booking page parents can use to self-schedule',
-      'Stripe-powered billing with automatic invoicing',
-      'AI tutor assistant for between-session student practice',
-      'Progress reports that keep parents engaged and retained',
+      "Professional booking page parents can use to self-schedule",
+      "Stripe-powered billing with automatic invoicing",
+      "AI tutor assistant for between-session student practice",
+      "Progress reports that keep parents engaged and retained",
     ],
-    cta: 'Start Solo Plan',
-    ctaHref: '/get-started',
+    cta: "Start Solo Plan",
+    ctaHref: "/get-started",
   },
   {
-    key: 'schools',
-    label: 'Schools & Districts',
+    key: "schools",
+    label: "Schools & Districts",
     icon: School,
-    headline: 'Supplement classroom instruction at scale',
+    headline: "Supplement classroom instruction at scale",
     points: [
-      'Bulk student import and class-level diagnostic assessments',
-      'Assign AI-powered practice aligned to curriculum standards',
-      'Teacher and admin dashboards with exportable reports',
-      'COPPA-compliant with district SSO integration options',
+      "Bulk student import and class-level diagnostic assessments",
+      "Assign AI-powered practice aligned to curriculum standards",
+      "Teacher and admin dashboards with exportable reports",
+      "COPPA-compliant with district SSO integration options",
     ],
-    cta: 'Contact Sales',
-    ctaHref: '/get-started',
+    cta: "Contact Sales",
+    ctaHref: "/get-started",
   },
 ];
 
@@ -102,46 +102,46 @@ const audiences = [
 const featureRows = [
   {
     icon: Brain,
-    badge: 'AI Tutoring',
-    headline: 'Claude-Powered AI That Actually Teaches Math',
+    badge: "AI Tutoring",
+    headline: "Claude-Powered AI That Actually Teaches Math",
     points: [
-      'Step-by-step problem solving with Socratic questioning',
-      'LaTeX-rendered equations that look like a real textbook',
-      'Adapts to each student\'s level automatically',
-      'Available 24/7 for practice between live sessions',
+      "Step-by-step problem solving with Socratic questioning",
+      "LaTeX-rendered equations that look like a real textbook",
+      "Adapts to each student's level automatically",
+      "Available 24/7 for practice between live sessions",
     ],
   },
   {
     icon: Calendar,
-    badge: 'Scheduling',
-    headline: 'Scheduling That Runs Itself',
+    badge: "Scheduling",
+    headline: "Scheduling That Runs Itself",
     points: [
-      'Calendar sync with Google, Outlook, and Apple Calendar',
-      'Recurring sessions with automatic reminders',
-      'Parent self-booking from your branded page',
-      'Tutor availability management with conflict detection',
+      "Calendar sync with Google, Outlook, and Apple Calendar",
+      "Recurring sessions with automatic reminders",
+      "Parent self-booking from your branded page",
+      "Tutor availability management with conflict detection",
     ],
   },
   {
     icon: BarChart3,
-    badge: 'Mastery Tracking',
-    headline: 'Know Exactly Where Every Student Stands',
+    badge: "Mastery Tracking",
+    headline: "Know Exactly Where Every Student Stands",
     points: [
-      'Diagnostic assessments that pinpoint skill gaps',
+      "Diagnostic assessments that pinpoint skill gaps",
       'Topic-level mastery scores from "not started" to "mastered"',
-      'Progress over time with visual charts and trends',
-      'Parent-visible reports generated automatically each week',
+      "Progress over time with visual charts and trends",
+      "Parent-visible reports generated automatically each week",
     ],
   },
   {
     icon: CreditCard,
-    badge: 'Billing',
-    headline: 'Get Paid Without the Paperwork',
+    badge: "Billing",
+    headline: "Get Paid Without the Paperwork",
     points: [
-      'Stripe-powered payments with automatic receipts',
-      'Credit packages for flexible session pricing',
-      'Automatic invoice generation and email delivery',
-      'Parent payment portal with full billing history',
+      "Stripe-powered payments with automatic receipts",
+      "Credit packages for flexible session pricing",
+      "Automatic invoice generation and email delivery",
+      "Parent payment portal with full billing history",
     ],
   },
 ];
@@ -149,63 +149,94 @@ const featureRows = [
 /* ─── pricing tiers ─── */
 const pricingTiers = [
   {
-    name: 'Solo Tutor',
-    price: '$49',
-    unit: 'per session',
-    features: ['1-on-1 scheduling', 'AI tutor assistant', 'Progress reports', 'Stripe billing', 'Parent portal'],
+    name: "Solo Tutor",
+    price: "$49",
+    unit: "per session",
+    features: [
+      "1-on-1 scheduling",
+      "AI tutor assistant",
+      "Progress reports",
+      "Stripe billing",
+      "Parent portal",
+    ],
     featured: false,
   },
   {
-    name: 'Growth',
-    price: '$199',
-    unit: '/month',
-    label: 'Most Popular',
-    features: ['Everything in Solo', 'Up to 50 students', 'Group sessions', 'Certifications', 'Priority support'],
+    name: "Growth",
+    price: "$199",
+    unit: "/month",
+    label: "Most Popular",
+    features: [
+      "Everything in Solo",
+      "Up to 50 students",
+      "Group sessions",
+      "Certifications",
+      "Priority support",
+    ],
     featured: true,
   },
   {
-    name: 'Center',
-    price: '$399',
-    unit: '/month',
-    features: ['Everything in Growth', 'Unlimited students', 'Multi-tutor payroll', 'Room management', 'Admin analytics'],
+    name: "Center",
+    price: "$399",
+    unit: "/month",
+    features: [
+      "Everything in Growth",
+      "Unlimited students",
+      "Multi-tutor payroll",
+      "Room management",
+      "Admin analytics",
+    ],
     featured: false,
   },
 ];
 
 /* ─── org features ─── */
 const orgFeatures = [
-  'Multi-location management',
-  'Tutor payroll tracking',
-  'Room & resource scheduling',
-  'Lead management & intake forms',
-  'Custom branding',
-  'Bulk student import (CSV)',
-  'Drop-in session support',
-  'Admin analytics dashboard',
-  'API access',
+  "Multi-location management",
+  "Tutor payroll tracking",
+  "Room & resource scheduling",
+  "Lead management & intake forms",
+  "Custom branding",
+  "Bulk student import (CSV)",
+  "Drop-in session support",
+  "Admin analytics dashboard",
+  "API access",
 ];
 
 /* ─── platform dropdown items ─── */
 const platformItems = [
-  { label: 'AI Tutor', icon: Brain, desc: 'Claude-powered math assistant' },
-  { label: 'Scheduling', icon: Calendar, desc: 'Smart booking & calendar sync' },
-  { label: 'Progress Tracking', icon: BarChart3, desc: 'Mastery diagnostics & reports' },
-  { label: 'Whiteboard', icon: PenTool, desc: 'Desmos + LaTeX collaboration' },
-  { label: 'Certifications', icon: Award, desc: 'Assessments & competition prep' },
-  { label: 'Parent Portal', icon: Users, desc: 'Full visibility for parents' },
+  { label: "AI Tutor", icon: Brain, desc: "Claude-powered math assistant" },
+  {
+    label: "Scheduling",
+    icon: Calendar,
+    desc: "Smart booking & calendar sync",
+  },
+  {
+    label: "Progress Tracking",
+    icon: BarChart3,
+    desc: "Mastery diagnostics & reports",
+  },
+  { label: "Whiteboard", icon: PenTool, desc: "Desmos + LaTeX collaboration" },
+  {
+    label: "Certifications",
+    icon: Award,
+    desc: "Assessments & competition prep",
+  },
+  { label: "Parent Portal", icon: Users, desc: "Full visibility for parents" },
 ];
 
-export default function HomePage() {
+export default function HomePage({ isLoggedIn }: { isLoggedIn?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [platformOpen, setPlatformOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('centers');
-  const [redirecting, setRedirecting] = useState(true);
+  const [activeTab, setActiveTab] = useState("centers");
+  const [redirecting, setRedirecting] = useState(!!isLoggedIn);
 
-  // Check if user is authenticated and redirect
+  // Check if user is authenticated and redirect to their dashboard
   useEffect(() => {
+    if (!isLoggedIn) return;
     async function checkAuth() {
       try {
-        const res = await fetch('/api/auth/check', { method: 'GET' });
+        const res = await fetch("/api/auth/check", { method: "GET" });
         if (res.ok) {
           const data = await res.json();
           if (data.redirectTo) {
@@ -219,7 +250,7 @@ export default function HomePage() {
       setRedirecting(false);
     }
     checkAuth();
-  }, []);
+  }, [isLoggedIn]);
 
   if (redirecting) {
     return (
@@ -270,7 +301,9 @@ export default function HomePage() {
                           <item.icon className="w-4 h-4 text-blue-600" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-900">{item.label}</p>
+                          <p className="text-sm font-medium text-slate-900">
+                            {item.label}
+                          </p>
                           <p className="text-xs text-slate-500">{item.desc}</p>
                         </div>
                       </a>
@@ -279,14 +312,32 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-            <Link href="/pricing" className="hover:text-slate-900 transition-colors">Pricing</Link>
-            <a href="#organizations" className="hover:text-slate-900 transition-colors">For Organizations</a>
-            <a href="#features" className="hover:text-slate-900 transition-colors">Features</a>
+            <Link
+              href="/pricing"
+              className="hover:text-slate-900 transition-colors"
+            >
+              Pricing
+            </Link>
+            <a
+              href="#organizations"
+              className="hover:text-slate-900 transition-colors"
+            >
+              For Organizations
+            </a>
+            <a
+              href="#features"
+              className="hover:text-slate-900 transition-colors"
+            >
+              Features
+            </a>
           </nav>
 
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link href="/login" className="text-sm text-slate-600 hover:text-slate-900 px-3 py-2 transition-colors">
+            <Link
+              href="/login"
+              className="text-sm text-slate-600 hover:text-slate-900 px-3 py-2 transition-colors"
+            >
               Sign In
             </Link>
             <Link
@@ -302,7 +353,11 @@ export default function HomePage() {
             className="lg:hidden p-2 text-slate-600"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
 
@@ -310,13 +365,39 @@ export default function HomePage() {
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-slate-100 bg-white px-4 pb-4">
             <nav className="flex flex-col gap-1 py-3 text-sm">
-              <a href="#features" className="py-2 text-slate-600 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>Platform</a>
-              <Link href="/pricing" className="py-2 text-slate-600 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-              <a href="#organizations" className="py-2 text-slate-600 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>For Organizations</a>
+              <a
+                href="#features"
+                className="py-2 text-slate-600 hover:text-slate-900"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Platform
+              </a>
+              <Link
+                href="/pricing"
+                className="py-2 text-slate-600 hover:text-slate-900"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
+              <a
+                href="#organizations"
+                className="py-2 text-slate-600 hover:text-slate-900"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                For Organizations
+              </a>
             </nav>
             <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-              <Link href="/login" className="text-sm text-center text-slate-600 py-2">Sign In</Link>
-              <Link href="/get-started" className="bg-blue-600 text-white text-sm font-medium text-center py-2.5 rounded-lg">
+              <Link
+                href="/login"
+                className="text-sm text-center text-slate-600 py-2"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/get-started"
+                className="bg-blue-600 text-white text-sm font-medium text-center py-2.5 rounded-lg"
+              >
                 Get Started Free
               </Link>
             </div>
@@ -334,12 +415,13 @@ export default function HomePage() {
               Built for Math &amp; CS Tutoring
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] tracking-tight">
-              The Operating System for{' '}
+              The Operating System for{" "}
               <span className="text-blue-600">Tutoring Centers</span>
             </h1>
             <p className="text-lg text-slate-600 mt-6 max-w-lg leading-relaxed">
-              Schedule sessions, track mastery, bill parents, and power AI-assisted learning — all from one platform
-              built specifically for math and computer science education.
+              Schedule sessions, track mastery, bill parents, and power
+              AI-assisted learning — all from one platform built specifically
+              for math and computer science education.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
               <Link
@@ -370,36 +452,47 @@ export default function HomePage() {
                 <div className="w-3 h-3 rounded-full bg-slate-300" />
                 <div className="w-3 h-3 rounded-full bg-slate-300" />
                 <div className="flex-1 bg-white rounded-md h-6 ml-2 border border-slate-200 flex items-center px-3">
-                  <span className="text-xs text-slate-400">app.mathpivot.com/student</span>
+                  <span className="text-xs text-slate-400">
+                    app.mathpivot.com/student
+                  </span>
                 </div>
               </div>
               {/* Mock dashboard content */}
               <div className="bg-white rounded-xl border border-slate-200 p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-sm font-medium text-slate-900">Student Progress</p>
+                    <p className="text-sm font-medium text-slate-900">
+                      Student Progress
+                    </p>
                     <p className="text-xs text-slate-500">This semester</p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-blue-600">87%</p>
-                    <p className="text-xs text-green-600 font-medium">+12% this month</p>
+                    <p className="text-xs text-green-600 font-medium">
+                      +12% this month
+                    </p>
                   </div>
                 </div>
                 {/* Mock mastery bars */}
                 <div className="space-y-3">
                   {[
-                    { topic: 'Algebra', pct: 92, color: 'bg-blue-600' },
-                    { topic: 'Geometry', pct: 78, color: 'bg-blue-500' },
-                    { topic: 'Pre-Calculus', pct: 85, color: 'bg-blue-600' },
-                    { topic: 'AP Calculus', pct: 64, color: 'bg-amber-500' },
+                    { topic: "Algebra", pct: 92, color: "bg-blue-600" },
+                    { topic: "Geometry", pct: 78, color: "bg-blue-500" },
+                    { topic: "Pre-Calculus", pct: 85, color: "bg-blue-600" },
+                    { topic: "AP Calculus", pct: 64, color: "bg-amber-500" },
                   ].map((bar) => (
                     <div key={bar.topic}>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-slate-600">{bar.topic}</span>
-                        <span className="text-slate-500 font-medium">{bar.pct}%</span>
+                        <span className="text-slate-500 font-medium">
+                          {bar.pct}%
+                        </span>
                       </div>
                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div className={`h-full ${bar.color} rounded-full`} style={{ width: `${bar.pct}%` }} />
+                        <div
+                          className={`h-full ${bar.color} rounded-full`}
+                          style={{ width: `${bar.pct}%` }}
+                        />
                       </div>
                     </div>
                   ))}
@@ -413,10 +506,13 @@ export default function HomePage() {
                 <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
                   <Brain className="w-3 h-3 text-white" />
                 </div>
-                <span className="text-xs font-medium text-slate-900">AI Tutor</span>
+                <span className="text-xs font-medium text-slate-900">
+                  AI Tutor
+                </span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                &ldquo;Let me help with that quadratic! Try factoring x² + 5x + 6 by finding two numbers that multiply to 6...&rdquo;
+                &ldquo;Let me help with that quadratic! Try factoring x² + 5x +
+                6 by finding two numbers that multiply to 6...&rdquo;
               </p>
             </div>
 
@@ -426,8 +522,12 @@ export default function HomePage() {
                 <Check className="w-3 h-3 text-green-600" />
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-900">Session Booked</p>
-                <p className="text-[10px] text-slate-500">Tomorrow at 4:00 PM</p>
+                <p className="text-xs font-medium text-slate-900">
+                  Session Booked
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  Tomorrow at 4:00 PM
+                </p>
               </div>
             </div>
           </div>
@@ -439,13 +539,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: '95%', label: 'Grade Improvement' },
-              { value: '500+', label: 'Families Served' },
-              { value: '50+', label: 'Expert Tutors' },
-              { value: '4.9/5', label: 'Parent Satisfaction' },
+              { value: "95%", label: "Grade Improvement" },
+              { value: "500+", label: "Families Served" },
+              { value: "50+", label: "Expert Tutors" },
+              { value: "4.9/5", label: "Parent Satisfaction" },
             ].map((stat) => (
               <div key={stat.label}>
-                <p className="text-3xl sm:text-4xl font-bold text-slate-900">{stat.value}</p>
+                <p className="text-3xl sm:text-4xl font-bold text-slate-900">
+                  {stat.value}
+                </p>
                 <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
               </div>
             ))}
@@ -457,9 +559,12 @@ export default function HomePage() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">Built for Every Type of Math Educator</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+              Built for Every Type of Math Educator
+            </h2>
             <p className="text-slate-600 mt-3 max-w-2xl mx-auto">
-              Whether you run a tutoring center or teach solo, MathPivot adapts to your workflow.
+              Whether you run a tutoring center or teach solo, MathPivot adapts
+              to your workflow.
             </p>
           </div>
 
@@ -471,8 +576,8 @@ export default function HomePage() {
                 onClick={() => setActiveTab(a.key)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === a.key
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 <a.icon className="w-4 h-4" />
@@ -484,7 +589,9 @@ export default function HomePage() {
           {/* Tab content */}
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">{activeAudience.headline}</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-6">
+                {activeAudience.headline}
+              </h3>
               <ul className="space-y-4">
                 {activeAudience.points.map((point, i) => (
                   <li key={i} className="flex items-start gap-3">
@@ -507,8 +614,12 @@ export default function HomePage() {
             <div className="bg-slate-50 rounded-2xl border border-slate-200 p-8 flex items-center justify-center min-h-[300px]">
               <div className="text-center">
                 <activeAudience.icon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                <p className="text-lg font-semibold text-slate-900">{activeAudience.label}</p>
-                <p className="text-sm text-slate-500 mt-1 max-w-xs mx-auto">{activeAudience.headline}</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {activeAudience.label}
+                </p>
+                <p className="text-sm text-slate-500 mt-1 max-w-xs mx-auto">
+                  {activeAudience.headline}
+                </p>
               </div>
             </div>
           </div>
@@ -523,7 +634,8 @@ export default function HomePage() {
               Everything You Need to Run a Tutoring Business
             </h2>
             <p className="text-slate-600 mt-3 max-w-2xl mx-auto">
-              From AI-assisted teaching to automated billing, every tool is designed for math and CS education.
+              From AI-assisted teaching to automated billing, every tool is
+              designed for math and CS education.
             </p>
           </div>
 
@@ -532,19 +644,24 @@ export default function HomePage() {
               <div
                 key={row.badge}
                 className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${
-                  idx % 2 === 1 ? 'lg:direction-rtl' : ''
+                  idx % 2 === 1 ? "lg:direction-rtl" : ""
                 }`}
               >
                 {/* Text side */}
-                <div className={idx % 2 === 1 ? 'lg:order-2' : ''}>
+                <div className={idx % 2 === 1 ? "lg:order-2" : ""}>
                   <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-4">
                     <row.icon className="w-3.5 h-3.5" />
                     {row.badge}
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">{row.headline}</h3>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+                    {row.headline}
+                  </h3>
                   <ul className="space-y-3">
                     {row.points.map((point, i) => (
-                      <li key={i} className="flex items-start gap-3 text-slate-600">
+                      <li
+                        key={i}
+                        className="flex items-start gap-3 text-slate-600"
+                      >
                         <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                         {point}
                       </li>
@@ -553,10 +670,14 @@ export default function HomePage() {
                 </div>
 
                 {/* Visual placeholder */}
-                <div className={`bg-slate-50 rounded-2xl border border-slate-200 p-8 flex items-center justify-center min-h-[280px] ${idx % 2 === 1 ? 'lg:order-1' : ''}`}>
+                <div
+                  className={`bg-slate-50 rounded-2xl border border-slate-200 p-8 flex items-center justify-center min-h-[280px] ${idx % 2 === 1 ? "lg:order-1" : ""}`}
+                >
                   <div className="text-center">
                     <row.icon className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-slate-500">{row.badge} Interface</p>
+                    <p className="text-sm font-medium text-slate-500">
+                      {row.badge} Interface
+                    </p>
                   </div>
                 </div>
               </div>
@@ -568,10 +689,13 @@ export default function HomePage() {
       {/* ════════ 6. WHITEBOARD SHOWCASE ════════ */}
       <section className="bg-slate-900 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">A Whiteboard Built for Math</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            A Whiteboard Built for Math
+          </h2>
           <p className="text-slate-400 max-w-2xl mx-auto mb-12">
-            Real-time collaborative whiteboard with Desmos graphing, LaTeX equations, and drawing tools —
-            purpose-built for teaching math and computer science.
+            Real-time collaborative whiteboard with Desmos graphing, LaTeX
+            equations, and drawing tools — purpose-built for teaching math and
+            computer science.
           </p>
 
           {/* Whiteboard mockup */}
@@ -579,9 +703,13 @@ export default function HomePage() {
             <div className="bg-white rounded-xl p-6 min-h-[240px] flex items-center justify-center">
               <div className="text-center">
                 <PenTool className="w-10 h-10 text-blue-600 mx-auto mb-3" />
-                <p className="text-sm text-slate-500">Interactive whiteboard with Desmos &amp; LaTeX</p>
+                <p className="text-sm text-slate-500">
+                  Interactive whiteboard with Desmos &amp; LaTeX
+                </p>
                 <div className="flex items-center justify-center gap-4 mt-4">
-                  <span className="text-lg font-mono text-slate-700">f(x) = x² + 2x + 1</span>
+                  <span className="text-lg font-mono text-slate-700">
+                    f(x) = x² + 2x + 1
+                  </span>
                 </div>
               </div>
             </div>
@@ -589,7 +717,12 @@ export default function HomePage() {
 
           {/* Feature chips */}
           <div className="flex flex-wrap justify-center gap-3">
-            {['Desmos Integration', 'LaTeX Equations', 'Real-time Collaboration', 'Session Recording'].map((chip) => (
+            {[
+              "Desmos Integration",
+              "LaTeX Equations",
+              "Real-time Collaboration",
+              "Session Recording",
+            ].map((chip) => (
               <span
                 key={chip}
                 className="bg-slate-800 text-slate-300 text-sm font-medium px-4 py-2 rounded-full border border-slate-700"
@@ -608,11 +741,15 @@ export default function HomePage() {
             Scale Your Tutoring Center with MathPivot
           </h2>
           <p className="text-blue-100 max-w-2xl mx-auto mb-12">
-            Replace spreadsheets with a system built for math education. Everything your center needs in one platform.
+            Replace spreadsheets with a system built for math education.
+            Everything your center needs in one platform.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto mb-12">
             {orgFeatures.map((feature) => (
-              <div key={feature} className="flex items-center gap-2 text-left text-white/90">
+              <div
+                key={feature}
+                className="flex items-center gap-2 text-left text-white/90"
+              >
                 <Check className="w-4 h-4 text-white flex-shrink-0" />
                 <span className="text-sm">{feature}</span>
               </div>
@@ -641,27 +778,35 @@ export default function HomePage() {
           <div className="max-w-3xl mx-auto text-center">
             <Quote className="w-10 h-10 text-blue-200 mx-auto mb-6" />
             <blockquote className="text-xl sm:text-2xl text-slate-900 font-medium leading-relaxed">
-              &ldquo;MathPivot replaced three different tools we were juggling — scheduling, billing, and progress tracking.
-              Now our tutors spend time teaching instead of doing admin work.&rdquo;
+              &ldquo;MathPivot replaced three different tools we were juggling —
+              scheduling, billing, and progress tracking. Now our tutors spend
+              time teaching instead of doing admin work.&rdquo;
             </blockquote>
             <div className="mt-6">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-blue-600 font-bold">JR</span>
               </div>
               <p className="font-semibold text-slate-900">Jessica Rodriguez</p>
-              <p className="text-sm text-slate-500">Director, Apex Math Academy</p>
+              <p className="text-sm text-slate-500">
+                Director, Apex Math Academy
+              </p>
             </div>
           </div>
 
           {/* Impact metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto mt-12">
             {[
-              { metric: '2x', label: 'more sessions booked per week' },
-              { metric: '45 min', label: 'saved on admin per day' },
-              { metric: '30%', label: 'increase in student retention' },
+              { metric: "2x", label: "more sessions booked per week" },
+              { metric: "45 min", label: "saved on admin per day" },
+              { metric: "30%", label: "increase in student retention" },
             ].map((item) => (
-              <div key={item.label} className="bg-white rounded-xl border border-slate-200 p-5 text-center">
-                <p className="text-2xl font-bold text-blue-600">{item.metric}</p>
+              <div
+                key={item.label}
+                className="bg-white rounded-xl border border-slate-200 p-5 text-center"
+              >
+                <p className="text-2xl font-bold text-blue-600">
+                  {item.metric}
+                </p>
                 <p className="text-sm text-slate-600 mt-1">{item.label}</p>
               </div>
             ))}
@@ -673,8 +818,12 @@ export default function HomePage() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">Simple, Transparent Pricing</h2>
-            <p className="text-slate-600 mt-3">No hidden fees. Cancel anytime.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-slate-600 mt-3">
+              No hidden fees. Cancel anytime.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -683,8 +832,8 @@ export default function HomePage() {
                 key={tier.name}
                 className={`rounded-2xl p-6 ${
                   tier.featured
-                    ? 'bg-blue-600 text-white ring-4 ring-blue-600/20 scale-[1.02]'
-                    : 'bg-white border border-slate-200'
+                    ? "bg-blue-600 text-white ring-4 ring-blue-600/20 scale-[1.02]"
+                    : "bg-white border border-slate-200"
                 }`}
               >
                 {tier.label && (
@@ -692,21 +841,32 @@ export default function HomePage() {
                     {tier.label}
                   </span>
                 )}
-                <h3 className={`text-lg font-semibold mt-3 ${tier.featured ? 'text-white' : 'text-slate-900'}`}>
+                <h3
+                  className={`text-lg font-semibold mt-3 ${tier.featured ? "text-white" : "text-slate-900"}`}
+                >
                   {tier.name}
                 </h3>
                 <div className="mt-2 mb-5">
-                  <span className={`text-3xl font-bold ${tier.featured ? 'text-white' : 'text-slate-900'}`}>
+                  <span
+                    className={`text-3xl font-bold ${tier.featured ? "text-white" : "text-slate-900"}`}
+                  >
                     {tier.price}
                   </span>
-                  <span className={`text-sm ml-1 ${tier.featured ? 'text-blue-100' : 'text-slate-500'}`}>
+                  <span
+                    className={`text-sm ml-1 ${tier.featured ? "text-blue-100" : "text-slate-500"}`}
+                  >
                     {tier.unit}
                   </span>
                 </div>
                 <ul className="space-y-2.5 mb-6">
                   {tier.features.map((f) => (
-                    <li key={f} className={`flex items-center gap-2 text-sm ${tier.featured ? 'text-blue-50' : 'text-slate-600'}`}>
-                      <Check className={`w-4 h-4 flex-shrink-0 ${tier.featured ? 'text-white' : 'text-green-500'}`} />
+                    <li
+                      key={f}
+                      className={`flex items-center gap-2 text-sm ${tier.featured ? "text-blue-50" : "text-slate-600"}`}
+                    >
+                      <Check
+                        className={`w-4 h-4 flex-shrink-0 ${tier.featured ? "text-white" : "text-green-500"}`}
+                      />
                       {f}
                     </li>
                   ))}
@@ -715,8 +875,8 @@ export default function HomePage() {
                   href="/get-started"
                   className={`block text-center font-medium py-2.5 rounded-lg text-sm transition-colors ${
                     tier.featured
-                      ? 'bg-white text-blue-600 hover:bg-blue-50'
-                      : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
+                      ? "bg-white text-blue-600 hover:bg-blue-50"
+                      : "border border-slate-300 text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   Get Started
@@ -726,8 +886,11 @@ export default function HomePage() {
           </div>
 
           <p className="text-center text-sm text-slate-500 mt-8">
-            Need enterprise pricing?{' '}
-            <Link href="/get-started" className="text-blue-600 font-medium hover:underline">
+            Need enterprise pricing?{" "}
+            <Link
+              href="/get-started"
+              className="text-blue-600 font-medium hover:underline"
+            >
               Contact Sales
             </Link>
           </p>
@@ -741,7 +904,8 @@ export default function HomePage() {
             Ready to Transform Your Tutoring Business?
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto mb-8">
-            Join 500+ families and 50+ tutors already using MathPivot to deliver better math education.
+            Join 500+ families and 50+ tutors already using MathPivot to deliver
+            better math education.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
@@ -779,43 +943,99 @@ export default function HomePage() {
 
             {/* Platform */}
             <div>
-              <p className="font-semibold text-slate-900 text-sm mb-3">Platform</p>
+              <p className="font-semibold text-slate-900 text-sm mb-3">
+                Platform
+              </p>
               <ul className="space-y-2 text-sm text-slate-500">
-                <li><a href="#features" className="hover:text-slate-700">AI Tutor</a></li>
-                <li><a href="#features" className="hover:text-slate-700">Scheduling</a></li>
-                <li><a href="#features" className="hover:text-slate-700">Progress Tracking</a></li>
-                <li><a href="#features" className="hover:text-slate-700">Whiteboard</a></li>
-                <li><a href="#features" className="hover:text-slate-700">Billing</a></li>
-                <li><a href="#features" className="hover:text-slate-700">Certifications</a></li>
+                <li>
+                  <a href="#features" className="hover:text-slate-700">
+                    AI Tutor
+                  </a>
+                </li>
+                <li>
+                  <a href="#features" className="hover:text-slate-700">
+                    Scheduling
+                  </a>
+                </li>
+                <li>
+                  <a href="#features" className="hover:text-slate-700">
+                    Progress Tracking
+                  </a>
+                </li>
+                <li>
+                  <a href="#features" className="hover:text-slate-700">
+                    Whiteboard
+                  </a>
+                </li>
+                <li>
+                  <a href="#features" className="hover:text-slate-700">
+                    Billing
+                  </a>
+                </li>
+                <li>
+                  <a href="#features" className="hover:text-slate-700">
+                    Certifications
+                  </a>
+                </li>
               </ul>
             </div>
 
             {/* Company */}
             <div>
-              <p className="font-semibold text-slate-900 text-sm mb-3">Company</p>
+              <p className="font-semibold text-slate-900 text-sm mb-3">
+                Company
+              </p>
               <ul className="space-y-2 text-sm text-slate-500">
-                <li><Link href="/pricing" className="hover:text-slate-700">Pricing</Link></li>
-                <li><Link href="/get-started" className="hover:text-slate-700">Get Started</Link></li>
-                <li><Link href="/login" className="hover:text-slate-700">Sign In</Link></li>
+                <li>
+                  <Link href="/pricing" className="hover:text-slate-700">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/get-started" className="hover:text-slate-700">
+                    Get Started
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="hover:text-slate-700">
+                    Sign In
+                  </Link>
+                </li>
               </ul>
             </div>
 
             {/* Resources */}
             <div>
-              <p className="font-semibold text-slate-900 text-sm mb-3">Resources</p>
+              <p className="font-semibold text-slate-900 text-sm mb-3">
+                Resources
+              </p>
               <ul className="space-y-2 text-sm text-slate-500">
-                <li><a href="#features" className="hover:text-slate-700">Features</a></li>
-                <li><a href="#organizations" className="hover:text-slate-700">For Organizations</a></li>
+                <li>
+                  <a href="#features" className="hover:text-slate-700">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#organizations" className="hover:text-slate-700">
+                    For Organizations
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
           {/* Bottom bar */}
           <div className="border-t border-slate-200 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-400">&copy; {new Date().getFullYear()} MathPivot. All rights reserved.</p>
+            <p className="text-xs text-slate-400">
+              &copy; {new Date().getFullYear()} MathPivot. All rights reserved.
+            </p>
             <div className="flex gap-6 text-xs text-slate-400">
-              <a href="#" className="hover:text-slate-600">Privacy Policy</a>
-              <a href="#" className="hover:text-slate-600">Terms of Service</a>
+              <a href="#" className="hover:text-slate-600">
+                Privacy Policy
+              </a>
+              <a href="#" className="hover:text-slate-600">
+                Terms of Service
+              </a>
             </div>
           </div>
         </div>

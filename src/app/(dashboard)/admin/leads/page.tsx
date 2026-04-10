@@ -1,23 +1,32 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { getLeadsByStatus } from '@/app/actions/leads';
-import { LeadKanban } from './LeadKanban';
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { getLeadsByStatus } from "@/app/actions/leads";
+import { LeadKanban } from "./LeadKanban";
+
+interface LeadRow {
+  next_follow_up_at: string | null;
+}
 
 export default async function AdminLeadsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { columns, error } = await getLeadsByStatus();
 
   // Summary
-  const cols = columns as Record<string, any[]>;
+  const cols = columns as Record<string, LeadRow[]>;
   const allLeads = Object.values(cols).flat();
   const totalLeads = allLeads.length;
-  const newLeads = cols['new']?.length || 0;
-  const followUpsToday = allLeads.filter((l: unknown) =>
-    l.next_follow_up_at && new Date(l.next_follow_up_at).toDateString() === new Date().toDateString()
+  const newLeads = cols["new"]?.length || 0;
+  const followUpsToday = allLeads.filter(
+    (l: LeadRow) =>
+      l.next_follow_up_at &&
+      new Date(l.next_follow_up_at).toDateString() ===
+        new Date().toDateString(),
   ).length;
 
   return (
@@ -44,16 +53,24 @@ export default async function AdminLeadsPage() {
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide">Total Leads</p>
+          <p className="text-xs text-slate-500 uppercase tracking-wide">
+            Total Leads
+          </p>
           <p className="text-2xl font-bold text-slate-900 mt-1">{totalLeads}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide">New (uncontacted)</p>
+          <p className="text-xs text-slate-500 uppercase tracking-wide">
+            New (uncontacted)
+          </p>
           <p className="text-2xl font-bold text-blue-600 mt-1">{newLeads}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide">Follow-ups Today</p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">{followUpsToday}</p>
+          <p className="text-xs text-slate-500 uppercase tracking-wide">
+            Follow-ups Today
+          </p>
+          <p className="text-2xl font-bold text-amber-600 mt-1">
+            {followUpsToday}
+          </p>
         </div>
       </div>
 
@@ -62,4 +79,3 @@ export default async function AdminLeadsPage() {
     </div>
   );
 }
-

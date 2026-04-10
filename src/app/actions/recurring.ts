@@ -1,11 +1,29 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { z } from 'zod';
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { z } from "zod";
 
-export type RecurringResult = { success: boolean; error?: string; seriesId?: string };
+export type RecurringResult = {
+  success: boolean;
+  error?: string;
+  seriesId?: string;
+};
+
+interface BookingRow {
+  id: string;
+  start_at: string;
+  end_at: string;
+  status: string;
+  modality: string;
+  is_group_session: boolean;
+  notes: string | null;
+  room: { name: string } | null;
+  tutor: { full_name: string } | null;
+  student: { full_name: string } | null;
+  parent: { full_name: string } | null;
+}
 
 // ============================================================
 // GET RECURRING SERIES
@@ -14,14 +32,16 @@ export async function getRecurringSeries() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('recurring_series')
-    .select(`
+    .from("recurring_series")
+    .select(
+      `
       *,
       tutor:tutor_user_id (full_name),
       student:student_user_id (full_name),
       room:room_id (name)
-    `)
-    .order('created_at', { ascending: false });
+    `,
+    )
+    .order("created_at", { ascending: false });
 
   if (error) return { series: [], error: error.message };
   return { series: data || [], error: null };
@@ -35,11 +55,11 @@ const createSeriesSchema = z.object({
   studentUserId: z.string().uuid().optional(),
   familyId: z.string().uuid().optional(),
   roomId: z.string().uuid().optional(),
-  pattern: z.enum(['weekly', 'biweekly', 'monthly']),
+  pattern: z.enum(["weekly", "biweekly", "monthly"]),
   dayOfWeek: z.coerce.number().int().min(0).max(6),
   startTime: z.string(),
   endTime: z.string(),
-  modality: z.enum(['online', 'in_person']),
+  modality: z.enum(["online", "in_person"]),
   isGroup: z.coerce.boolean().default(false),
   maxStudents: z.coerce.number().int().min(1).default(1),
   subject: z.string().optional(),
@@ -48,32 +68,37 @@ const createSeriesSchema = z.object({
   endsOn: z.string().optional(),
 });
 
-export async function createRecurringSeries(formData: FormData): Promise<RecurringResult> {
+export async function createRecurringSeries(
+  formData: FormData,
+): Promise<RecurringResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const parsed = createSeriesSchema.safeParse({
-    tutorUserId: formData.get('tutorUserId'),
-    studentUserId: formData.get('studentUserId') || undefined,
-    familyId: formData.get('familyId') || undefined,
-    roomId: formData.get('roomId') || undefined,
-    pattern: formData.get('pattern'),
-    dayOfWeek: formData.get('dayOfWeek'),
-    startTime: formData.get('startTime'),
-    endTime: formData.get('endTime'),
-    modality: formData.get('modality') || 'online',
-    isGroup: formData.get('isGroup') === 'true',
-    maxStudents: formData.get('maxStudents') || 1,
-    subject: formData.get('subject') || undefined,
-    title: formData.get('title') || undefined,
-    startsOn: formData.get('startsOn'),
-    endsOn: formData.get('endsOn') || undefined,
+    tutorUserId: formData.get("tutorUserId"),
+    studentUserId: formData.get("studentUserId") || undefined,
+    familyId: formData.get("familyId") || undefined,
+    roomId: formData.get("roomId") || undefined,
+    pattern: formData.get("pattern"),
+    dayOfWeek: formData.get("dayOfWeek"),
+    startTime: formData.get("startTime"),
+    endTime: formData.get("endTime"),
+    modality: formData.get("modality") || "online",
+    isGroup: formData.get("isGroup") === "true",
+    maxStudents: formData.get("maxStudents") || 1,
+    subject: formData.get("subject") || undefined,
+    title: formData.get("title") || undefined,
+    startsOn: formData.get("startsOn"),
+    endsOn: formData.get("endsOn") || undefined,
   });
 
-  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+  if (!parsed.success)
+    return { success: false, error: parsed.error.issues[0].message };
 
   const { data, error } = await supabase
-    .from('recurring_series')
+    .from("recurring_series")
     .insert({
       tutor_user_id: parsed.data.tutorUserId,
       student_user_id: parsed.data.studentUserId || null,
@@ -92,46 +117,58 @@ export async function createRecurringSeries(formData: FormData): Promise<Recurri
       ends_on: parsed.data.endsOn || null,
       created_by: user?.id || null,
     })
-    .select('id')
+    .select("id")
     .single();
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/calendar');
+  revalidatePath("/admin/calendar");
   return { success: true, seriesId: data?.id };
 }
 
 // ============================================================
 // GENERATE BOOKINGS FROM SERIES (admin)
 // ============================================================
-export async function generateRecurringBookings(seriesId: string, weeksAhead = 4): Promise<RecurringResult> {
+export async function generateRecurringBookings(
+  seriesId: string,
+  weeksAhead = 4,
+): Promise<RecurringResult> {
   const admin = createAdminClient();
 
-  const { data, error } = await admin.rpc('generate_recurring_bookings', {
+  const { data, error } = await admin.rpc("generate_recurring_bookings", {
     p_series_id: seriesId,
     p_weeks_ahead: weeksAhead,
   });
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/calendar');
-  return { success: true, error: data === 0 ? 'No new bookings generated (slots may already exist)' : undefined };
+  revalidatePath("/admin/calendar");
+  return {
+    success: true,
+    error:
+      data === 0
+        ? "No new bookings generated (slots may already exist)"
+        : undefined,
+  };
 }
 
 // ============================================================
 // PAUSE / RESUME SERIES
 // ============================================================
-export async function toggleRecurringSeries(seriesId: string, active: boolean): Promise<RecurringResult> {
+export async function toggleRecurringSeries(
+  seriesId: string,
+  active: boolean,
+): Promise<RecurringResult> {
   const supabase = await createClient();
 
   const { error } = await supabase
-    .from('recurring_series')
+    .from("recurring_series")
     .update({ is_active: active })
-    .eq('id', seriesId);
+    .eq("id", seriesId);
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/calendar');
+  revalidatePath("/admin/calendar");
   return { success: true };
 }
 
@@ -142,9 +179,9 @@ export async function getRooms() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('rooms')
-    .select('*')
-    .order('name');
+    .from("rooms")
+    .select("*")
+    .order("name");
 
   if (error) return { rooms: [], error: error.message };
   return { rooms: data || [], error: null };
@@ -155,7 +192,7 @@ export async function getRooms() {
 // ============================================================
 const roomSchema = z.object({
   name: z.string().min(1),
-  roomType: z.enum(['classroom', 'lab', 'office', 'virtual']),
+  roomType: z.enum(["classroom", "lab", "office", "virtual"]),
   capacity: z.coerce.number().int().min(1),
   location: z.string().optional(),
   floor: z.string().optional(),
@@ -168,48 +205,50 @@ export async function createRoom(formData: FormData): Promise<RecurringResult> {
   const supabase = await createClient();
 
   const parsed = roomSchema.safeParse({
-    name: formData.get('name'),
-    roomType: formData.get('roomType'),
-    capacity: formData.get('capacity'),
-    location: formData.get('location') || undefined,
-    floor: formData.get('floor') || undefined,
-    isVirtual: formData.get('isVirtual') === 'true',
-    virtualLink: formData.get('virtualLink') || undefined,
-    notes: formData.get('notes') || undefined,
+    name: formData.get("name"),
+    roomType: formData.get("roomType"),
+    capacity: formData.get("capacity"),
+    location: formData.get("location") || undefined,
+    floor: formData.get("floor") || undefined,
+    isVirtual: formData.get("isVirtual") === "true",
+    virtualLink: formData.get("virtualLink") || undefined,
+    notes: formData.get("notes") || undefined,
   });
 
-  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
+  if (!parsed.success)
+    return { success: false, error: parsed.error.issues[0].message };
 
-  const { error } = await supabase
-    .from('rooms')
-    .insert({
-      name: parsed.data.name,
-      room_type: parsed.data.roomType,
-      capacity: parsed.data.capacity,
-      location: parsed.data.location || null,
-      floor: parsed.data.floor || null,
-      is_virtual: parsed.data.isVirtual,
-      virtual_link: parsed.data.virtualLink || null,
-      notes: parsed.data.notes || null,
-    });
+  const { error } = await supabase.from("rooms").insert({
+    name: parsed.data.name,
+    room_type: parsed.data.roomType,
+    capacity: parsed.data.capacity,
+    location: parsed.data.location || null,
+    floor: parsed.data.floor || null,
+    is_virtual: parsed.data.isVirtual,
+    virtual_link: parsed.data.virtualLink || null,
+    notes: parsed.data.notes || null,
+  });
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/rooms');
+  revalidatePath("/admin/rooms");
   return { success: true };
 }
 
-export async function toggleRoom(roomId: string, active: boolean): Promise<RecurringResult> {
+export async function toggleRoom(
+  roomId: string,
+  active: boolean,
+): Promise<RecurringResult> {
   const supabase = await createClient();
 
   const { error } = await supabase
-    .from('rooms')
+    .from("rooms")
     .update({ is_active: active })
-    .eq('id', roomId);
+    .eq("id", roomId);
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath('/admin/rooms');
+  revalidatePath("/admin/rooms");
   return { success: true };
 }
 
@@ -219,9 +258,10 @@ export async function toggleRoom(roomId: string, active: boolean): Promise<Recur
 export async function getCalendarEvents(startDate: string, endDate: string) {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('bookings')
-    .select(`
+  const { data, error } = (await supabase
+    .from("bookings")
+    .select(
+      `
       id,
       start_at,
       end_at,
@@ -233,30 +273,32 @@ export async function getCalendarEvents(startDate: string, endDate: string) {
       tutor:tutor_user_id (full_name),
       student:student_user_id (full_name),
       parent:parent_user_id (full_name)
-    `)
-    .gte('start_at', startDate)
-    .lte('start_at', endDate)
-    .neq('status', 'canceled')
-    .order('start_at', { ascending: true }) as { data: unknown[] | null; error: unknown };
+    `,
+    )
+    .gte("start_at", startDate)
+    .lte("start_at", endDate)
+    .neq("status", "canceled")
+    .order("start_at", { ascending: true })) as {
+    data: BookingRow[] | null;
+    error: { message: string } | null;
+  };
 
   if (error) return { events: [], error: error.message };
 
-  const events = (data || []).map((b: unknown) => ({
+  const events = (data || []).map((b: BookingRow) => ({
     id: b.id,
     title: b.is_group_session
-      ? `Group: ${b.tutor?.full_name || 'TBD'}`
-      : `${b.student?.full_name || 'Student'} — ${b.tutor?.full_name || 'Tutor'}`,
+      ? `Group: ${b.tutor?.full_name || "TBD"}`
+      : `${b.student?.full_name || "Student"} — ${b.tutor?.full_name || "Tutor"}`,
     start: b.start_at,
     end: b.end_at,
     status: b.status,
     modality: b.modality,
     isGroup: b.is_group_session,
     room: b.room?.name || null,
-    tutorName: b.tutor?.full_name,
-    studentName: b.student?.full_name,
+    tutorName: b.tutor?.full_name || "",
+    studentName: b.student?.full_name || "",
   }));
 
   return { events, error: null };
 }
-
-
