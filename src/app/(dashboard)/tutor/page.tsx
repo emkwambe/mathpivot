@@ -134,7 +134,12 @@ export default async function TutorDashboardPage() {
           <div>
             <h1 className="text-2xl font-bold">
               Welcome,{" "}
-              {(authUser.user_metadata?.full_name || "Tutor").split(" ")[0]}!
+              {
+                String(authUser.user_metadata?.full_name || "Tutor").split(
+                  " ",
+                )[0]
+              }
+              !
             </h1>
             <p className="text-emerald-100 mt-1">
               {formatDate(now, "EEEE, MMMM d, yyyy")}
