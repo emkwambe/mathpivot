@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -46,7 +47,7 @@ export default async function TutorDashboardPage() {
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser();
-  if (!authUser) return null;
+  if (!authUser) redirect("/login");
 
   const now = new Date();
   const THIRTY_DAYS_AGO = new Date(
