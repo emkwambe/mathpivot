@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createRoom, toggleRoom } from "@/app/actions/recurring";
+import type { RoomRecord } from "@/types/views";
 
 const typeLabels: Record<string, string> = {
   classroom: "Classroom",
@@ -18,21 +19,8 @@ const typeColors: Record<string, string> = {
   virtual: "bg-green-100 text-green-700",
 };
 
-interface Room {
-  id: string;
-  name: string;
-  room_type: string;
-  capacity: number;
-  is_active: boolean;
-  is_virtual: boolean;
-  location?: string;
-  floor?: string;
-  virtual_link?: string;
-  notes?: string;
-}
-
 interface RoomManagerProps {
-  rooms: Room[];
+  rooms: RoomRecord[];
 }
 
 export function RoomManager({ rooms }: RoomManagerProps) {
@@ -210,7 +198,7 @@ export function RoomManager({ rooms }: RoomManagerProps) {
                 </td>
               </tr>
             )}
-            {rooms.map((room: Room) => (
+            {rooms.map((room: RoomRecord) => (
               <tr key={room.id} className={!room.is_active ? "opacity-50" : ""}>
                 <td className="px-4 py-3">
                   <p className="font-medium text-slate-900">{room.name}</p>

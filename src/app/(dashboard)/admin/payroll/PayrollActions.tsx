@@ -2,22 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-interface PayoutPeriod {
-  id: string;
-  period_start: string;
-  period_end: string;
-  is_locked: boolean;
-}
-
-interface Payout {
-  id: string;
-  status: string;
-  total_amount_cents: number;
-  sessions_count: number;
-  total_hours: number;
-  tutor?: { full_name?: string; email?: string };
-}
+import type { PayoutPeriod, AdminPayoutRow } from "@/types/views";
 
 interface PayrollActionsProps {
   periods: PayoutPeriod[];
@@ -35,7 +20,7 @@ interface PayrollActionsProps {
   markPayoutPaid: (
     payoutId: string,
   ) => Promise<{ success: boolean; error?: string }>;
-  payouts: Payout[];
+  payouts: AdminPayoutRow[];
 }
 
 const statusColors: Record<string, string> = {
@@ -241,7 +226,7 @@ export function PayrollActions({
                 </td>
               </tr>
             )}
-            {payouts.map((p: Payout) => (
+            {payouts.map((p: AdminPayoutRow) => (
               <tr key={p.id}>
                 <td className="px-4 py-3">
                   <p className="font-medium text-slate-900">

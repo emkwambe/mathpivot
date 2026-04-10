@@ -2,26 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getDropInSlots, getTodayDropInAttendance } from "@/app/actions/dropin";
 import { DropInManager } from "./DropInManager";
-
-interface DropInAttendanceRow {
-  id: string;
-  check_in_at: string;
-  check_out_at: string | null;
-  student: { full_name: string } | null;
-  slot: { title: string } | null;
-}
-
-interface DropInSlotRow {
-  id: string;
-  title: string;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  tutor: { full_name: string } | null;
-  room: { name: string } | null;
-  modality: string;
-  max_concurrent: number;
-}
+import type { DropInAttendanceRow, DropInSlotRow } from "@/types/views";
 
 const DAYS = [
   "Sunday",

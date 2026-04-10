@@ -9,22 +9,7 @@ import {
   markPayoutPaid,
 } from "@/app/actions/payroll";
 import { PayrollActions } from "./PayrollActions";
-
-interface PayoutPeriod {
-  id: string;
-  period_start: string;
-  period_end: string;
-  is_locked: boolean;
-}
-
-interface Payout {
-  id: string;
-  status: string;
-  total_amount_cents: number;
-  sessions_count: number;
-  total_hours: number;
-  tutor?: { full_name?: string; email?: string };
-}
+import type { PayoutPeriod, AdminPayoutRow } from "@/types/views";
 
 export default async function AdminPayrollPage({
   searchParams,
@@ -51,16 +36,19 @@ export default async function AdminPayrollPage({
 
   // Summary stats
   const totalPayable = payouts.reduce(
-    (s: number, p: Payout) => s + p.total_amount_cents,
+    (s: number, p: AdminPayoutRow) => s + p.total_amount_cents,
     0,
   );
   const pendingCount = payouts.filter(
-    (p: Payout) => p.status === "draft" || p.status === "pending_approval",
+    (p: AdminPayoutRow) =>
+      p.status === "draft" || p.status === "pending_approval",
   ).length;
   const approvedCount = payouts.filter(
-    (p: Payout) => p.status === "approved",
+    (p: AdminPayoutRow) => p.status === "approved",
   ).length;
-  const paidCount = payouts.filter((p: Payout) => p.status === "paid").length;
+  const paidCount = payouts.filter(
+    (p: AdminPayoutRow) => p.status === "paid",
+  ).length;
 
   return (
     <div className="p-6 max-w-6xl mx-auto">

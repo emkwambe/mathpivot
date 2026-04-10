@@ -14,19 +14,7 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { togglePackageActive } from "@/app/actions/packages";
 import Link from "next/link";
-
-interface PackageRecord {
-  id: string;
-  name: string;
-  slug: string;
-  service_tier: string;
-  billing_type: string;
-  price_cents: number;
-  credits_per_period: number;
-  is_active: boolean;
-  is_featured: boolean;
-  display_order: number;
-}
+import type { PackageRecord } from "@/types/views";
 
 const tierColors: Record<string, { badge: string; border: string }> = {
   TIER_TUTORING: {

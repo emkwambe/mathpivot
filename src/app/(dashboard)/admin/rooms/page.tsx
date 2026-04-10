@@ -2,19 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getRooms } from "@/app/actions/recurring";
 import { RoomManager } from "./RoomManager";
-
-interface Room {
-  id: string;
-  name: string;
-  room_type: string;
-  capacity: number;
-  is_active: boolean;
-  is_virtual: boolean;
-  location?: string;
-  floor?: string;
-  virtual_link?: string;
-  notes?: string;
-}
+import type { RoomRecord } from "@/types/views";
 
 export default async function AdminRoomsPage() {
   const supabase = await createClient();
@@ -25,9 +13,9 @@ export default async function AdminRoomsPage() {
 
   const { rooms, error } = await getRooms();
 
-  const activeRooms = rooms.filter((r: Room) => r.is_active);
+  const activeRooms = rooms.filter((r: RoomRecord) => r.is_active);
   const totalCapacity = activeRooms.reduce(
-    (s: number, r: Room) => s + r.capacity,
+    (s: number, r: RoomRecord) => s + r.capacity,
     0,
   );
 
@@ -73,7 +61,7 @@ export default async function AdminRoomsPage() {
             Virtual Rooms
           </p>
           <p className="text-2xl font-bold text-purple-600 mt-1">
-            {activeRooms.filter((r: Room) => r.is_virtual).length}
+            {activeRooms.filter((r: RoomRecord) => r.is_virtual).length}
           </p>
         </div>
       </div>

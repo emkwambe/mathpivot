@@ -1,16 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getMyInvoices } from "@/app/actions/invoices";
-
-interface InvoiceRow {
-  id: string;
-  invoice_number: string;
-  issued_at: string | null;
-  created_at: string;
-  total_cents: number;
-  due_date: string | null;
-  status: string;
-}
+import type { ParentInvoiceRow } from "@/types/views";
 
 const statusColors: Record<string, string> = {
   sent: "bg-blue-100 text-blue-700",
@@ -28,10 +19,10 @@ export default async function ParentInvoicesPage() {
   const { invoices, error } = await getMyInvoices();
 
   const outstanding = invoices.filter(
-    (i: InvoiceRow) => i.status === "sent" || i.status === "overdue",
+    (i: ParentInvoiceRow) => i.status === "sent" || i.status === "overdue",
   );
   const totalOwed = outstanding.reduce(
-    (s: number, i: InvoiceRow) => s + i.total_cents,
+    (s: number, i: ParentInvoiceRow) => s + i.total_cents,
     0,
   );
 
@@ -114,7 +105,7 @@ export default async function ParentInvoicesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {invoices.map((inv: InvoiceRow) => (
+              {invoices.map((inv: ParentInvoiceRow) => (
                 <tr key={inv.id}>
                   <td className="px-4 py-3 font-mono text-slate-900 text-xs">
                     {inv.invoice_number}

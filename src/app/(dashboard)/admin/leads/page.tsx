@@ -3,10 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getLeadsByStatus } from "@/app/actions/leads";
 import { LeadKanban } from "./LeadKanban";
-
-interface LeadRow {
-  next_follow_up_at: string | null;
-}
+import type { LeadRecord } from "@/types/views";
 
 export default async function AdminLeadsPage() {
   const supabase = await createClient();
@@ -18,12 +15,12 @@ export default async function AdminLeadsPage() {
   const { columns, error } = await getLeadsByStatus();
 
   // Summary
-  const cols = columns as Record<string, LeadRow[]>;
+  const cols = columns as Record<string, LeadRecord[]>;
   const allLeads = Object.values(cols).flat();
   const totalLeads = allLeads.length;
   const newLeads = cols["new"]?.length || 0;
   const followUpsToday = allLeads.filter(
-    (l: LeadRow) =>
+    (l: LeadRecord) =>
       l.next_follow_up_at &&
       new Date(l.next_follow_up_at).toDateString() ===
         new Date().toDateString(),

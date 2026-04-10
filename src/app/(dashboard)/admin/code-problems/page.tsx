@@ -2,15 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getCodeProblems } from "@/app/actions/code-problems";
 import { CodeProblemManager } from "./CodeProblemManager";
-
-interface CodeProblemRow {
-  id: string;
-  title: string;
-  difficulty: string;
-  language: string;
-  topic: string | null;
-  test_cases: unknown[];
-}
+import type { CodeProblemRow } from "@/types/views";
 
 const difficultyColors: Record<string, string> = {
   easy: "bg-green-100 text-green-700",

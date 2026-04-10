@@ -2,16 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getInvoices } from "@/app/actions/invoices";
 import { InvoiceActions } from "./InvoiceActions";
-
-interface InvoiceRow {
-  id: string;
-  invoice_number: string;
-  status: string;
-  total_cents: number;
-  due_date: string | null;
-  family?: { name: string };
-  parent?: { full_name: string };
-}
+import type { AdminInvoiceRow } from "@/types/views";
 
 const statusColors: Record<string, string> = {
   draft: "bg-slate-100 text-slate-700",
@@ -32,11 +23,13 @@ export default async function AdminInvoicesPage() {
   const { invoices, error } = await getInvoices();
 
   const totalOutstanding = invoices
-    .filter((i: InvoiceRow) => i.status === "sent" || i.status === "overdue")
-    .reduce((s: number, i: InvoiceRow) => s + i.total_cents, 0);
+    .filter(
+      (i: AdminInvoiceRow) => i.status === "sent" || i.status === "overdue",
+    )
+    .reduce((s: number, i: AdminInvoiceRow) => s + i.total_cents, 0);
   const totalPaid = invoices
-    .filter((i: InvoiceRow) => i.status === "paid")
-    .reduce((s: number, i: InvoiceRow) => s + i.total_cents, 0);
+    .filter((i: AdminInvoiceRow) => i.status === "paid")
+    .reduce((s: number, i: AdminInvoiceRow) => s + i.total_cents, 0);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">

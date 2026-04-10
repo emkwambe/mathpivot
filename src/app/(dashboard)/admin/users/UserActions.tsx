@@ -8,16 +8,7 @@ import {
   deactivateUser,
   reactivateUser,
 } from "@/app/actions/users";
-
-interface UserRecord {
-  id: string;
-  full_name: string;
-  email: string;
-  role: string;
-  created_at: string;
-  phone?: string;
-  timezone?: string;
-}
+import type { UserRecord } from "@/types/views";
 
 interface UserActionsProps {
   users: UserRecord[];

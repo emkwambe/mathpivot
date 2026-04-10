@@ -1,28 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getMyEarnings } from "@/app/actions/payroll";
-
-interface PayoutPeriod {
-  period_start: string;
-  period_end: string;
-}
-
-interface PayoutRow {
-  id: string;
-  status: string;
-  total_amount_cents: number;
-  sessions_count: number;
-  total_hours: number;
-  period: PayoutPeriod | null;
-}
-
-interface RateRow {
-  id: string;
-  label: string;
-  is_default: boolean;
-  rate_cents: number;
-  rate_type: string;
-}
+import type { TutorPayoutRow, TutorRateRow } from "@/types/views";
 
 const statusColors: Record<string, string> = {
   draft: "bg-slate-100 text-slate-700",
@@ -41,13 +20,15 @@ export default async function TutorEarningsPage() {
   const { payouts, rates, error } = await getMyEarnings();
 
   const totalEarned = payouts
-    .filter((p: PayoutRow) => p.status === "paid")
-    .reduce((s: number, p: PayoutRow) => s + p.total_amount_cents, 0);
+    .filter((p: TutorPayoutRow) => p.status === "paid")
+    .reduce((s: number, p: TutorPayoutRow) => s + p.total_amount_cents, 0);
   const totalPending = payouts
-    .filter((p: PayoutRow) => p.status !== "paid" && p.status !== "rejected")
-    .reduce((s: number, p: PayoutRow) => s + p.total_amount_cents, 0);
+    .filter(
+      (p: TutorPayoutRow) => p.status !== "paid" && p.status !== "rejected",
+    )
+    .reduce((s: number, p: TutorPayoutRow) => s + p.total_amount_cents, 0);
   const totalSessions = payouts.reduce(
-    (s: number, p: PayoutRow) => s + p.sessions_count,
+    (s: number, p: TutorPayoutRow) => s + p.sessions_count,
     0,
   );
 
@@ -99,7 +80,7 @@ export default async function TutorEarningsPage() {
         <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6">
           <h2 className="font-semibold text-slate-900 mb-3">Your Pay Rates</h2>
           <div className="space-y-2">
-            {rates.map((r: RateRow) => (
+            {rates.map((r: TutorRateRow) => (
               <div
                 key={r.id}
                 className="flex items-center justify-between text-sm"
@@ -159,7 +140,7 @@ export default async function TutorEarningsPage() {
                 </td>
               </tr>
             )}
-            {payouts.map((p: PayoutRow) => (
+            {payouts.map((p: TutorPayoutRow) => (
               <tr key={p.id}>
                 <td className="px-4 py-3 text-slate-900">
                   {p.period ? (

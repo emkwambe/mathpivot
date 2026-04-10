@@ -3,14 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { checkOutStudent, createDropInSlot } from "@/app/actions/dropin";
-
-interface DropInAttendanceRow {
-  id: string;
-  check_in_at: string;
-  check_out_at: string | null;
-  student: { full_name: string } | null;
-  slot: { title: string } | null;
-}
+import type { DropInAttendanceRow } from "@/types/views";
 
 interface DropInManagerProps {
   attendance: DropInAttendanceRow[];

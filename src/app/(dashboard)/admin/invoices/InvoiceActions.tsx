@@ -7,19 +7,10 @@ import {
   markInvoicePaid,
   voidInvoice,
 } from "@/app/actions/invoices";
-
-interface InvoiceRecord {
-  id: string;
-  invoice_number: string;
-  status: string;
-  total_cents: number;
-  due_date: string | null;
-  family?: { name: string };
-  parent?: { full_name: string };
-}
+import type { AdminInvoiceRow } from "@/types/views";
 
 interface InvoiceActionsProps {
-  invoices: InvoiceRecord[];
+  invoices: AdminInvoiceRow[];
   statusColors: Record<string, string>;
 }
 
@@ -101,7 +92,7 @@ export function InvoiceActions({
                 </td>
               </tr>
             )}
-            {invoices.map((inv: InvoiceRecord) => (
+            {invoices.map((inv: AdminInvoiceRow) => (
               <tr key={inv.id}>
                 <td className="px-4 py-3 font-mono text-slate-900 text-xs">
                   {inv.invoice_number}

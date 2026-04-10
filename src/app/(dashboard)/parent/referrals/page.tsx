@@ -6,15 +6,7 @@ import {
   getRewardPolicy,
 } from "@/app/actions/referrals";
 import { ReferralForm } from "./ReferralForm";
-
-interface ReferralRow {
-  id: string;
-  status: string;
-  referrer_reward_cents: number;
-  referred_name: string;
-  referred_email: string;
-  created_at: string;
-}
+import type { ReferralRow } from "@/types/views";
 
 const statusColors: Record<string, string> = {
   pending: "bg-slate-100 text-slate-700",

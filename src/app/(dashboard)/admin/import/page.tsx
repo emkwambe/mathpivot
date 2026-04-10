@@ -2,17 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getImportHistory } from "@/app/actions/csv-import";
 import { ImportManager } from "./ImportManager";
-
-interface ImportJobRow {
-  id: string;
-  file_name: string;
-  entity_type: string;
-  success_rows: number;
-  error_rows: number;
-  total_rows: number;
-  status: string;
-  created_at: string;
-}
+import type { ImportJobRow } from "@/types/views";
 
 const statusColors: Record<string, string> = {
   pending: "bg-slate-100 text-slate-700",

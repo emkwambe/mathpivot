@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateLeadStatus, addLeadNote } from "@/app/actions/leads";
+import type { LeadRecord } from "@/types/views";
 
 const COLUMNS = [
   { key: "new", label: "New", color: "bg-slate-500" },
@@ -13,21 +14,6 @@ const COLUMNS = [
   { key: "converted", label: "Converted", color: "bg-green-500" },
   { key: "lost", label: "Lost", color: "bg-red-400" },
 ];
-
-interface LeadRecord {
-  id: string;
-  parent_name: string;
-  parent_email: string;
-  score: number;
-  student_name: string | null;
-  student_grade: string | null;
-  subjects_interested: string[] | null;
-  source: string;
-  goals: string | null;
-  notes: string | null;
-  assigned_user: { full_name: string } | null;
-  next_follow_up_at: string | null;
-}
 
 interface LeadKanbanProps {
   columns: Record<string, LeadRecord[]>;

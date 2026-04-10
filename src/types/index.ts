@@ -1,4 +1,5 @@
-export * from './database';
+export * from "./database";
+export * from "./views";
 
 // API Response types
 export interface ApiResponse<T = unknown> {
@@ -15,7 +16,7 @@ export interface ApiResponse<T = unknown> {
 export interface AuthUser {
   id: string;
   email: string;
-  role: import('./database').UserRole;
+  role: import("./database").UserRole;
   fullName: string;
   avatarUrl?: string;
 }

@@ -2,15 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getLeadAnalytics } from "@/app/actions/leads";
-
-interface SourceStat {
-  source: string;
-  total: number;
-  qualified: number;
-  trials: number;
-  converted: number;
-  conversionRate: string;
-}
+import type { LeadSourceStat } from "@/types/views";
 
 const sourceLabels: Record<string, string> = {
   website: "Website",
@@ -177,7 +169,7 @@ export default async function LeadAnalyticsPage() {
                 </td>
               </tr>
             )}
-            {stats.map((row: SourceStat) => (
+            {stats.map((row: LeadSourceStat) => (
               <tr key={row.source}>
                 <td className="px-4 py-3 font-medium text-slate-900">
                   {sourceLabels[row.source] || row.source}
