@@ -173,7 +173,7 @@ export async function createCodeProblem(formData: FormData): Promise<CodeResult>
   if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const testCasesRaw = formData.get('testCases') as string;
-  let testCases: any[] = [];
+  let testCases: unknown[] = [];
   try {
     testCases = testCasesRaw ? JSON.parse(testCasesRaw) : [];
   } catch {
@@ -222,4 +222,5 @@ export async function gradeSubmission(
   if (error) return { success: false, error: error.message };
   return { success: true };
 }
+
 

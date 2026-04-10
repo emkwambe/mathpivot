@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { updateUserRole, updateUserProfile, deactivateUser, reactivateUser } from '@/app/actions/users';
 
 interface UserActionsProps {
-  users: any[];
+  users: unknown[];
   roleColors: Record<string, string>;
 }
 
@@ -148,4 +148,5 @@ export function UserActions({ users, roleColors }: UserActionsProps) {
     </div>
   );
 }
+
 

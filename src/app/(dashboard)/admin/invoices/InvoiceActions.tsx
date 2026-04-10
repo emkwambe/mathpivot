@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { sendInvoice, markInvoicePaid, voidInvoice } from '@/app/actions/invoices';
 
 interface InvoiceActionsProps {
-  invoices: any[];
+  invoices: unknown[];
   statusColors: Record<string, string>;
 }
 
@@ -128,4 +128,5 @@ export function InvoiceActions({ invoices, statusColors }: InvoiceActionsProps) 
     </div>
   );
 }
+
 

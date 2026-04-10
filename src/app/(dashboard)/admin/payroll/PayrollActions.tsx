@@ -4,14 +4,14 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface PayrollActionsProps {
-  periods: any[];
+  periods: unknown[];
   selectedPeriodId: string | undefined;
   selectedPeriodLocked: boolean | undefined;
   createPayoutPeriod: (formData: FormData) => Promise<any>;
   generatePayoutsForPeriod: (periodId: string) => Promise<any>;
   approvePayout: (payoutId: string) => Promise<any>;
   markPayoutPaid: (payoutId: string) => Promise<any>;
-  payouts: any[];
+  payouts: unknown[];
 }
 
 const statusColors: Record<string, string> = {
@@ -211,4 +211,5 @@ export function PayrollActions({
     </div>
   );
 }
+
 

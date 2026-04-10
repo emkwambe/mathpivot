@@ -19,7 +19,7 @@ const typeColors: Record<string, string> = {
 };
 
 interface RoomManagerProps {
-  rooms: any[];
+  rooms: unknown[];
 }
 
 export function RoomManager({ rooms }: RoomManagerProps) {
@@ -170,4 +170,5 @@ export function RoomManager({ rooms }: RoomManagerProps) {
     </div>
   );
 }
+
 

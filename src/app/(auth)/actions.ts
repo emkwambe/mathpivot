@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -89,7 +89,7 @@ export { signOut as logoutAction };
 export async function loginAction(
   _prevState: unknown,
   formData: FormData
-): Promise<{ error?: string; retryAfterSeconds?: number }> {
+): Promise<{ error?: string; retryAfterSeconds?: number; redirectTo?: string }> {
   const raw = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -210,4 +210,5 @@ export async function updatePasswordAction(
   revalidatePath("/", "layout");
   redirect("/login?message=password-updated");
 }
+
 

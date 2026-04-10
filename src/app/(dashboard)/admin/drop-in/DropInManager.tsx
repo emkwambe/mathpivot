@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { checkOutStudent, createDropInSlot } from '@/app/actions/dropin';
 
 interface DropInManagerProps {
-  attendance: any[];
+  attendance: unknown[];
 }
 
 export function DropInManager({ attendance }: DropInManagerProps) {
@@ -136,4 +136,5 @@ export function DropInManager({ attendance }: DropInManagerProps) {
     </div>
   );
 }
+
 

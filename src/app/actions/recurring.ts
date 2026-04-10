@@ -237,7 +237,7 @@ export async function getCalendarEvents(startDate: string, endDate: string) {
     .gte('start_at', startDate)
     .lte('start_at', endDate)
     .neq('status', 'canceled')
-    .order('start_at', { ascending: true }) as { data: any[] | null; error: any };
+    .order('start_at', { ascending: true }) as { data: unknown[] | null; error: unknown };
 
   if (error) return { events: [], error: error.message };
 
@@ -258,4 +258,5 @@ export async function getCalendarEvents(startDate: string, endDate: string) {
 
   return { events, error: null };
 }
+
 

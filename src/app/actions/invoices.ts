@@ -190,7 +190,7 @@ export async function generateSessionInvoice(
     `)
     .eq('status', 'completed')
     .gte('completed_at', dateFrom)
-    .lte('completed_at', dateTo) as { data: any[] | null };
+    .lte('completed_at', dateTo) as { data: unknown[] | null };
 
   // Filter to this family's sessions
   const familySessions = (sessions || []).filter(
@@ -322,4 +322,5 @@ export async function voidInvoice(invoiceId: string): Promise<InvoiceResult> {
   revalidatePath('/admin/invoices');
   return { success: true, invoiceId };
 }
+
 

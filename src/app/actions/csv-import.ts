@@ -257,7 +257,7 @@ export async function exportTutorsCSV(): Promise<{ csv: string; error?: string }
       hourly_rate,
       is_active,
       user:user_id (full_name, email)
-    `) as { data: any[] | null };
+    `) as { data: unknown[] | null };
 
   if (!tutors || tutors.length === 0) return { csv: '', error: 'No tutors found' };
 
@@ -277,7 +277,7 @@ export async function exportSessionsCSV(dateFrom: string, dateTo: string): Promi
     `)
     .gte('created_at', dateFrom)
     .lte('created_at', dateTo)
-    .order('created_at', { ascending: false }) as { data: any[] | null };
+    .order('created_at', { ascending: false }) as { data: unknown[] | null };
 
   if (!sessions || sessions.length === 0) return { csv: '', error: 'No sessions found' };
 
@@ -301,4 +301,5 @@ export async function getImportHistory() {
   if (error) return { jobs: [], error: error.message };
   return { jobs: data || [], error: null };
 }
+
 

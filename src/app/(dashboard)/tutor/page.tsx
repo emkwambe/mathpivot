@@ -34,7 +34,7 @@ export default async function TutorDashboardPage() {
       .from('bookings')
       .select('student_user_id', { count: 'exact', head: true })
       .eq('tutor_user_id', authUser.id)
-      .gte('start_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+      .gte('start_at', THIRTY_DAYS_AGO)
       .in('status', ['confirmed', 'completed']),
     supabase
       .from('bookings')
@@ -340,4 +340,5 @@ export default async function TutorDashboardPage() {
     </div>
   );
 }
+
 
