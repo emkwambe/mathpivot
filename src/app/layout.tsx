@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import { ToastProvider } from "@/components/ui/toast";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: 'MathPivot TutorOS',
-    template: '%s | MathPivot',
+    default: "MathPivot TutorOS",
+    template: "%s | MathPivot",
   },
-  description: 'Professional math tutoring platform for students and families',
+  description: "Professional math tutoring platform for students and families",
 };
 
 export default function RootLayout({
@@ -17,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased font-sans">
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );
