@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -14,7 +15,7 @@ export default async function StudentDashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   // Get student profile
   const { data: studentProfile } = await supabase
