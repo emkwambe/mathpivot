@@ -118,6 +118,163 @@ export async function getThreads() {
 }
 
 // ============================================================
+// GET MESSAGEABLE CONTACTS
+// Returns users the current user can message based on role:
+// - Parents can message tutors assigned to their students
+// - Tutors can message parents of their students
+// - Admins can message anyone
+// ============================================================
+export async function getMessageableContacts() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { contacts: [], students: [], error: "Not authenticated" };
+
+  const { data: profile } = await supabase
+    .from("users_profile")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const role = profile?.role;
+  let contacts: { id: string; full_name: string; role: string }[] = [];
+  let students: { id: string; full_name: string }[] = [];
+
+  if (role === "parent") {
+    // Get student IDs in this parent's family
+    const { data: familyMember } = await supabase
+      .from("family_members")
+      .select("family_id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (familyMember) {
+      // Get students in family
+      const { data: familyStudents } = await supabase
+        .from("family_members")
+        .select("user_id, users_profile:user_id(full_name)")
+        .eq("family_id", familyMember.family_id)
+        .eq("member_role", "student");
+
+      students = (familyStudents || []).map((s) => ({
+        id: s.user_id,
+        full_name:
+          (s.users_profile as unknown as { full_name: string })?.full_name ||
+          "Student",
+      }));
+
+      // Get tutors who have bookings with these students
+      const studentIds = students.map((s) => s.id);
+      if (studentIds.length > 0) {
+        const { data: bookings } = await supabase
+          .from("bookings")
+          .select("tutor_user_id")
+          .in("student_user_id", studentIds)
+          .neq("status", "canceled");
+
+        const tutorIds = [
+          ...new Set(bookings?.map((b) => b.tutor_user_id) || []),
+        ];
+        if (tutorIds.length > 0) {
+          const { data: tutors } = await supabase
+            .from("users_profile")
+            .select("id, full_name, role")
+            .in("id", tutorIds);
+          contacts = tutors || [];
+        }
+      }
+    }
+  } else if (role === "tutor") {
+    // Get parents of students the tutor has sessions with
+    const { data: bookings } = await supabase
+      .from("bookings")
+      .select("student_user_id, family_id")
+      .eq("tutor_user_id", user.id)
+      .neq("status", "canceled");
+
+    const familyIds = [
+      ...new Set(bookings?.map((b) => b.family_id).filter(Boolean) || []),
+    ];
+    const studentIds = [
+      ...new Set(bookings?.map((b) => b.student_user_id) || []),
+    ];
+
+    if (familyIds.length > 0) {
+      const { data: parents } = await supabase
+        .from("family_members")
+        .select("user_id, users_profile:user_id(id, full_name, role)")
+        .in("family_id", familyIds)
+        .eq("member_role", "parent");
+
+      contacts = (parents || []).map((p) => {
+        const prof = p.users_profile as unknown as {
+          id: string;
+          full_name: string;
+          role: string;
+        };
+        return {
+          id: prof?.id || p.user_id,
+          full_name: prof?.full_name || "Parent",
+          role: "parent",
+        };
+      });
+    }
+
+    if (studentIds.length > 0) {
+      const { data: studentProfiles } = await supabase
+        .from("users_profile")
+        .select("id, full_name")
+        .in("id", studentIds);
+      students = studentProfiles || [];
+    }
+  } else if (role === "admin" || role === "super_admin") {
+    // Admins can message anyone
+    const { data: allUsers } = await supabase
+      .from("users_profile")
+      .select("id, full_name, role")
+      .neq("id", user.id)
+      .order("full_name")
+      .limit(100);
+    contacts = allUsers || [];
+  }
+
+  return { contacts, students, error: null };
+}
+
+// ============================================================
+// GET TOTAL UNREAD COUNT (for sidebar badge)
+// ============================================================
+export async function getTotalUnreadCount(): Promise<number> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  // Get all thread IDs the user participates in
+  const { data: threads } = await supabase
+    .from("message_threads")
+    .select("id")
+    .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
+    .eq("status", "active");
+
+  if (!threads || threads.length === 0) return 0;
+
+  const { count } = await supabase
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .in(
+      "thread_id",
+      threads.map((t) => t.id),
+    )
+    .neq("sender_id", user.id)
+    .is("read_at", null);
+
+  return count || 0;
+}
+
+// ============================================================
 // GET MESSAGES FOR A THREAD
 // ============================================================
 export async function getMessages(threadId: string) {
