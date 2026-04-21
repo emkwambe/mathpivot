@@ -1,32 +1,39 @@
-import { notFound, redirect } from 'next/navigation';
-import Link from 'next/link';
-import { requireRole } from '@/lib/auth';
-import { createClient } from '@/lib/supabase/server';
-import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/ui';
-import { formatDate } from '@/lib/utils';
-import { revalidatePath } from 'next/cache';
-import { SessionWhiteboard } from '@/components/SessionWhiteboard';
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { requireRole } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Badge,
+  Button,
+} from "@/components/ui";
+import { formatDate } from "@/lib/utils";
+import { revalidatePath } from "next/cache";
+import { SessionWhiteboard } from "@/components/SessionWhiteboard";
 
 async function endSessionAction(formData: FormData) {
-  'use server';
+  "use server";
 
-  const { getCurrentUser } = await import('@/lib/auth');
-  const { createClient } = await import('@/lib/supabase/server');
+  const { getCurrentUser } = await import("@/lib/auth");
+  const { createClient } = await import("@/lib/supabase/server");
 
   const user = await getCurrentUser();
   if (!user) return;
 
-  const sessionId = formData.get('sessionId') as string;
-  const tutorNotes = formData.get('tutorNotes') as string;
-  const nextSteps = formData.get('nextSteps') as string;
+  const sessionId = formData.get("sessionId") as string;
+  const tutorNotes = formData.get("tutorNotes") as string;
+  const nextSteps = formData.get("nextSteps") as string;
 
   const supabase = await createClient();
 
   // Get session with booking to verify tutor ownership
   const { data: session } = await supabase
-    .from('sessions')
-    .select('*, booking:bookings!inner(tutor_user_id)')
-    .eq('id', sessionId)
+    .from("sessions")
+    .select("*, booking:bookings(tutor_user_id)")
+    .eq("id", sessionId)
     .single();
 
   const booking = session?.booking as { tutor_user_id: string } | null;
@@ -34,56 +41,54 @@ async function endSessionAction(formData: FormData) {
 
   // Update session
   await supabase
-    .from('sessions')
+    .from("sessions")
     .update({
       completed_at: new Date().toISOString(),
-      status: 'completed',
+      status: "completed",
       internal_notes: tutorNotes || null,
       next_steps: nextSteps || null,
     })
-    .eq('id', sessionId);
+    .eq("id", sessionId);
 
   // Update booking status to completed
   await supabase
-    .from('bookings')
-    .update({ status: 'completed' })
-    .eq('id', session.booking_id);
+    .from("bookings")
+    .update({ status: "completed" })
+    .eq("id", session.booking_id);
 
-  revalidatePath('/tutor');
-  revalidatePath('/parent');
+  revalidatePath("/tutor");
+  revalidatePath("/parent");
 }
 
 async function updateMasteryAction(formData: FormData) {
-  'use server';
+  "use server";
 
-  const { getCurrentUser } = await import('@/lib/auth');
-  const { createClient } = await import('@/lib/supabase/server');
+  const { getCurrentUser } = await import("@/lib/auth");
+  const { createClient } = await import("@/lib/supabase/server");
 
   const user = await getCurrentUser();
-  if (!user || (user.role !== 'tutor' && user.role !== 'admin')) return;
+  if (!user || (user.role !== "tutor" && user.role !== "admin")) return;
 
-  const studentUserId = formData.get('studentUserId') as string;
-  const skillId = formData.get('skillId') as string;
-  const level = formData.get('level') as string;
+  const studentUserId = formData.get("studentUserId") as string;
+  const skillId = formData.get("skillId") as string;
+  const level = formData.get("level") as string;
 
   const supabase = await createClient();
 
-  await supabase
-    .from('student_skill_mastery')
-    .upsert(
-      {
-        student_user_id: studentUserId,
-        skill_id: skillId,
-        mastery_level: level,
-        last_practiced_at: new Date().toISOString(),
-        updated_by_user_id: user.id,
-      },
-      {
-        onConflict: 'student_user_id,skill_id',
-      }
-    );
+  await supabase.from("student_skill_mastery").upsert(
+    {
+      student_user_id: studentUserId,
+      skill_id: skillId,
+      mastery_level: level,
+      last_practiced_at: new Date().toISOString(),
+      updated_by_user_id: user.id,
+    },
+    {
+      onConflict: "student_user_id,skill_id",
+    },
+  );
 
-  revalidatePath('/tutor');
+  revalidatePath("/tutor");
 }
 
 type Props = {
@@ -92,13 +97,14 @@ type Props = {
 
 export default async function SessionDetailPage({ params }: Props) {
   const { sessionId } = await params;
-  const user = await requireRole(['tutor', 'admin']);
+  const user = await requireRole(["tutor", "admin"]);
   const supabase = await createClient();
 
   // Get session details (include booking for tutor/student info)
   const { data: session, error } = await supabase
-    .from('sessions')
-    .select(`
+    .from("sessions")
+    .select(
+      `
       *,
       booking:bookings(
         start_at,
@@ -108,53 +114,61 @@ export default async function SessionDetailPage({ params }: Props) {
         tutor_user_id,
         student_user_id
       )
-    `)
-    .eq('id', sessionId)
+    `,
+    )
+    .eq("id", sessionId)
     .single();
 
   if (error || !session) {
     notFound();
   }
 
-  const bookingData = session.booking as { start_at: string; end_at: string; notes: string | null; status: string; tutor_user_id: string; student_user_id: string };
+  const bookingData = session.booking as {
+    start_at: string;
+    end_at: string;
+    notes: string | null;
+    status: string;
+    tutor_user_id: string;
+    student_user_id: string;
+  };
 
   // Verify tutor owns this session
-  if (bookingData.tutor_user_id !== user.id && user.role !== 'admin') {
-    redirect('/tutor');
+  if (bookingData.tutor_user_id !== user.id && user.role !== "admin") {
+    redirect("/tutor");
   }
 
   const studentUserId = bookingData.student_user_id;
 
   // Get student profile
   const { data: studentProfile } = await supabase
-    .from('users_profile')
-    .select('full_name')
-    .eq('id', studentUserId)
+    .from("users_profile")
+    .select("full_name")
+    .eq("id", studentUserId)
     .single();
 
   // Get student's grade and course track
   const { data: studentDetails } = await supabase
-    .from('students_profile')
-    .select('grade, course_track, goals')
-    .eq('user_id', studentUserId)
+    .from("students_profile")
+    .select("grade, course_track, goals")
+    .eq("user_id", studentUserId)
     .single();
 
   // Get skills for the student's course track
   const { data: skills } = await supabase
-    .from('skills')
-    .select('*')
-    .eq('course_track', studentDetails?.course_track || 'math_1')
-    .order('category')
-    .order('order_index');
+    .from("skills")
+    .select("*")
+    .eq("course_track", studentDetails?.course_track || "math_1")
+    .order("category")
+    .order("order_index");
 
   // Get current mastery levels
   const { data: masteryLevels } = await supabase
-    .from('student_skill_mastery')
-    .select('skill_id, mastery_level')
-    .eq('student_user_id', studentUserId);
+    .from("student_skill_mastery")
+    .select("skill_id, mastery_level")
+    .eq("student_user_id", studentUserId);
 
   const masteryMap = new Map(
-    masteryLevels?.map((m) => [m.skill_id, m.mastery_level]) || []
+    masteryLevels?.map((m) => [m.skill_id, m.mastery_level]) || [],
   );
 
   // Group skills by category
@@ -174,35 +188,43 @@ export default async function SessionDetailPage({ params }: Props) {
   return (
     <div className="space-y-6">
       {/* Back Link */}
-        <Link
-          href="/tutor/sessions"
-          className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
+      <Link
+        href="/tutor/sessions"
+        className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900"
+      >
+        <svg
+          className="w-4 h-4 mr-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Sessions
-        </Link>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+        Back to Sessions
+      </Link>
 
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Session with {studentProfile?.full_name || 'Student'}
-            </h1>
-            <p className="text-slate-600">
-              {formatDate(booking.start_at, 'EEEE, MMMM d, yyyy')} at{' '}
-              {formatDate(booking.start_at, 'h:mm a')}
-            </p>
-          </div>
-          <Badge
-            variant={
-              isCompleted ? 'success' : isActive ? 'warning' : 'secondary'
-            }
-          >
-            {isCompleted ? 'Completed' : isActive ? 'In Progress' : 'Scheduled'}
-          </Badge>
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Session with {studentProfile?.full_name || "Student"}
+          </h1>
+          <p className="text-slate-600">
+            {formatDate(booking.start_at, "EEEE, MMMM d, yyyy")} at{" "}
+            {formatDate(booking.start_at, "h:mm a")}
+          </p>
         </div>
+        <Badge
+          variant={isCompleted ? "success" : isActive ? "warning" : "secondary"}
+        >
+          {isCompleted ? "Completed" : isActive ? "In Progress" : "Scheduled"}
+        </Badge>
+      </div>
 
       {/* Session Info */}
       <Card>
@@ -226,22 +248,22 @@ export default async function SessionDetailPage({ params }: Props) {
             <div>
               <dt className="text-slate-600">Scheduled Time</dt>
               <dd className="font-medium text-slate-900">
-                {formatDate(booking.start_at, 'h:mm a')} -{' '}
-                {formatDate(booking.end_at, 'h:mm a')}
+                {formatDate(booking.start_at, "h:mm a")} -{" "}
+                {formatDate(booking.end_at, "h:mm a")}
               </dd>
             </div>
             <div>
               <dt className="text-slate-600">
-                {isCompleted ? 'Actual Duration' : 'Duration'}
+                {isCompleted ? "Actual Duration" : "Duration"}
               </dt>
               <dd className="font-medium text-slate-900">
                 {isCompleted && session.completed_at
                   ? `${Math.round(
                       (new Date(session.completed_at).getTime() -
                         new Date(session.started_at).getTime()) /
-                        60000
+                        60000,
                     )} minutes`
-                  : '60 minutes'}
+                  : "60 minutes"}
               </dd>
             </div>
           </dl>
@@ -267,8 +289,18 @@ export default async function SessionDetailPage({ params }: Props) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              <svg
+                className="w-5 h-5 text-indigo-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
               </svg>
               Teaching Whiteboard
             </CardTitle>
@@ -287,21 +319,27 @@ export default async function SessionDetailPage({ params }: Props) {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {Object.entries(skillsByCategory).map(([category, categorySkills]) => (
-                <div key={category}>
-                  <h4 className="font-medium text-slate-900 mb-3">{category}</h4>
-                  <div className="space-y-2">
-                    {categorySkills?.map((skill) => (
-                      <MasteryRow
-                        key={skill.id}
-                        skill={skill}
-                        studentUserId={studentUserId}
-                        currentLevel={masteryMap.get(skill.id) || 'not_started'}
-                      />
-                    ))}
+              {Object.entries(skillsByCategory).map(
+                ([category, categorySkills]) => (
+                  <div key={category}>
+                    <h4 className="font-medium text-slate-900 mb-3">
+                      {category}
+                    </h4>
+                    <div className="space-y-2">
+                      {categorySkills?.map((skill) => (
+                        <MasteryRow
+                          key={skill.id}
+                          skill={skill}
+                          studentUserId={studentUserId}
+                          currentLevel={
+                            masteryMap.get(skill.id) || "not_started"
+                          }
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </CardContent>
         </Card>
@@ -341,7 +379,10 @@ export default async function SessionDetailPage({ params }: Props) {
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
+              <Button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
                 Complete Session
               </Button>
             </form>
@@ -402,14 +443,17 @@ function MasteryRow({
   currentLevel: string;
 }) {
   const levels = [
-    { value: 'not_started', label: 'Not Started', color: 'bg-slate-200' },
-    { value: 'developing', label: 'Developing', color: 'bg-amber-400' },
-    { value: 'proficient', label: 'Proficient', color: 'bg-sky-400' },
-    { value: 'mastered', label: 'Mastered', color: 'bg-green-400' },
+    { value: "not_started", label: "Not Started", color: "bg-slate-200" },
+    { value: "developing", label: "Developing", color: "bg-amber-400" },
+    { value: "proficient", label: "Proficient", color: "bg-sky-400" },
+    { value: "mastered", label: "Mastered", color: "bg-green-400" },
   ];
 
   return (
-    <form action={updateMasteryAction} className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg">
+    <form
+      action={updateMasteryAction}
+      className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg"
+    >
       <input type="hidden" name="studentUserId" value={studentUserId} />
       <input type="hidden" name="skillId" value={skill.id} />
 
@@ -429,8 +473,8 @@ function MasteryRow({
             value={level.value}
             className={`w-8 h-8 rounded-full ${level.color} ${
               currentLevel === level.value
-                ? 'ring-2 ring-offset-2 ring-slate-900'
-                : 'opacity-40 hover:opacity-70'
+                ? "ring-2 ring-offset-2 ring-slate-900"
+                : "opacity-40 hover:opacity-70"
             }`}
             title={level.label}
           />

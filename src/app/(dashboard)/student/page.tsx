@@ -45,6 +45,14 @@ export default async function StudentDashboardPage() {
     .limit(5);
 
   // Get recent session notes (sessions don't have student_user_id, filter via bookings)
+  // First get booking IDs for this student, then fetch sessions
+  const { data: studentBookings } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("student_user_id", user.id);
+
+  const studentBookingIds = studentBookings?.map((b) => b.id) || [];
+
   const { data: recentSessions } = await supabase
     .from("sessions")
     .select(
@@ -53,11 +61,15 @@ export default async function StudentDashboardPage() {
       started_at,
       completed_at,
       internal_notes,
-      next_steps,
-      booking:bookings!inner(student_user_id)
+      next_steps
     `,
     )
-    .eq("bookings.student_user_id", user.id)
+    .in(
+      "booking_id",
+      studentBookingIds.length > 0
+        ? studentBookingIds
+        : ["00000000-0000-0000-0000-000000000000"],
+    )
     .not("completed_at", "is", null)
     .order("completed_at", { ascending: false })
     .limit(3);
