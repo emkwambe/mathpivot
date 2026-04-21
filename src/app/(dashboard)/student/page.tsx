@@ -24,25 +24,30 @@ export default async function StudentDashboardPage() {
     .eq("user_id", user.id)
     .single();
 
-  // Get upcoming sessions
+  // Get upcoming sessions (no nested joins — avoids RLS issues)
   const { data: upcomingSessions } = await supabase
     .from("bookings")
-    .select(
-      `
-      id,
-      start_at,
-      end_at,
-      status,
-      tutor:tutors_profile!bookings_tutor_user_id_fkey(
-        user:users_profile!tutors_profile_user_id_fkey(full_name)
-      )
-    `,
-    )
+    .select("id, start_at, end_at, status, tutor_user_id")
     .eq("student_user_id", user.id)
     .in("status", ["confirmed", "pending"])
     .gte("start_at", new Date().toISOString())
     .order("start_at", { ascending: true })
     .limit(5);
+
+  // Get tutor names separately
+  const tutorIds = [
+    ...new Set(upcomingSessions?.map((b) => b.tutor_user_id) || []),
+  ];
+  const { data: tutorNames } =
+    tutorIds.length > 0
+      ? await supabase
+          .from("users_profile")
+          .select("id, full_name")
+          .in("id", tutorIds)
+      : { data: [] };
+  const tutorNameMap = new Map(
+    (tutorNames || []).map((t) => [t.id, t.full_name]),
+  );
 
   // Get recent session notes (sessions don't have student_user_id, filter via bookings)
   // First get booking IDs for this student, then fetch sessions
@@ -244,9 +249,6 @@ export default async function StudentDashboardPage() {
             {upcomingSessions && upcomingSessions.length > 0 ? (
               <div className="space-y-3">
                 {upcomingSessions.map((session) => {
-                  const tutor = session.tutor as unknown as {
-                    user: { full_name: string } | null;
-                  } | null;
                   return (
                     <div
                       key={session.id}
@@ -258,7 +260,7 @@ export default async function StudentDashboardPage() {
                         </p>
                         <p className="text-sm text-slate-600">
                           {formatDate(session.start_at, "h:mm a")} with{" "}
-                          {tutor?.user?.full_name || "Tutor"}
+                          {tutorNameMap.get(session.tutor_user_id) || "Tutor"}
                         </p>
                       </div>
                       <Badge
