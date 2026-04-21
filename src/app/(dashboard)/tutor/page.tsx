@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { ConfirmBookingButton } from "./ConfirmBookingButton";
 import {
   Card,
   CardHeader,
@@ -490,15 +491,20 @@ export default async function TutorDashboardPage() {
                         <p className="font-medium text-slate-900">
                           {studentName}
                         </p>
-                        <Badge
-                          variant={
-                            booking.status === "confirmed"
-                              ? "success"
-                              : "warning"
-                          }
-                        >
-                          {booking.status}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {booking.status === "pending" && (
+                            <ConfirmBookingButton bookingId={booking.id} />
+                          )}
+                          <Badge
+                            variant={
+                              booking.status === "confirmed"
+                                ? "success"
+                                : "warning"
+                            }
+                          >
+                            {booking.status}
+                          </Badge>
+                        </div>
                       </div>
                       <p className="text-sm text-slate-600">
                         {formatDate(booking.start_at, "EEE, MMM d")} at{" "}
