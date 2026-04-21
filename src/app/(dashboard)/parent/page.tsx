@@ -44,7 +44,7 @@ export default async function ParentDashboardPage() {
       supabase
         .from("bookings")
         .select(
-          "id, start_at, end_at, modality, status, student_user_id, tutors_profile!inner (users_profile!inner (full_name))",
+          "id, start_at, end_at, modality, status, student_user_id, tutor_user_id",
         )
         .eq("family_id", familyId || "")
         .in("status", ["pending", "confirmed"])
@@ -65,12 +65,15 @@ export default async function ParentDashboardPage() {
   const upcomingBookings = bookingsResult.data;
   const recentSessions = sessionsResult.data;
 
-  // Get student names separately (avoids RLS join issues)
+  // Get names separately (avoids RLS join issues)
   const allStudentIds = studentsRaw.map((s) => s.user_id);
   const bookingStudentIds =
     upcomingBookings?.map((b) => b.student_user_id) || [];
-  const uniqueIds = [...new Set([...allStudentIds, ...bookingStudentIds])];
-  const { data: studentNames } =
+  const bookingTutorIds = upcomingBookings?.map((b) => b.tutor_user_id) || [];
+  const uniqueIds = [
+    ...new Set([...allStudentIds, ...bookingStudentIds, ...bookingTutorIds]),
+  ];
+  const { data: profileNames } =
     uniqueIds.length > 0
       ? await supabase
           .from("users_profile")
@@ -78,7 +81,7 @@ export default async function ParentDashboardPage() {
           .in("id", uniqueIds)
       : { data: [] };
 
-  const nameMap = new Map((studentNames || []).map((s) => [s.id, s]));
+  const nameMap = new Map((profileNames || []).map((s) => [s.id, s]));
   const students = studentsRaw.map((s) => ({
     ...s,
     users_profile: nameMap.get(s.user_id) || {
@@ -88,7 +91,7 @@ export default async function ParentDashboardPage() {
   }));
 
   const studentNameMap = new Map(
-    (studentNames || []).map((s) => [s.id, s.full_name]),
+    (profileNames || []).map((s) => [s.id, s.full_name]),
   );
 
   return (
@@ -326,9 +329,8 @@ export default async function ParentDashboardPage() {
             {upcomingBookings && upcomingBookings.length > 0 ? (
               <div className="space-y-4">
                 {upcomingBookings.map((booking) => {
-                  const tutorProfile = booking.tutors_profile as unknown as {
-                    users_profile: { full_name: string };
-                  };
+                  const tutorName =
+                    studentNameMap.get(booking.tutor_user_id) || "Tutor";
                   const studentName =
                     studentNameMap.get(booking.student_user_id) || "Student";
                   return (
@@ -350,9 +352,7 @@ export default async function ParentDashboardPage() {
                           {booking.status}
                         </Badge>
                       </div>
-                      <p className="text-sm text-slate-600">
-                        with {tutorProfile.users_profile.full_name}
-                      </p>
+                      <p className="text-sm text-slate-600">with {tutorName}</p>
                       <p className="text-sm text-slate-500 mt-1">
                         {formatDateTime(booking.start_at)} •{" "}
                         {booking.modality === "online" ? "Online" : "In Person"}
