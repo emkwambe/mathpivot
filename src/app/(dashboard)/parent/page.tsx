@@ -32,9 +32,7 @@ export default async function ParentDashboardPage() {
     await Promise.all([
       supabase
         .from("students_profile")
-        .select(
-          "user_id, grade, course_track, users_profile!inner (full_name, avatar_url)",
-        )
+        .select("user_id, grade, course_track")
         .eq("family_id", familyId || ""),
       supabase
         .from("credit_ledger")
@@ -62,23 +60,35 @@ export default async function ParentDashboardPage() {
         .limit(3),
     ]);
 
-  const students = studentsResult.data;
+  const studentsRaw = studentsResult.data || [];
   const creditBalance = creditResult.data?.balance_after || 0;
   const upcomingBookings = bookingsResult.data;
   const recentSessions = sessionsResult.data;
 
-  // Single query for booking student names
-  const studentIds = upcomingBookings?.map((b) => b.student_user_id) || [];
+  // Get student names separately (avoids RLS join issues)
+  const allStudentIds = studentsRaw.map((s) => s.user_id);
+  const bookingStudentIds =
+    upcomingBookings?.map((b) => b.student_user_id) || [];
+  const uniqueIds = [...new Set([...allStudentIds, ...bookingStudentIds])];
   const { data: studentNames } =
-    studentIds.length > 0
+    uniqueIds.length > 0
       ? await supabase
           .from("users_profile")
-          .select("id, full_name")
-          .in("id", studentIds)
+          .select("id, full_name, avatar_url")
+          .in("id", uniqueIds)
       : { data: [] };
 
+  const nameMap = new Map((studentNames || []).map((s) => [s.id, s]));
+  const students = studentsRaw.map((s) => ({
+    ...s,
+    users_profile: nameMap.get(s.user_id) || {
+      full_name: "Student",
+      avatar_url: null,
+    },
+  }));
+
   const studentNameMap = new Map(
-    studentNames?.map((s) => [s.id, s.full_name]) || [],
+    (studentNames || []).map((s) => [s.id, s.full_name]),
   );
 
   return (
