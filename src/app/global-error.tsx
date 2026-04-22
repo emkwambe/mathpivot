@@ -1,0 +1,79 @@
+"use client";
+
+import { useEffect } from "react";
+
+/**
+ * Global error boundary for Next.js App Router.
+ * In production, this reports errors to monitoring.
+ * Requires NEXT_PUBLIC_SENTRY_DSN to be set.
+ */
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log to console in all environments
+    console.error("[GlobalError]", error);
+
+    // In production, report to external monitoring
+    if (
+      process.env.NODE_ENV === "production" &&
+      process.env.NEXT_PUBLIC_SENTRY_DSN
+    ) {
+      // When Sentry is installed: Sentry.captureException(error);
+      // For now, send to a simple error reporting endpoint
+      fetch("/api/health", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          error: error.message,
+          digest: error.digest,
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {
+        // Silent fail — error reporting should never crash the app
+      });
+    }
+  }, [error]);
+
+  return (
+    <html lang="en">
+      <body className="antialiased font-sans">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="text-center max-w-md mx-auto p-6">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">
+              Something went wrong
+            </h2>
+            <p className="text-slate-600 mb-6">
+              An unexpected error occurred. Our team has been notified.
+            </p>
+            <button
+              onClick={reset}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </body>
+    </html>
+  );
+}
