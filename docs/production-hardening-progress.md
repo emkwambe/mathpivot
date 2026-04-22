@@ -1,5 +1,29 @@
 # Production Hardening Progress
 
+## Phase 3 — Quality Hardening
+
+### 3.1 Integration Tests
+- **Status:** COMPLETE
+- **Files changed:** `tests/integration/critical-flows.test.ts` (new), `docs/testing-strategy.md` (new)
+- **Coverage:** Booking validation (3 tests), session lifecycle (2 tests), messaging (1 test), auth enforcement (2 tests), consent flow (2 tests), audit wiring (3 tests) = 13 new test cases
+- **Limitation:** Tests validate logic and structure, not live database interactions
+
+### 3.2 Email Notifications
+- **Status:** CODE COMPLETE — already wired
+- **Finding:** `sendBookingConfirmation()` called in booking.ts, `sendSessionSummary()` called in session.ts. Both use fire-and-forget (.catch()). Resend integration exists in `src/lib/email/index.ts`.
+- **Human action:** Set `RESEND_API_KEY` in environment variables to enable real email delivery
+
+### 3.3 Mobile Responsiveness
+- **Status:** IMPROVED
+- **Files changed:** `src/components/layouts/DashboardLayout.tsx`
+- **Fixes:** Added Messages to mobile bottom nav (was showing only first 4 items), added z-40 to prevent overlap, added bottom padding (pb-20 on mobile) so content doesn't hide behind nav, reduced mobile padding from p-6 to p-4
+
+### 3.4 Polling Optimization
+- **Status:** OPTIMIZED
+- **Files changed:** `src/components/UnreadBadge.tsx`, `src/app/(dashboard)/messages/[threadId]/ThreadRefresher.tsx`
+- **Changes:** UnreadBadge: 15s → 30s polling interval. ThreadRefresher: 5s → 8s with visibility-aware polling (only refreshes when tab is visible, saves server resources when user switches tabs)
+- **Upgrade path:** Replace polling with Supabase Realtime subscriptions (documented in testing-strategy.md)
+
 ## Phase 2 — Tier 2 Pilot Blockers
 
 ### 2.1 COPPA Consent Flow

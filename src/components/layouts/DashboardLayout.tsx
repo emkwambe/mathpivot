@@ -1120,15 +1120,15 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-1">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 py-1 z-40">
         <div className="flex justify-around">
-          {navItems.slice(0, 4).map((item) => (
+          {navItems.slice(0, 3).map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -1141,6 +1141,30 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
               <span className="mt-1">{item.label}</span>
             </Link>
           ))}
+          <Link
+            href="/messages"
+            className={cn(
+              "flex flex-col items-center py-2 px-3 text-xs relative",
+              pathname.startsWith("/messages")
+                ? "text-blue-600"
+                : "text-slate-500",
+            )}
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
+            <span className="mt-1">Messages</span>
+          </Link>
         </div>
       </nav>
 
