@@ -14,6 +14,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  beta?: boolean;
 }
 
 const parentNavItems: NavItem[] = [
@@ -57,6 +58,7 @@ const parentNavItems: NavItem[] = [
   },
   {
     label: "Certifications",
+    beta: true,
     href: "/parent/certifications",
     icon: (
       <svg
@@ -76,6 +78,7 @@ const parentNavItems: NavItem[] = [
   },
   {
     label: "Programs",
+    beta: true,
     href: "/parent/programs",
     icon: (
       <svg
@@ -152,6 +155,7 @@ const parentNavItems: NavItem[] = [
   },
   {
     label: "Referrals",
+    beta: true,
     href: "/parent/referrals",
     icon: (
       <svg
@@ -313,6 +317,7 @@ const tutorNavItems: NavItem[] = [
   },
   {
     label: "Whiteboards",
+    beta: true,
     href: "/tutor/whiteboards",
     icon: (
       <svg
@@ -332,6 +337,7 @@ const tutorNavItems: NavItem[] = [
   },
   {
     label: "Desmos Calculator",
+    beta: true,
     href: "/tutor/desmos",
     icon: (
       <svg
@@ -493,6 +499,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     label: "Programs",
+    beta: true,
     href: "/admin/programs",
     icon: (
       <svg
@@ -512,6 +519,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     label: "Certifications",
+    beta: true,
     href: "/admin/certifications",
     icon: (
       <svg
@@ -531,6 +539,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     label: "Competitions",
+    beta: true,
     href: "/admin/competitions",
     icon: (
       <svg
@@ -550,6 +559,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     label: "Career Pathways",
+    beta: true,
     href: "/admin/career-pathways",
     icon: (
       <svg
@@ -664,6 +674,7 @@ const adminNavItems: NavItem[] = [
   },
   {
     label: "Equipment",
+    beta: true,
     href: "/admin/equipment",
     icon: (
       <svg
@@ -895,6 +906,7 @@ const studentNavItems: NavItem[] = [
   },
   {
     label: "Certifications",
+    beta: true,
     href: "/student/certifications",
     icon: (
       <svg
@@ -914,6 +926,7 @@ const studentNavItems: NavItem[] = [
   },
   {
     label: "Competitions",
+    beta: true,
     href: "/student/competitions",
     icon: (
       <svg
@@ -933,6 +946,7 @@ const studentNavItems: NavItem[] = [
   },
   {
     label: "Career Pathways",
+    beta: true,
     href: "/student/career-pathways",
     icon: (
       <svg
@@ -1094,6 +1108,11 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
               >
                 {item.icon}
                 {item.label}
+                {item.beta && (
+                  <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 font-normal">
+                    Beta
+                  </span>
+                )}
                 {item.href === "/messages" && <UnreadBadge />}
               </Link>
             ))}

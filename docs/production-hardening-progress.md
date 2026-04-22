@@ -1,5 +1,35 @@
 # Production Hardening Progress
 
+## Phase 2 — Tier 2 Pilot Blockers
+
+### 2.1 COPPA Consent Flow
+- **Status:** IMPLEMENTED — requires legal review of consent text
+- **Files changed:** `src/app/actions/consent.ts` (new), `src/app/actions/family.ts` (wired consent requests), `src/components/ConsentBanner.tsx` (new), `src/app/(dashboard)/parent/page.tsx` (banner integration)
+- **What works:** Adding a student triggers consent requests. Parent dashboard shows consent banner with approve buttons. Consent events are audit-logged.
+- **Legal note:** Consent text is placeholder — final wording requires legal review before production use with real minors.
+
+### 2.2 Tutor Start Session Button
+- **Status:** COMPLETE
+- **Files changed:** `src/app/(dashboard)/tutor/StartSessionButton.tsx` (new), `src/app/(dashboard)/tutor/page.tsx` (button added to Today's Schedule)
+- **What works:** Confirmed bookings in Today's Schedule show "Start Session" button. Clicking it creates a session record, transitions booking to in_progress, and navigates to session detail page where whiteboard and mastery tools become active.
+
+### 2.3 Placeholder Page Labeling
+- **Status:** COMPLETE
+- **Files changed:** `src/components/layouts/DashboardLayout.tsx`
+- **What changed:** Added `beta?: boolean` flag to NavItem interface. Non-core features (Certifications, Programs, Competitions, Equipment, Career Pathways, Referrals, Whiteboards, Desmos) marked with subtle "Beta" label in sidebar. Core features (Dashboard, Book Session, Credits, Sessions, Messages, etc.) remain unlabeled.
+
+### 2.4 Audit Logging
+- **Status:** WIRED — critical actions now log
+- **Files changed:** `src/app/actions/booking.ts`, `src/app/actions/session.ts`, `src/app/actions/users.ts`, `src/app/actions/consent.ts`
+- **Actions now audited:** Booking creation, session start, session completion, user role changes, consent approvals
+- **Remaining:** Additional actions could be audited (booking cancellation, CSV imports, etc.) but core compliance actions are covered.
+
+### 2.5 Stripe Flow
+- **Status:** CODE COMPLETE — requires Stripe credentials for live testing
+- **Finding:** End-to-end flow exists: purchase page → checkout API → Stripe session → webhook → credit addition
+- **Human action required:** Test with real Stripe test keys (sk_test_*, pk_test_*)
+- **Verification checklist added to:** `docs/manual-verification-checklist.md`
+
 ## Phase 1 — Tier 1 Production Blockers
 
 ### 1.1 Security Headers

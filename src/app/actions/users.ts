@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/auth";
+import { logAuditEvent } from "@/lib/audit";
 import { z } from "zod";
 
 export type UserResult = { success: boolean; error?: string };
@@ -39,6 +40,15 @@ export async function updateUserRole(formData: FormData): Promise<UserResult> {
     .eq("id", parsed.data.userId);
 
   if (error) return { success: false, error: error.message };
+
+  logAuditEvent({
+    actorUserId: currentUser.id,
+    action: "role_changed",
+    resourceType: "user",
+    resourceId: parsed.data.userId,
+    description: `Role changed to ${parsed.data.role}`,
+    isSensitive: true,
+  }).catch(() => {});
 
   revalidatePath("/admin/users");
   return { success: true };

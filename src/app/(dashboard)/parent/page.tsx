@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { getParentPendingConsents } from "@/app/actions/consent";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import {
   Card,
   CardHeader,
@@ -94,8 +96,25 @@ export default async function ParentDashboardPage() {
     (profileNames || []).map((s) => [s.id, s.full_name]),
   );
 
+  // Check for pending COPPA consents
+  const { consents: pendingConsents } = await getParentPendingConsents();
+
   return (
     <div className="space-y-6">
+      {/* COPPA Consent Banner */}
+      {pendingConsents && pendingConsents.length > 0 && (
+        <ConsentBanner
+          consents={
+            pendingConsents as unknown as {
+              id: string;
+              consent_type: string;
+              status: string;
+              student_user_id: string;
+            }[]
+          }
+        />
+      )}
+
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
