@@ -1,5 +1,37 @@
 # Production Hardening Progress
 
+## Phase 4 — External Pilot Readiness
+
+### 4.1 Pilot Operations
+- **Status:** COMPLETE
+- **Files created:** `docs/external-pilot-runbook.md`, `docs/rollback-checklist.md`, `docs/monitoring-checklist.md`
+- **Coverage:** Pre-pilot checklist, daily/weekly monitoring, incident response, support triage, SQL diagnostic queries
+
+### 4.2 Sentry/Error Monitoring
+- **Status:** CODE READY — scaffolding exists
+- **What exists:** Global error boundary (`src/app/global-error.tsx`), ErrorBoundary component, NEXT_PUBLIC_SENTRY_DSN support
+- **Human action:** Run `npx @sentry/wizard@latest -i nextjs`, set DSN in Vercel
+
+### 4.3 Stripe Pilot Verification
+- **Status:** DOCS COMPLETE
+- **Files created:** `docs/stripe-pilot-verification.md`
+- **Coverage:** Full manual test flow, test cards, webhook setup, verification queries, common issues
+
+### 4.4 CSP Hardening
+- **Status:** REPORT-ONLY MODE DEPLOYED
+- **Files changed:** `next.config.ts`
+- **What exists:** Content-Security-Policy-Report-Only header with allowlist for self, Supabase, Stripe, Sentry
+- **Next step:** After verifying no false positives in browser console, change to enforcing mode
+
+### 4.5 Admin Visibility
+- **Status:** DOCS COMPLETE
+- **Coverage:** SQL diagnostic queries in runbook, monitoring checklist with weekly database health checks
+
+### 4.6 Playwright
+- **Status:** EXISTING SCAFFOLDING SUFFICIENT
+- **What exists:** `playwright.config.ts` with chromium/firefox/webkit projects, 2 E2E spec files
+- **No changes needed:** Scaffolding is adequate for future expansion
+
 ## Phase 3 — Quality Hardening
 
 ### 3.1 Integration Tests
