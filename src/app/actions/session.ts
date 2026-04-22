@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { emitEvent } from "@/lib/events";
 import { sendSessionSummary } from "@/lib/notifications";
+import { logAuditEvent } from "@/lib/audit";
 import { z } from "zod";
 
 const startSessionSchema = z.object({
@@ -104,6 +105,14 @@ export async function startSession(
       tutor_user_id: booking.tutor_user_id,
     },
   });
+
+  logAuditEvent({
+    actorUserId: user.id,
+    action: "create",
+    resourceType: "session",
+    resourceId: session.id,
+    description: `Session started for booking ${bookingId}`,
+  }).catch(() => {});
 
   revalidatePath("/tutor");
 
@@ -232,6 +241,14 @@ export async function endSession(
   sendSessionSummary(sessionId).catch((err) =>
     console.error("[notifications] session summary:", err),
   );
+
+  logAuditEvent({
+    actorUserId: user.id,
+    action: "update",
+    resourceType: "session",
+    resourceId: sessionId,
+    description: `Session completed for booking ${session.booking_id}`,
+  }).catch(() => {});
 
   revalidatePath("/tutor");
   revalidatePath("/parent");

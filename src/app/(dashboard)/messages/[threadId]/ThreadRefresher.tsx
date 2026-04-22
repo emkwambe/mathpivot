@@ -5,17 +5,24 @@ import { useRouter } from "next/navigation";
 
 /**
  * Lightweight auto-refresh for message threads.
- * Polls every 5 seconds to fetch new messages without full Supabase realtime.
- * Minimal overhead — just triggers Next.js router.refresh() which
- * re-runs server components with fresh data.
+ * Uses visibility-aware polling — only refreshes when tab is visible.
+ * Reduces server load when user switches tabs.
  */
 export function ThreadRefresher() {
   const router = useRouter();
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      router.refresh();
-    }, 5000);
+    let interval: ReturnType<typeof setInterval>;
+
+    function startPolling() {
+      interval = setInterval(() => {
+        if (document.visibilityState === "visible") {
+          router.refresh();
+        }
+      }, 8000); // Poll every 8s (reduced from 5s, only when visible)
+    }
+
+    startPolling();
 
     return () => clearInterval(interval);
   }, [router]);

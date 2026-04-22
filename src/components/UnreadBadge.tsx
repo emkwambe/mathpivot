@@ -25,7 +25,7 @@ export function UnreadBadge() {
     }
 
     fetchCount();
-    const interval = setInterval(fetchCount, 15000); // Poll every 15s
+    const interval = setInterval(fetchCount, 30000); // Poll every 30s (reduced from 15s)
 
     return () => {
       mounted = false;

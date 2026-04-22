@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ConfirmBookingButton } from "./ConfirmBookingButton";
+import { StartSessionButton } from "./StartSessionButton";
 import {
   Card,
   CardHeader,
@@ -439,6 +440,14 @@ export default async function TutorDashboardPage() {
                       <p className="text-sm text-slate-500 mt-1">
                         {booking.modality === "online" ? "Online" : "In Person"}
                       </p>
+                      {booking.status === "confirmed" && !session && (
+                        <div
+                          className="mt-3"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <StartSessionButton bookingId={booking.id} />
+                        </div>
+                      )}
                     </Link>
                   );
                 })}

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, canAccessStudent, isAdminOrAbove } from "@/lib/auth";
 import { emitEvent } from "@/lib/events";
 import { sendBookingConfirmation } from "@/lib/notifications";
+import { logAuditEvent } from "@/lib/audit";
 import { z } from "zod";
 
 const createBookingSchema = z.object({
@@ -138,6 +139,15 @@ export async function createBooking(
   }).catch((err) =>
     console.error("[notifications] booking confirmation:", err),
   );
+
+  // Audit log
+  logAuditEvent({
+    actorUserId: user.id,
+    action: "create",
+    resourceType: "booking",
+    resourceId: booking.id,
+    description: `Booking created for student ${studentUserId} with tutor ${tutorUserId}`,
+  }).catch(() => {});
 
   revalidatePath("/parent");
   revalidatePath("/tutor");
