@@ -38,7 +38,6 @@ export async function middleware(request: NextRequest) {
   }
 
   // Landing page, pricing, get-started — let authenticated users through too
-  // (the landing page handles its own redirect client-side)
   if (
     pathname === "/" ||
     pathname === "/get-started" ||
@@ -47,28 +46,7 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Authenticated on auth routes (login/signup) — redirect to dashboard
-  if (isPublic) {
-    try {
-      const { data: profile, error } = await supabase
-        .from("users_profile")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (error) throw error;
-
-      const role = profile?.role ?? "student";
-      const dest = ROLE_PREFIXES[role] ?? "/student";
-      return NextResponse.redirect(new URL(dest, request.url));
-    } catch (err) {
-      console.error("Middleware: failed to fetch user profile", err);
-      // Fallback: send to a generic dashboard (student is safest)
-      return NextResponse.redirect(new URL("/student", request.url));
-    }
-  }
-
-  // Role-based access check
+  // Fetch profile once for all subsequent checks
   const { data: profile } = await supabase
     .from("users_profile")
     .select("role")
@@ -76,6 +54,12 @@ export async function middleware(request: NextRequest) {
     .single();
 
   const role = profile?.role as string | undefined;
+
+  // Authenticated on auth routes (login/signup) — redirect to dashboard
+  if (isPublic) {
+    const dest = ROLE_PREFIXES[role ?? "student"] ?? "/student";
+    return NextResponse.redirect(new URL(dest, request.url));
+  }
 
   // No profile yet — send to signup to complete
   if (!role) {
