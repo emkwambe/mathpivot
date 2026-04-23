@@ -1,12 +1,8 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 
-/**
- * Global error boundary for Next.js App Router.
- * In production, this reports errors to monitoring.
- * Requires NEXT_PUBLIC_SENTRY_DSN to be set.
- */
 export default function GlobalError({
   error,
   reset,
@@ -15,28 +11,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log to console in all environments
-    console.error("[GlobalError]", error);
-
-    // In production, report to external monitoring
-    if (
-      process.env.NODE_ENV === "production" &&
-      process.env.NEXT_PUBLIC_SENTRY_DSN
-    ) {
-      // When Sentry is installed: Sentry.captureException(error);
-      // For now, send to a simple error reporting endpoint
-      fetch("/api/health", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: error.message,
-          digest: error.digest,
-          timestamp: new Date().toISOString(),
-        }),
-      }).catch(() => {
-        // Silent fail — error reporting should never crash the app
-      });
-    }
+    Sentry.captureException(error);
   }, [error]);
 
   return (
