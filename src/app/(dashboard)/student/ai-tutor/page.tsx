@@ -191,7 +191,7 @@ export default function AITutorPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">AI Math Tutor</h1>
+        <h1 className="text-2xl font-bold text-slate-900">AI Math Coach</h1>
         <p className="text-slate-600">
           Ask me anything about math - I&apos;m here to help you learn!
         </p>
@@ -219,7 +219,7 @@ export default function AITutorPage() {
                   </svg>
                 </div>
                 <div>
-                  <span>AI Math Tutor</span>
+                  <span>AI Math Coach</span>
                   <p className="text-xs text-indigo-200 font-normal">
                     Powered by AI
                   </p>
@@ -247,7 +247,7 @@ export default function AITutorPage() {
                       </svg>
                     </div>
                     <h3 className="text-lg font-medium text-slate-900 mb-2">
-                      Hi! I&apos;m your AI Math Tutor
+                      Hi! I&apos;m your AI Math Coach
                     </h3>
                     <p className="text-slate-500 max-w-md mx-auto">
                       I&apos;m here to help you understand math concepts and

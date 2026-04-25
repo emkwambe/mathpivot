@@ -3,7 +3,10 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { signupAction } from "@/app/(auth)/actions";
 
-const initial = { error: undefined as string | undefined, success: undefined as string | undefined };
+const initial = {
+  error: undefined as string | undefined,
+  success: undefined as string | undefined,
+};
 
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signupAction, initial);
@@ -13,13 +16,28 @@ export default function SignupPage() {
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm text-center space-y-4">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-2">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-6 h-6 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-foreground">Check your email</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Check your email
+          </h1>
           <p className="text-sm text-muted-foreground">{state.success}</p>
-          <Link href="/login" className="block text-sm text-primary hover:underline">
+          <Link
+            href="/login"
+            className="block text-sm text-primary hover:underline"
+          >
             Back to login
           </Link>
         </div>
@@ -34,13 +52,20 @@ export default function SignupPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 bg-primary rounded-xl mb-4">
             <span className="text-primary-foreground font-bold text-lg">M</span>
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">Create your account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Join MathPivot TutorOS</p>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Create your account
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Join MathPivot TutorOS
+          </p>
         </div>
 
         <form action={formAction} className="space-y-4">
           <div>
-            <label htmlFor="full_name" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="full_name"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Full name
             </label>
             <input
@@ -55,7 +80,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Email
             </label>
             <input
@@ -70,7 +98,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               I am a...
             </label>
             <select
@@ -81,12 +112,15 @@ export default function SignupPage() {
             >
               <option value="parent">Parent / Guardian</option>
               <option value="student">Student</option>
-              <option value="tutor">Tutor</option>
+              <option value="tutor">Coach</option>
             </select>
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Password
             </label>
             <input
@@ -117,15 +151,25 @@ export default function SignupPage() {
 
           <p className="text-xs text-center text-muted-foreground">
             By signing up you agree to our{" "}
-            <Link href="/terms" className="text-primary hover:underline">Terms</Link>
-            {" "}and{" "}
-            <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+            <Link href="/terms" className="text-primary hover:underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="text-primary hover:underline font-medium">Sign in</Link>
+          <Link
+            href="/login"
+            className="text-primary hover:underline font-medium"
+          >
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

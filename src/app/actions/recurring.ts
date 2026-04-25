@@ -310,7 +310,7 @@ export async function getCalendarEvents(startDate: string, endDate: string) {
     id: b.id,
     title: b.is_group_session
       ? `Group: ${b.tutor?.full_name || "TBD"}`
-      : `${b.student?.full_name || "Student"} — ${b.tutor?.full_name || "Tutor"}`,
+      : `${b.student?.full_name || "Student"} — ${b.tutor?.full_name || "Coach"}`,
     start: b.start_at,
     end: b.end_at,
     status: b.status,

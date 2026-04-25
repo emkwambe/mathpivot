@@ -67,7 +67,7 @@ export function DropInManager({ attendance }: DropInManagerProps) {
             </div>
             <div>
               <label className="block text-xs text-slate-500 mb-1">
-                Tutor ID *
+                Coach ID *
               </label>
               <input
                 type="text"

@@ -349,7 +349,7 @@ export default async function ParentDashboardPage() {
               <div className="space-y-4">
                 {upcomingBookings.map((booking) => {
                   const tutorName =
-                    studentNameMap.get(booking.tutor_user_id) || "Tutor";
+                    studentNameMap.get(booking.tutor_user_id) || "Coach";
                   const studentName =
                     studentNameMap.get(booking.student_user_id) || "Student";
                   return (
