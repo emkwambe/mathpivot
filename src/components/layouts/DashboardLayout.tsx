@@ -38,8 +38,8 @@ const parentNavItems: NavItem[] = [
     ),
   },
   {
-    label: "Book Session",
-    href: "/parent/book",
+    label: "Programs",
+    href: "/parent/programs",
     icon: (
       <svg
         className="w-5 h-5"

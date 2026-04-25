@@ -1,583 +1,246 @@
-import Link from "next/link";
-import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  Badge,
-} from "@/components/ui";
-import { formatDate, formatCurrency } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Badge } from "@/components/ui";
 
-type ProgramType =
-  | "clinic"
-  | "workshop"
-  | "camp"
-  | "bootcamp"
-  | "competition"
-  | "hackathon";
-type RegistrationStatus = "pending" | "confirmed" | "waitlisted" | "canceled";
-
-const PROGRAM_TYPE_LABELS: Record<ProgramType, string> = {
-  clinic: "Clinic",
-  workshop: "Workshop",
-  camp: "Camp",
-  bootcamp: "Bootcamp",
-  competition: "Competition",
-  hackathon: "Hackathon",
+const trackColors = {
+  foundation: {
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    badge: "bg-blue-100 text-blue-800",
+    accent: "text-blue-600",
+    button: "bg-blue-600 hover:bg-blue-700",
+  },
+  acceleration: {
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    badge: "bg-amber-100 text-amber-800",
+    accent: "text-amber-600",
+    button: "bg-amber-600 hover:bg-amber-700",
+  },
+  elite: {
+    bg: "bg-purple-50",
+    border: "border-purple-200",
+    badge: "bg-purple-100 text-purple-800",
+    accent: "text-purple-600",
+    button: "bg-purple-600 hover:bg-purple-700",
+  },
 };
 
-const STATUS_COLORS: Record<
-  RegistrationStatus,
-  "secondary" | "success" | "warning" | "danger"
-> = {
-  pending: "warning",
-  confirmed: "success",
-  waitlisted: "secondary",
-  canceled: "danger",
+const trackDescriptions: Record<string, string> = {
+  foundation:
+    "Build strong fundamentals with grade-level mastery. Perfect for students who need structured support and confidence building.",
+  acceleration:
+    "Push beyond grade level with competition prep and applied projects. For students ready to challenge themselves.",
+  elite:
+    "Intensive coaching for advanced students pursuing competition excellence and early career exposure.",
 };
 
-async function registerStudentAction(formData: FormData) {
-  "use server";
+const trackFeatures: Record<string, string[]> = {
+  foundation: [
+    "Named coach for the duration",
+    "4 sessions per month",
+    "Mastery tracking dashboard",
+    "Career exposure modules",
+    "Progress reports for parents",
+  ],
+  acceleration: [
+    "Everything in Foundation",
+    "6 sessions per month",
+    "Mathathlon competition prep",
+    "AMC 8 / MATHCOUNTS readiness",
+    "Applied math projects",
+  ],
+  elite: [
+    "Everything in Acceleration",
+    "8 sessions per month",
+    "1-on-1 intensive coaching",
+    "AMC 10/12 and AIME prep",
+    "College readiness portfolio",
+  ],
+};
 
-  const { getCurrentUser } = await import("@/lib/auth");
-  const { createClient } = await import("@/lib/supabase/server");
-
-  const user = await getCurrentUser();
-  if (!user || user.role !== "parent") return;
-
+export default async function ProgramsPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  // Get parent's family
-  const { data: familyMember } = await supabase
-    .from("family_members")
-    .select("family_id")
-    .eq("user_id", user.id)
-    .single();
+  const { data: programs } = await supabase
+    .from("coaching_programs")
+    .select("*")
+    .eq("is_active", true)
+    .order("monthly_price_cents", { ascending: true });
 
-  if (!familyMember) return;
+  const { data: enrollments } = await supabase
+    .from("program_enrollments")
+    .select("id, program_id, student_id, status")
+    .eq("parent_id", user.id)
+    .eq("status", "active");
 
-  const programId = formData.get("programId") as string;
-  const studentId = formData.get("studentId") as string;
-
-  // Check if program is open for registration
-  const { data: program } = await supabase
-    .from("programs")
-    .select("id, status, max_participants")
-    .eq("id", programId)
-    .single();
-
-  if (
-    !program ||
-    !["registration_open", "published"].includes(program.status)
-  ) {
-    return;
-  }
-
-  // Check if already registered
-  const { data: existing } = await supabase
-    .from("program_registrations")
-    .select("id")
-    .eq("program_id", programId)
-    .eq("student_user_id", studentId)
-    .single();
-
-  if (existing) return;
-
-  // Count current registrations
-  const { count: currentCount } = await supabase
-    .from("program_registrations")
-    .select("*", { count: "exact", head: true })
-    .eq("program_id", programId)
-    .in("status", ["pending", "confirmed"]);
-
-  // Determine status (confirmed or waitlisted)
-  const status =
-    program.max_participants &&
-    currentCount &&
-    currentCount >= program.max_participants
-      ? "waitlisted"
-      : "pending";
-
-  const waitlistPosition =
-    status === "waitlisted"
-      ? (currentCount || 0) - (program.max_participants || 0) + 1
-      : null;
-
-  // Create registration
-  const { error } = await supabase.from("program_registrations").insert({
-    program_id: programId,
-    student_user_id: studentId,
-    parent_user_id: user.id,
-    family_id: familyMember.family_id,
-    status,
-    waitlist_position: waitlistPosition,
-  });
-
-  if (error) {
-    console.error("Failed to register:", error);
-  }
-
-  revalidatePath("/parent/programs");
-}
-
-async function cancelRegistrationAction(registrationId: string) {
-  "use server";
-
-  const { getCurrentUser } = await import("@/lib/auth");
-  const { createClient } = await import("@/lib/supabase/server");
-
-  const user = await getCurrentUser();
-  if (!user || user.role !== "parent") return;
-
-  const supabase = await createClient();
-
-  await supabase
-    .from("program_registrations")
-    .update({ status: "canceled" })
-    .eq("id", registrationId)
-    .eq("parent_user_id", user.id);
-
-  revalidatePath("/parent/programs");
-}
-
-export default async function ParentProgramsPage() {
-  const user = await requireRole("parent");
-  const supabase = await createClient();
-
-  // Get parent's family
-  const { data: familyMember } = await supabase
-    .from("family_members")
-    .select("family_id")
-    .eq("user_id", user.id)
-    .single();
-
-  const familyId = familyMember?.family_id;
-
-  // Get children in family
-  const { data: childrenRaw } = await supabase
-    .from("students_profile")
-    .select(
-      `
-      user_id,
-      grade
-    `,
-    )
-    .eq("family_id", familyId || "");
-
-  // Fetch child names separately (avoids RLS join issues)
-  const childIds = (childrenRaw || []).map((c) => c.user_id);
-  const { data: childProfiles } =
-    childIds.length > 0
-      ? await supabase
-          .from("users_profile")
-          .select("id, full_name")
-          .in("id", childIds)
-      : { data: [] };
-
-  const childNameMap = new Map((childProfiles || []).map((s) => [s.id, s]));
-  const children = (childrenRaw || []).map((c) => ({
-    ...c,
-    users_profile: childNameMap.get(c.user_id) || {
-      id: c.user_id,
-      full_name: "Student",
-    },
-  }));
-
-  // Get existing registrations
-  const { data: registrationsRaw } = await supabase
-    .from("program_registrations")
-    .select(
-      `
-      *,
-      program:programs(id, name, program_type, start_date, end_date, status, price_cents)
-    `,
-    )
-    .eq("family_id", familyId || "")
-    .in("status", ["pending", "confirmed", "waitlisted"])
-    .order("created_at", { ascending: false });
-
-  // Fetch registration student names separately (avoids RLS join issues)
-  const regStudentIds = [
-    ...new Set((registrationsRaw || []).map((r) => r.student_user_id)),
-  ];
-  const allNameIds = [...new Set([...childIds, ...regStudentIds])];
-  const { data: regStudentProfiles } =
-    allNameIds.length > 0
-      ? await supabase
-          .from("users_profile")
-          .select("id, full_name")
-          .in("id", allNameIds)
-      : { data: [] };
-
-  const regNameMap = new Map((regStudentProfiles || []).map((s) => [s.id, s]));
-  // Update childNameMap with any additional names
-  (regStudentProfiles || []).forEach((s) => {
-    if (!childNameMap.has(s.id)) childNameMap.set(s.id, s);
-  });
-
-  const registrations = (registrationsRaw || []).map((r) => ({
-    ...r,
-    student: regNameMap.get(r.student_user_id) || {
-      id: r.student_user_id,
-      full_name: "Student",
-    },
-  }));
-
-  // Get available programs for registration
-  const { data: availablePrograms } = await supabase
-    .from("programs")
-    .select(
-      `
-      *,
-      career_pathways(name),
-      registrations:program_registrations(count)
-    `,
-    )
-    .in("status", ["published", "registration_open"])
-    .gte("start_date", new Date().toISOString().split("T")[0])
-    .order("start_date", { ascending: true });
-
-  // Get registered program IDs for each child
-  const registeredByChild = new Map<string, Set<string>>();
-  registrations?.forEach((r) => {
-    if (!registeredByChild.has(r.student_user_id)) {
-      registeredByChild.set(r.student_user_id, new Set());
-    }
-    registeredByChild.get(r.student_user_id)?.add(r.program_id);
-  });
+  const enrolledProgramIds = new Set(
+    enrollments?.map((e) => e.program_id) || [],
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Programs & Camps</h1>
-        <p className="text-slate-600">
-          Register your children for camps, workshops, and competitions
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-900">Coaching Programs</h1>
+        <p className="text-slate-600 mt-1">
+          Structured programs with a named coach — not hourly sessions. Your
+          child gets a long-term mentor who knows their strengths, gaps, and
+          goals.
         </p>
       </div>
 
-      {/* Current Registrations */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Registrations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {registrations && registrations.length > 0 ? (
-            <div className="space-y-4">
-              {registrations.map((reg) => {
-                const program = reg.program as {
-                  id: string;
-                  name: string;
-                  program_type: ProgramType;
-                  start_date: string;
-                  end_date: string;
-                  status: string;
-                  price_cents: number;
-                } | null;
-                const student = reg.student as {
-                  id: string;
-                  full_name: string;
-                } | null;
+      {!programs || programs.length === 0 ? (
+        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
+          <h2 className="text-lg font-semibold text-slate-700 mb-2">
+            Programs coming soon
+          </h2>
+          <p className="text-slate-500">
+            We&apos;re setting up our coaching programs. Check back soon or
+            contact us to be notified when enrollment opens.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {programs.map((program) => {
+            const track = program.track_level as keyof typeof trackColors;
+            const colors = trackColors[track] || trackColors.foundation;
+            const features = trackFeatures[track] || trackFeatures.foundation;
+            const desc =
+              trackDescriptions[track] || trackDescriptions.foundation;
+            const isEnrolled = enrolledProgramIds.has(program.id);
+            const price = (program.monthly_price_cents / 100).toFixed(0);
 
-                return (
-                  <div
-                    key={reg.id}
-                    className="flex items-center justify-between p-4 border border-slate-200 rounded-xl"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium text-slate-900">
-                          {program?.name}
-                        </h4>
-                        <Badge
-                          variant={
-                            STATUS_COLORS[reg.status as RegistrationStatus]
-                          }
-                        >
-                          {reg.status === "waitlisted" && reg.waitlist_position
-                            ? `Waitlisted (#${reg.waitlist_position})`
-                            : reg.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-slate-500">
-                        <span>Student: {student?.full_name}</span>
-                        {program?.program_type && (
-                          <Badge variant="secondary">
-                            {PROGRAM_TYPE_LABELS[program.program_type]}
-                          </Badge>
-                        )}
-                        {program?.start_date && (
-                          <span>{formatDate(program.start_date)}</span>
-                        )}
-                      </div>
-                    </div>
-                    {reg.status !== "canceled" && (
-                      <form
-                        action={cancelRegistrationAction.bind(null, reg.id)}
-                      >
-                        <button
-                          type="submit"
-                          className="text-sm text-red-600 hover:text-red-800"
-                        >
-                          Cancel
-                        </button>
-                      </form>
-                    )}
+            return (
+              <div
+                key={program.id}
+                className={`relative rounded-xl border-2 ${colors.border} ${colors.bg} p-6 flex flex-col`}
+              >
+                {track === "acceleration" && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      Most Popular
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-center text-slate-500 py-4">
-              No active registrations. Browse programs below to register your
-              children.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+                )}
 
-      {/* Available Programs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Available Programs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {availablePrograms && availablePrograms.length > 0 ? (
-            <div className="space-y-6">
-              {availablePrograms.map((program) => {
-                const pathway = program.career_pathways as {
-                  name: string;
-                } | null;
-                const regCount =
-                  (program.registrations as unknown as { count: number }[])?.[0]
-                    ?.count || 0;
-                const spotsLeft = program.max_participants
-                  ? program.max_participants - regCount
-                  : null;
-                const isFull = spotsLeft !== null && spotsLeft <= 0;
+                <div className="mb-4">
+                  <Badge className={colors.badge}>
+                    {track.charAt(0).toUpperCase() + track.slice(1)}
+                  </Badge>
+                  <h2 className="text-xl font-bold text-slate-900 mt-3">
+                    {program.name}
+                  </h2>
+                  <p className="text-sm text-slate-600 mt-2">{desc}</p>
+                </div>
 
-                return (
-                  <div
-                    key={program.id}
-                    className="p-4 border border-slate-200 rounded-xl"
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-slate-900">
-                            {program.name}
-                          </h3>
-                          {program.featured && (
-                            <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
-                              Featured
-                            </span>
-                          )}
-                        </div>
+                <div className="mb-6">
+                  <span className={`text-3xl font-bold ${colors.accent}`}>
+                    ${price}
+                  </span>
+                  <span className="text-slate-500 text-sm">/month</span>
+                  {program.min_enrollment_months > 1 && (
+                    <p className="text-xs text-slate-400 mt-1">
+                      {program.min_enrollment_months}-month minimum
+                    </p>
+                  )}
+                </div>
 
-                        <div className="flex items-center gap-3 text-sm text-slate-500 mb-2">
-                          <Badge variant="secondary">
-                            {
-                              PROGRAM_TYPE_LABELS[
-                                program.program_type as ProgramType
-                              ]
-                            }
-                          </Badge>
-                          {pathway && <span>{pathway.name}</span>}
-                        </div>
-
-                        {program.description && (
-                          <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                            {program.description}
-                          </p>
-                        )}
-
-                        <div className="flex items-center gap-4 text-sm">
-                          {program.start_date && (
-                            <span className="text-slate-600">
-                              {formatDate(program.start_date)}
-                              {program.end_date &&
-                                program.end_date !== program.start_date && (
-                                  <> - {formatDate(program.end_date)}</>
-                                )}
-                            </span>
-                          )}
-                          {program.price_cents > 0 && (
-                            <span className="font-medium text-slate-900">
-                              {formatCurrency(program.price_cents)}
-                            </span>
-                          )}
-                          {spotsLeft !== null && (
-                            <span
-                              className={
-                                spotsLeft <= 5
-                                  ? "text-amber-600 font-medium"
-                                  : "text-slate-500"
-                              }
-                            >
-                              {spotsLeft > 0
-                                ? `${spotsLeft} spots left`
-                                : "Full (Waitlist)"}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <Badge
-                        variant={
-                          program.status === "registration_open"
-                            ? "success"
-                            : "info"
-                        }
+                <div className="mb-6">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
+                    {program.sessions_per_month} sessions/month includes:
+                  </p>
+                  <ul className="space-y-2">
+                    {features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-start gap-2 text-sm text-slate-700"
                       >
-                        {program.status === "registration_open"
-                          ? "Open"
-                          : "Coming Soon"}
-                      </Badge>
+                        <svg
+                          className={`w-4 h-4 mt-0.5 flex-shrink-0 ${colors.accent}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-auto">
+                  {isEnrolled ? (
+                    <div className="w-full text-center py-2.5 rounded-lg bg-green-100 text-green-800 font-medium text-sm">
+                      Currently Enrolled
                     </div>
+                  ) : (
+                    <Link
+                      href={`/parent/programs/${program.id}/enroll`}
+                      className={`block w-full text-center py-2.5 rounded-lg text-white font-medium text-sm transition-colors ${colors.button}`}
+                    >
+                      Enroll Now
+                    </Link>
+                  )}
+                </div>
 
-                    {/* Registration Forms for Each Child */}
-                    {children &&
-                      children.length > 0 &&
-                      program.status === "registration_open" && (
-                        <div className="border-t border-slate-100 pt-4">
-                          <p className="text-sm font-medium text-slate-700 mb-3">
-                            Register a student:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {children.map((child) => {
-                              const profileData =
-                                child.users_profile as unknown;
-                              const profile = Array.isArray(profileData)
-                                ? profileData[0]
-                                : (profileData as {
-                                    id: string;
-                                    full_name: string;
-                                  });
-                              const isRegistered = registeredByChild
-                                .get(child.user_id)
-                                ?.has(program.id);
-
-                              if (isRegistered) {
-                                return (
-                                  <span
-                                    key={child.user_id}
-                                    className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm"
-                                  >
-                                    {profile.full_name} - Registered
-                                  </span>
-                                );
-                              }
-
-                              return (
-                                <form
-                                  key={child.user_id}
-                                  action={registerStudentAction}
-                                >
-                                  <input
-                                    type="hidden"
-                                    name="programId"
-                                    value={program.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="studentId"
-                                    value={child.user_id}
-                                  />
-                                  <button
-                                    type="submit"
-                                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                      isFull
-                                        ? "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                                        : "bg-blue-600 text-white hover:bg-blue-700"
-                                    }`}
-                                  >
-                                    {profile.full_name} (
-                                    {isFull ? "Join Waitlist" : "Register"})
-                                  </button>
-                                </form>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                    {(!children || children.length === 0) && (
-                      <div className="border-t border-slate-100 pt-4">
-                        <p className="text-sm text-slate-500">
-                          No students in your family to register.{" "}
-                          <Link
-                            href="/parent"
-                            className="text-blue-600 hover:underline"
-                          >
-                            Add a student first
-                          </Link>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
+                {program.grade_range_start && (
+                  <p className="text-xs text-slate-400 text-center mt-3">
+                    Grades {program.grade_range_start}–{program.grade_range_end}
+                  </p>
+                )}
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">
-                No Programs Available
-              </h3>
-              <p className="text-slate-500">
-                Check back soon for upcoming camps and workshops!
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            );
+          })}
+        </div>
+      )}
 
-      {/* Program Types Info */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <div className="text-2xl mb-2">🏕️</div>
-            <h4 className="font-medium text-slate-900">Camps</h4>
-            <p className="text-xs text-slate-500">
-              Multi-day immersive programs
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <div className="text-2xl mb-2">🔧</div>
-            <h4 className="font-medium text-slate-900">Workshops</h4>
-            <p className="text-xs text-slate-500">
-              Focused skill-building sessions
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <div className="text-2xl mb-2">🏆</div>
-            <h4 className="font-medium text-slate-900">Competitions</h4>
-            <p className="text-xs text-slate-500">
-              Math challenges and contests
-            </p>
-          </CardContent>
-        </Card>
+      <div className="mt-12 bg-white border border-slate-200 rounded-xl p-6">
+        <h2 className="text-lg font-bold text-slate-900 mb-4">How It Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[
+            {
+              step: "1",
+              title: "Choose a Program",
+              desc: "Pick the track that matches your child's level and goals.",
+            },
+            {
+              step: "2",
+              title: "Get Matched with a Coach",
+              desc: "Your child gets a named coach who stays with them long-term.",
+            },
+            {
+              step: "3",
+              title: "Learn & Track Mastery",
+              desc: "Structured sessions with measurable outcomes every time.",
+            },
+            {
+              step: "4",
+              title: "Compete & Grow",
+              desc: "Mathathlon competitions and career exposure build confidence.",
+            },
+          ].map((item) => (
+            <div key={item.step} className="text-center">
+              <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mx-auto mb-3">
+                {item.step}
+              </div>
+              <h3 className="font-semibold text-slate-900 text-sm">
+                {item.title}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
