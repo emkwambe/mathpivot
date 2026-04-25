@@ -17,7 +17,10 @@ const LoginSchema = z.object({
 
 const SignupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(256, "Password must be at most 256 characters"),
   full_name: z.string().min(2, "Full name is required"),
   role: z.enum(["parent", "tutor", "student"]).default("parent"),
 });
@@ -49,7 +52,7 @@ async function checkRateLimit(
   identifier: string,
   action: string,
   maxAttempts = 5,
-  windowMinutes = 15
+  windowMinutes = 15,
 ): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
   try {
     const admin = createAdminClient();
@@ -63,7 +66,10 @@ async function checkRateLimit(
       console.error("[rate-limit]", error.message);
       return { allowed: false }; // fail closed — deny on error
     }
-    return { allowed: data.allowed, retryAfterSeconds: data.retry_after_seconds };
+    return {
+      allowed: data.allowed,
+      retryAfterSeconds: data.retry_after_seconds,
+    };
   } catch (err) {
     console.error("[rate-limit] unexpected:", err);
     return { allowed: true };
@@ -88,8 +94,12 @@ export { signOut as logoutAction };
 // ============================================================
 export async function loginAction(
   _prevState: unknown,
-  formData: FormData
-): Promise<{ error?: string; retryAfterSeconds?: number; redirectTo?: string }> {
+  formData: FormData,
+): Promise<{
+  error?: string;
+  retryAfterSeconds?: number;
+  redirectTo?: string;
+}> {
   const raw = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -103,10 +113,13 @@ export async function loginAction(
     `${ip}:${parsed.data.email.toLowerCase()}`,
     "login",
     5,
-    15
+    15,
   );
   if (!rateCheck.allowed)
-    return { error: RATE_LIMIT_ERROR, retryAfterSeconds: rateCheck.retryAfterSeconds };
+    return {
+      error: RATE_LIMIT_ERROR,
+      retryAfterSeconds: rateCheck.retryAfterSeconds,
+    };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -128,7 +141,7 @@ export async function loginAction(
 // ============================================================
 export async function signupAction(
   _prevState: unknown,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ error?: string; success?: string; retryAfterSeconds?: number }> {
   const raw = {
     email: formData.get("email") as string,
@@ -138,13 +151,15 @@ export async function signupAction(
   };
 
   const parsed = SignupSchema.safeParse(raw);
-  if (!parsed.success)
-    return { error: parsed.error.issues[0].message };
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const ip = await getClientIdentifier();
   const rateCheck = await checkRateLimit(ip, "signup", 3, 60);
   if (!rateCheck.allowed)
-    return { error: RATE_LIMIT_ERROR, retryAfterSeconds: rateCheck.retryAfterSeconds };
+    return {
+      error: RATE_LIMIT_ERROR,
+      retryAfterSeconds: rateCheck.retryAfterSeconds,
+    };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
@@ -152,7 +167,7 @@ export async function signupAction(
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.full_name, role: parsed.data.role },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     },
   });
 
@@ -170,7 +185,7 @@ export async function signupAction(
 // ============================================================
 export async function requestPasswordResetAction(
   _prevState: unknown,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ success: boolean }> {
   const email = (formData.get("email") as string)?.toLowerCase().trim();
   if (!email || !z.string().email().safeParse(email).success)
@@ -182,7 +197,7 @@ export async function requestPasswordResetAction(
 
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/update-password`,
   });
 
   return { success: true };
@@ -193,11 +208,11 @@ export async function requestPasswordResetAction(
 // ============================================================
 export async function updatePasswordAction(
   _prevState: unknown,
-  formData: FormData
+  formData: FormData,
 ): Promise<{ error?: string }> {
   const password = formData.get("password") as string;
-  if (!password || password.length < 8)
-    return { error: "Password must be at least 8 characters." };
+  if (!password || password.length < 8 || password.length > 256)
+    return { error: "Password must be between 8 and 256 characters." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
@@ -210,5 +225,3 @@ export async function updatePasswordAction(
   revalidatePath("/", "layout");
   redirect("/login?message=password-updated");
 }
-
-

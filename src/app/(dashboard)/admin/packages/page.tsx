@@ -32,7 +32,7 @@ const tierColors: Record<string, { badge: string; border: string }> = {
 };
 
 const tierNames: Record<string, string> = {
-  TIER_TUTORING: "Tutoring",
+  TIER_TUTORING: "Coaching",
   TIER_COACHING: "Coaching",
   TIER_MENTORSHIP: "Mentorship",
 };

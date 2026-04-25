@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
-import { getCurrentUser } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
+import { getCurrentUser } from "@/lib/auth";
 import {
   getStudentContext,
   getOrCreateConversation,
@@ -8,7 +8,7 @@ import {
   buildChatMessages,
   saveMessage,
   updateConversationTitle,
-} from '@/lib/ai/tutor-chat';
+} from "@/lib/ai/tutor-chat";
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
@@ -17,13 +17,13 @@ const anthropic = new Anthropic({
 
 // Fallback response when API is unavailable
 function getFallbackResponse(
-  messages: Array<{ role: string; content: string }>
+  messages: Array<{ role: string; content: string }>,
 ): string {
-  const systemPrompt = messages.find((m) => m.role === 'system')?.content || '';
+  const systemPrompt = messages.find((m) => m.role === "system")?.content || "";
   const nameMatch = systemPrompt.match(/helping (\w+),/);
-  const studentName = nameMatch ? nameMatch[1] : 'there';
+  const studentName = nameMatch ? nameMatch[1] : "there";
 
-  return `Hi ${studentName}! I'm your AI Math Tutor, but I'm currently running in offline mode.
+  return `Hi ${studentName}! I'm your AI Math Coach, but I'm currently running in offline mode.
 
 **I can help you with:**
 - Algebra (equations, expressions, functions)
@@ -40,24 +40,28 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Only students can use the chat (parents can view but not chat)
-    if (user.role !== 'student' && user.role !== 'admin') {
+    if (user.role !== "student" && user.role !== "admin") {
       return NextResponse.json(
-        { error: 'Only students can use the AI tutor chat' },
-        { status: 403 }
+        { error: "Only students can use the AI tutor chat" },
+        { status: 403 },
       );
     }
 
     const body = await request.json();
     const { message, conversationId } = body;
 
-    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+    if (
+      !message ||
+      typeof message !== "string" ||
+      message.trim().length === 0
+    ) {
       return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
+        { error: "Message is required" },
+        { status: 400 },
       );
     }
 
@@ -66,9 +70,9 @@ export async function POST(request: NextRequest) {
     if (!context) {
       // Use default context for students without a full profile
       context = {
-        studentName: user.fullName?.split(' ')[0] || 'there',
+        studentName: user.fullName?.split(" ")[0] || "there",
         gradeLevel: 9,
-        courseTrack: 'general_math',
+        courseTrack: "general_math",
         recentSkills: [],
         masteryLevels: {},
         goals: undefined,
@@ -82,7 +86,7 @@ export async function POST(request: NextRequest) {
     const history = await getConversationHistory(convoId);
 
     // Save user message
-    await saveMessage(convoId, 'user', message.trim());
+    await saveMessage(convoId, "user", message.trim());
 
     // Update title if this is the first message
     if (history.length === 0) {
@@ -94,9 +98,9 @@ export async function POST(request: NextRequest) {
 
     // Check if API key is configured - use non-streaming fallback
     if (!process.env.ANTHROPIC_API_KEY) {
-      console.warn('ANTHROPIC_API_KEY not set - using fallback response');
+      console.warn("ANTHROPIC_API_KEY not set - using fallback response");
       const fallbackResponse = getFallbackResponse(messages);
-      await saveMessage(convoId, 'assistant', fallbackResponse);
+      await saveMessage(convoId, "assistant", fallbackResponse);
       return NextResponse.json({
         conversationId: convoId,
         message: fallbackResponse,
@@ -104,11 +108,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract system prompt and conversation messages for streaming
-    const systemPrompt = messages.find((m) => m.role === 'system')?.content || '';
+    const systemPrompt =
+      messages.find((m) => m.role === "system")?.content || "";
     const conversationMessages = messages
-      .filter((m) => m.role !== 'system')
+      .filter((m) => m.role !== "system")
       .map((m) => ({
-        role: m.role as 'user' | 'assistant',
+        role: m.role as "user" | "assistant",
         content: m.content,
       }));
 
@@ -117,11 +122,11 @@ export async function POST(request: NextRequest) {
     // Create streaming response
     const stream = new ReadableStream({
       async start(controller) {
-        let fullResponse = '';
+        let fullResponse = "";
 
         try {
           const anthropicStream = anthropic.messages.stream({
-            model: 'claude-sonnet-4-20250514',
+            model: "claude-sonnet-4-20250514",
             max_tokens: 1024,
             system: systemPrompt,
             messages: conversationMessages,
@@ -129,33 +134,33 @@ export async function POST(request: NextRequest) {
 
           for await (const event of anthropicStream) {
             if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
+              event.type === "content_block_delta" &&
+              event.delta.type === "text_delta"
             ) {
               const text = event.delta.text;
               fullResponse += text;
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
+                encoder.encode(`data: ${JSON.stringify({ text })}\n\n`),
               );
             }
           }
 
           // Save complete response to database
-          await saveMessage(convoId, 'assistant', fullResponse);
+          await saveMessage(convoId, "assistant", fullResponse);
 
           // Send completion event with conversationId
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ done: true, conversationId: convoId })}\n\n`
-            )
+              `data: ${JSON.stringify({ done: true, conversationId: convoId })}\n\n`,
+            ),
           );
         } catch (error) {
-          console.error('Streaming error:', error);
+          console.error("Streaming error:", error);
           // Send error event
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ error: 'Failed to generate response' })}\n\n`
-            )
+              `data: ${JSON.stringify({ error: "Failed to generate response" })}\n\n`,
+            ),
           );
         } finally {
           controller.close();
@@ -165,16 +170,16 @@ export async function POST(request: NextRequest) {
 
     return new Response(stream, {
       headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
       },
     });
   } catch (error) {
-    console.error('AI Chat error:', error);
+    console.error("AI Chat error:", error);
     return NextResponse.json(
-      { error: 'Failed to process chat message' },
-      { status: 500 }
+      { error: "Failed to process chat message" },
+      { status: 500 },
     );
   }
 }
@@ -185,11 +190,11 @@ export async function GET(request: NextRequest) {
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const conversationId = searchParams.get('conversationId');
+    const conversationId = searchParams.get("conversationId");
 
     if (conversationId) {
       // Get specific conversation
@@ -198,15 +203,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Get list of conversations
-    const { getStudentConversations } = await import('@/lib/ai/tutor-chat');
+    const { getStudentConversations } = await import("@/lib/ai/tutor-chat");
     const conversations = await getStudentConversations(user.id);
     return NextResponse.json({ conversations });
-
   } catch (error) {
-    console.error('AI Chat GET error:', error);
+    console.error("AI Chat GET error:", error);
     return NextResponse.json(
-      { error: 'Failed to retrieve chat data' },
-      { status: 500 }
+      { error: "Failed to retrieve chat data" },
+      { status: 500 },
     );
   }
 }

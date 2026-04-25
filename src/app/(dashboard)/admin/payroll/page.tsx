@@ -54,9 +54,9 @@ export default async function AdminPayrollPage({
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Tutor Payroll</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Coach Payroll</h1>
           <p className="text-sm text-slate-500">
-            Manage tutor earnings and payouts
+            Manage coach earnings and payouts
           </p>
         </div>
       </div>

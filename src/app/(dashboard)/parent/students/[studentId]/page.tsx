@@ -273,7 +273,7 @@ export default async function StudentProfilePage({ params }: PageProps) {
               </div>
               <div>
                 <h4 className="text-sm font-medium text-slate-700 mb-1">
-                  Tutor Notes
+                  Coach Notes
                 </h4>
                 <p className="text-sm text-slate-600">
                   {student.notes || "No notes yet."}
@@ -510,7 +510,7 @@ export default async function StudentProfilePage({ params }: PageProps) {
                   tutor_user_id: string;
                 };
                 const tutorName =
-                  tutorNameMap.get(booking.tutor_user_id) || "Tutor";
+                  tutorNameMap.get(booking.tutor_user_id) || "Coach";
                 return (
                   <div
                     key={session.id}

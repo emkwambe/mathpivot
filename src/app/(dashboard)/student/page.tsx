@@ -193,7 +193,7 @@ export default async function StudentDashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600">AI Tutor</p>
+                <p className="text-sm text-slate-600">AI Coach</p>
                 <p className="text-lg font-semibold text-slate-900">
                   Ready to help!
                 </p>

@@ -28,7 +28,7 @@ import {
 const audiences = [
   {
     key: "centers",
-    label: "Tutoring Centers",
+    label: "Coaching Centers",
     icon: Building2,
     headline: "Manage your entire center from one dashboard",
     points: [
@@ -70,7 +70,7 @@ const audiences = [
   },
   {
     key: "independent",
-    label: "Independent Tutors",
+    label: "Independent Coaches",
     icon: UserCheck,
     headline: "Run your solo practice like a pro",
     points: [
@@ -102,7 +102,7 @@ const audiences = [
 const featureRows = [
   {
     icon: Brain,
-    badge: "AI Tutoring",
+    badge: "AI Coaching",
     headline: "Claude-Powered AI That Actually Teaches Math",
     points: [
       "Step-by-step problem solving with Socratic questioning",
@@ -119,7 +119,7 @@ const featureRows = [
       "Calendar sync with Google, Outlook, and Apple Calendar",
       "Recurring sessions with automatic reminders",
       "Parent self-booking from your branded page",
-      "Tutor availability management with conflict detection",
+      "Coach availability management with conflict detection",
     ],
   },
   {
@@ -193,7 +193,7 @@ const pricingTiers = [
 /* ─── org features ─── */
 const orgFeatures = [
   "Multi-location management",
-  "Tutor payroll tracking",
+  "Coach payroll tracking",
   "Room & resource scheduling",
   "Lead management & intake forms",
   "Custom branding",
@@ -205,7 +205,7 @@ const orgFeatures = [
 
 /* ─── platform dropdown items ─── */
 const platformItems = [
-  { label: "AI Tutor", icon: Brain, desc: "Claude-powered math assistant" },
+  { label: "AI Coach", icon: Brain, desc: "Claude-powered math assistant" },
   {
     label: "Scheduling",
     icon: Calendar,
@@ -412,11 +412,11 @@ export default function HomePage({ isLoggedIn }: { isLoggedIn?: boolean }) {
           <div>
             <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
               <BookOpen className="w-3.5 h-3.5" />
-              Built for Math &amp; CS Tutoring
+              Built for Math &amp; CS Coaching
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] tracking-tight">
               The Operating System for{" "}
-              <span className="text-blue-600">Tutoring Centers</span>
+              <span className="text-blue-600">Coaching Centers</span>
             </h1>
             <p className="text-lg text-slate-600 mt-6 max-w-lg leading-relaxed">
               Schedule sessions, track mastery, bill parents, and power
@@ -541,7 +541,7 @@ export default function HomePage({ isLoggedIn }: { isLoggedIn?: boolean }) {
             {[
               { value: "95%", label: "Grade Improvement" },
               { value: "500+", label: "Families Served" },
-              { value: "50+", label: "Expert Tutors" },
+              { value: "50+", label: "Expert Coaches" },
               { value: "4.9/5", label: "Parent Satisfaction" },
             ].map((stat) => (
               <div key={stat.label}>
@@ -631,7 +631,7 @@ export default function HomePage({ isLoggedIn }: { isLoggedIn?: boolean }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
-              Everything You Need to Run a Tutoring Business
+              Everything You Need to Run a Coaching Business
             </h2>
             <p className="text-slate-600 mt-3 max-w-2xl mx-auto">
               From AI-assisted teaching to automated billing, every tool is
@@ -738,7 +738,7 @@ export default function HomePage({ isLoggedIn }: { isLoggedIn?: boolean }) {
       <section id="organizations" className="bg-blue-600 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Scale Your Tutoring Center with MathPivot
+            Scale Your Coaching Center with MathPivot
           </h2>
           <p className="text-blue-100 max-w-2xl mx-auto mb-12">
             Replace spreadsheets with a system built for math education.
@@ -901,7 +901,7 @@ export default function HomePage({ isLoggedIn }: { isLoggedIn?: boolean }) {
       <section className="bg-slate-900 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Ready to Transform Your Tutoring Business?
+            Ready to Transform Your Coaching Business?
           </h2>
           <p className="text-slate-400 max-w-xl mx-auto mb-8">
             Join 500+ families and 50+ tutors already using MathPivot to deliver

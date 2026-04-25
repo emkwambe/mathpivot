@@ -93,7 +93,7 @@ export default async function BookPage() {
   const formattedTutors =
     tutorProfiles?.map((t) => ({
       id: t.user_id,
-      name: nameMap.get(t.user_id) || "Tutor",
+      name: nameMap.get(t.user_id) || "Coach",
       bio: t.bio,
       hourlyRateCents: t.hourly_rate,
     })) || [];

@@ -138,7 +138,7 @@ export default async function TutorDashboardPage() {
             <h1 className="text-2xl font-bold">
               Welcome,{" "}
               {
-                String(authUser.user_metadata?.full_name || "Tutor").split(
+                String(authUser.user_metadata?.full_name || "Coach").split(
                   " ",
                 )[0]
               }
