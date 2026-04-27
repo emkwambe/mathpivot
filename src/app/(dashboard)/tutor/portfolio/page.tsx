@@ -155,21 +155,29 @@ export default async function CoachPortfolioPage() {
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      {mastery && mastery.total > 0 ? (
-                        <div>
-                          <p className="text-lg font-bold text-slate-900">
-                            {masteryPct}%
-                          </p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        {mastery && mastery.total > 0 ? (
+                          <div>
+                            <p className="text-lg font-bold text-slate-900">
+                              {masteryPct}%
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {mastery.mastered}/{mastery.total} mastered
+                            </p>
+                          </div>
+                        ) : (
                           <p className="text-xs text-slate-400">
-                            {mastery.mastered}/{mastery.total} mastered
+                            No mastery data
                           </p>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-slate-400">
-                          No mastery data
-                        </p>
-                      )}
+                        )}
+                      </div>
+                      <Link
+                        href={`/tutor/portfolio/${enrollment.id}/mastery`}
+                        className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Track
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
