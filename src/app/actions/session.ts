@@ -8,7 +8,7 @@ import { sendSessionSummary } from "@/lib/notifications";
 import { logAuditEvent } from "@/lib/audit";
 import { z } from "zod";
 
-const startSessionSchema = z.object({
+const _startSessionSchema = z.object({
   bookingId: z.string().uuid(),
 });
 
@@ -17,6 +17,7 @@ const endSessionSchema = z.object({
   tutorNotes: z.string().optional(),
   nextSteps: z.string().optional(),
   skillsCovered: z.array(z.string().uuid()).optional(),
+  conceptsUpdated: z.number().optional(),
 });
 
 const updateMasterySchema = z.object({
@@ -180,6 +181,22 @@ export async function endSession(
     return { success: false, error: "Session has already ended" };
   }
 
+  // Mastery gate: check if coach updated at least 1 concept during this session
+  const { count: masteryUpdates } = await supabase
+    .from("student_concept_mastery")
+    .select("id", { count: "exact", head: true })
+    .eq("student_id", booking.student_user_id)
+    .eq("assessed_by", user.id)
+    .gte("assessed_at", session.started_at || new Date().toISOString());
+
+  if (!masteryUpdates || masteryUpdates === 0) {
+    return {
+      success: false,
+      error:
+        "Please update at least one concept mastery before ending the session. Go to Portfolio > Track to mark what was covered.",
+    };
+  }
+
   // Update session — use correct schema column names
   const { error: updateError } = await supabase
     .from("sessions")
@@ -281,7 +298,7 @@ export async function updateStudentMastery(
     return { success: false, error: result.error.issues[0].message };
   }
 
-  const { studentUserId, skillId, level, notes } = result.data;
+  const { studentUserId, skillId, level, notes: _notes } = result.data;
 
   const supabase = await createClient();
 
