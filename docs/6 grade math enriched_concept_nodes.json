@@ -1,0 +1,5491 @@
+{
+  "8171ce7d-099f-1f52-9a85-12486f7845fc": {
+    "id": "8171ce7d-099f-1f52-9a85-12486f7845fc",
+    "concept_name": "Fluently Add and Subtract Multi-Digit Decimals",
+    "canonical_definition": "Fluently Add and Subtract Multi-Digit Decimals. Add and subtract multi-digit numbers involving decimals using the standard algorithm",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 0,
+      "typical_misconception": [
+        "Misaligns decimal points when adding/subtracting.",
+        "Forgets to place decimal point in product (multiplies as whole numbers then guesses)."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misaligns decimal points when adding/subtracting.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Fluently Add and Subtract Multi-Digit Decimals to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.B.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.1.1",
+      "standard": "NC.6.NS.B.3",
+      "keySkills": [
+        "Add and subtract multi-digit numbers involving decimals using the standard algorithm"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "03d14df7-8383-eefd-a8d4-e6eba9a487ce": {
+    "id": "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+    "concept_name": "Fluently Multiply Multi-Digit Decimals",
+    "canonical_definition": "Fluently Multiply Multi-Digit Decimals. Multiply multi-digit numbers involving decimals using the standard algorithm",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 1,
+      "typical_misconception": [
+        "Misaligns decimal points when adding/subtracting.",
+        "Forgets to place decimal point in product (multiplies as whole numbers then guesses)."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misaligns decimal points when adding/subtracting.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Fluently Multiply Multi-Digit Decimals to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.B.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.1.2",
+      "standard": "NC.6.NS.B.3",
+      "keySkills": [
+        "Multiply multi-digit numbers involving decimals using the standard algorithm"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "c71674a2-292b-c95f-b61e-9161ee1a7688": {
+    "id": "c71674a2-292b-c95f-b61e-9161ee1a7688",
+    "concept_name": "Fluently Divide Multi-Digit Whole Numbers (Long Division)",
+    "canonical_definition": "Fluently Divide Multi-Digit Whole Numbers (Long Division). Divide multi-digit whole numbers using the standard algorithm for long division",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 2,
+      "typical_misconception": [
+        "Misunderstands the relationship between Fluently Divide Multi-Digit Whole Numbers (Long Division) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Fluently Divide Multi-Digit Whole Numbers (Long Division) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Fluently Divide Multi-Digit Whole Numbers (Long Division) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.B.2"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.1.3",
+      "standard": "NC.6.NS.B.2",
+      "keySkills": [
+        "Divide multi-digit whole numbers using the standard algorithm for long division"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "935a35e5-7285-e414-3b98-9e27e13796dd": {
+    "id": "935a35e5-7285-e414-3b98-9e27e13796dd",
+    "concept_name": "Fluently Divide Multi-Digit Decimals",
+    "canonical_definition": "Fluently Divide Multi-Digit Decimals. Divide multi-digit decimals using the standard algorithm",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 3,
+      "typical_misconception": [
+        "Misaligns decimal points when adding/subtracting.",
+        "Forgets to place decimal point in product (multiplies as whole numbers then guesses)."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misaligns decimal points when adding/subtracting.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Fluently Divide Multi-Digit Decimals to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.B.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.1.4",
+      "standard": "NC.6.NS.B.3",
+      "keySkills": [
+        "Divide multi-digit decimals using the standard algorithm"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "9ce59f43-43ec-2239-b2b0-6b200bdbd964": {
+    "id": "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+    "concept_name": "Understanding Fraction Division (Conceptually)",
+    "canonical_definition": "Understanding Fraction Division (Conceptually). Interpret and compute quotients of fractions using visual models (e.g., how many 3/4s are in 1/2)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand"
+      ],
+      "prerequisite_depth": 4,
+      "typical_misconception": [
+        "Thinks dividing fractions means 'divide numerators and denominators separately'.",
+        "Confuses 'invert and multiply' with 'multiply and invert'."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Thinks dividing fractions means 'divide numerators and denominators separately'.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Fraction Division (Conceptually) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.2.1",
+      "standard": "NC.6.NS.A.1",
+      "keySkills": [
+        "Interpret and compute quotients of fractions using visual models (e.g., how many 3/4s are in 1/2)"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "7ba69a27-90ff-2dc3-da45-404344310be8": {
+    "id": "7ba69a27-90ff-2dc3-da45-404344310be8",
+    "concept_name": "Computing Quotients of Fractions by Fractions (Algorithm)",
+    "canonical_definition": "Computing Quotients of Fractions by Fractions (Algorithm). Apply the algorithm (invert and multiply) to divide fractions by fractions",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 5,
+      "typical_misconception": [
+        "Thinks dividing fractions means 'divide numerators and denominators separately'.",
+        "Confuses 'invert and multiply' with 'multiply and invert'."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Thinks dividing fractions means 'divide numerators and denominators separately'.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Computing Quotients of Fractions by Fractions (Algorithm) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.2.2",
+      "standard": "NC.6.NS.A.1",
+      "keySkills": [
+        "Apply the algorithm (invert and multiply) to divide fractions by fractions"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "f3a843bf-77cd-ae88-6c6f-60191dc03a56": {
+    "id": "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+    "concept_name": "Solving Word Problems Involving Fraction Division",
+    "canonical_definition": "Solving Word Problems Involving Fraction Division. Use fraction division to solve real-world problems involving lengths, areas, and quantities",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 6,
+      "typical_misconception": [
+        "Thinks dividing fractions means 'divide numerators and denominators separately'.",
+        "Confuses 'invert and multiply' with 'multiply and invert'."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Thinks dividing fractions means 'divide numerators and denominators separately'.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving Word Problems Involving Fraction Division to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.2.3",
+      "standard": "NC.6.NS.A.1",
+      "keySkills": [
+        "Use fraction division to solve real-world problems involving lengths, areas, and quantities"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5": {
+    "id": "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+    "concept_name": "Finding the Greatest Common Factor (GCF) of Two Whole Numbers",
+    "canonical_definition": "Finding the Greatest Common Factor (GCF) of Two Whole Numbers. Find the GCF of two whole numbers less than or equal to 100",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 7,
+      "typical_misconception": [
+        "Misunderstands the relationship between Finding the Greatest Common Factor (GCF) of Two Whole Numbers and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Finding the Greatest Common Factor (GCF) of Two Whole Numbers and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Finding the Greatest Common Factor (GCF) of Two Whole Numbers to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.B.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.3.1",
+      "standard": "NC.6.NS.B.4",
+      "keySkills": [
+        "Find the GCF of two whole numbers less than or equal to 100"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "39f0e34a-6b9c-b9d3-7561-f9c137d26957": {
+    "id": "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+    "concept_name": "Finding the Least Common Multiple (LCM) of Two Whole Numbers",
+    "canonical_definition": "Finding the Least Common Multiple (LCM) of Two Whole Numbers. Find the LCM of two whole numbers less than or equal to 12",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 8,
+      "typical_misconception": [
+        "Misunderstands the relationship between Finding the Least Common Multiple (LCM) of Two Whole Numbers and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Finding the Least Common Multiple (LCM) of Two Whole Numbers and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Finding the Least Common Multiple (LCM) of Two Whole Numbers to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.B.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.3.2",
+      "standard": "NC.6.NS.B.4",
+      "keySkills": [
+        "Find the LCM of two whole numbers less than or equal to 12"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "3e2ead86-9aaa-80eb-5224-11438df5b14a": {
+    "id": "3e2ead86-9aaa-80eb-5224-11438df5b14a",
+    "concept_name": "Using GCF and LCM to Rewrite Expressions (Distributive Property, Common Denominators)",
+    "canonical_definition": "Using GCF and LCM to Rewrite Expressions (Distributive Property, Common Denominators). Use the distributive property to express a sum of two whole numbers with a common factor",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 9,
+      "typical_misconception": [
+        "Misunderstands the relationship between Using GCF and LCM to Rewrite Expressions (Distributive Property, Common Denominators) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Using GCF and LCM to Rewrite Expressions (Distributive Property, Common Denominators) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Using GCF and LCM to Rewrite Expressions (Distributive Property, Common Denominators) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.B.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.3.3",
+      "standard": "NC.6.NS.B.4",
+      "keySkills": [
+        "Use the distributive property to express a sum of two whole numbers with a common factor"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "e62ea90b-0756-28f5-f082-6a34321415bb": {
+    "id": "e62ea90b-0756-28f5-f082-6a34321415bb",
+    "concept_name": "Understanding Positive and Negative Numbers in Context",
+    "canonical_definition": "Understanding Positive and Negative Numbers in Context. Use positive and negative numbers to represent quantities in real-world contexts (e.g., temperature, elevation)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 10,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Positive and Negative Numbers in Context and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+      "3e2ead86-9aaa-80eb-5224-11438df5b14a"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Positive and Negative Numbers in Context and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Positive and Negative Numbers in Context to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.C.5"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.4.1",
+      "standard": "NC.6.NS.C.5",
+      "keySkills": [
+        "Use positive and negative numbers to represent quantities in real-world contexts (e.g., temperature, elevation)"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "8c0cf9b7-b44b-2fe1-8c3b-e7f9626f14fe": {
+    "id": "8c0cf9b7-b44b-2fe1-8c3b-e7f9626f14fe",
+    "concept_name": "Understanding Integers and Opposites",
+    "canonical_definition": "Understanding Integers and Opposites. Define integers Understand that opposite numbers are equidistant from zero on a number line",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 11,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Integers and Opposites and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+      "3e2ead86-9aaa-80eb-5224-11438df5b14a",
+      "e62ea90b-0756-28f5-f082-6a34321415bb"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Integers and Opposites and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Integers and Opposites to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.C.5, NC.6.NS.C.6a"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.4.2",
+      "standard": "NC.6.NS.C.5, NC.6.NS.C.6a",
+      "keySkills": [
+        "Define integers",
+        "Understand that opposite numbers are equidistant from zero on a number line"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "7b80ddb5-5937-47a6-0fc4-34abe34b5582": {
+    "id": "7b80ddb5-5937-47a6-0fc4-34abe34b5582",
+    "concept_name": "Plotting Rational Numbers on a Number Line and Coordinate Plane",
+    "canonical_definition": "Plotting Rational Numbers on a Number Line and Coordinate Plane. Plot rational numbers on a horizontal or vertical number line and in all four quadrants of the coordinate plane",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 12,
+      "typical_misconception": [
+        "Switches x and y coordinates when plotting.",
+        "Counts grid squares from origin instead of using absolute difference for distance."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+      "3e2ead86-9aaa-80eb-5224-11438df5b14a",
+      "e62ea90b-0756-28f5-f082-6a34321415bb",
+      "8c0cf9b7-b44b-2fe1-8c3b-e7f9626f14fe"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "cartesian_plane",
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": true,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "observed_outputs": [
+          "point_positions",
+          "distance_if_aligned"
+        ],
+        "minimal_viable_sim_code": "if x1==x2: return abs(y2-y1); if y1==y2: return abs(x2-x1); else: return 'Not aligned'"
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Switches x and y coordinates when plotting.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Plotting Rational Numbers on a Number Line and Coordinate Plane to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.C.6, NC.6.NS.C.8"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.4.3",
+      "standard": "NC.6.NS.C.6, NC.6.NS.C.8",
+      "keySkills": [
+        "Plot rational numbers on a horizontal or vertical number line and in all four quadrants of the coordinate plane"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "8ecb702d-073d-2ad8-6437-62855da16b0b": {
+    "id": "8ecb702d-073d-2ad8-6437-62855da16b0b",
+    "concept_name": "Understanding Absolute Value of Rational Numbers",
+    "canonical_definition": "Understanding Absolute Value of Rational Numbers. Define absolute value as distance from zero Interpret absolute value in real-world situations",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 13,
+      "typical_misconception": [
+        "Thinks absolute value makes numbers negative.",
+        "Confuses absolute value with changing sign."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+      "3e2ead86-9aaa-80eb-5224-11438df5b14a",
+      "e62ea90b-0756-28f5-f082-6a34321415bb",
+      "8c0cf9b7-b44b-2fe1-8c3b-e7f9626f14fe",
+      "7b80ddb5-5937-47a6-0fc4-34abe34b5582"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Thinks absolute value makes numbers negative.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Absolute Value of Rational Numbers to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.C.7c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.4.4",
+      "standard": "NC.6.NS.C.7c",
+      "keySkills": [
+        "Define absolute value as distance from zero",
+        "Interpret absolute value in real-world situations"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "0313cb1e-e6a0-6eb8-7181-077885fa1d19": {
+    "id": "0313cb1e-e6a0-6eb8-7181-077885fa1d19",
+    "concept_name": "Comparing and Ordering Rational Numbers",
+    "canonical_definition": "Comparing and Ordering Rational Numbers. Use inequality symbols (<, >, =) to compare rational numbers Order rational numbers on a number line",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 14,
+      "typical_misconception": [
+        "Misunderstands the relationship between Comparing and Ordering Rational Numbers and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+      "3e2ead86-9aaa-80eb-5224-11438df5b14a",
+      "e62ea90b-0756-28f5-f082-6a34321415bb",
+      "8c0cf9b7-b44b-2fe1-8c3b-e7f9626f14fe",
+      "7b80ddb5-5937-47a6-0fc4-34abe34b5582",
+      "8ecb702d-073d-2ad8-6437-62855da16b0b"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Comparing and Ordering Rational Numbers and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Comparing and Ordering Rational Numbers to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.C.7"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.4.5",
+      "standard": "NC.6.NS.C.7",
+      "keySkills": [
+        "Use inequality symbols (<, >, =) to compare rational numbers",
+        "Order rational numbers on a number line"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "0fe22fc0-4e17-da7e-4c6d-2f36449f38bd": {
+    "id": "0fe22fc0-4e17-da7e-4c6d-2f36449f38bd",
+    "concept_name": "Graphing Points in All Four Quadrants of the Coordinate Plane",
+    "canonical_definition": "Graphing Points in All Four Quadrants of the Coordinate Plane. Plot points (x, y) in all four quadrants Understand the meaning of coordinates in context",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 15,
+      "typical_misconception": [
+        "Switches x and y coordinates when plotting.",
+        "Counts grid squares from origin instead of using absolute difference for distance."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+      "3e2ead86-9aaa-80eb-5224-11438df5b14a",
+      "e62ea90b-0756-28f5-f082-6a34321415bb",
+      "8c0cf9b7-b44b-2fe1-8c3b-e7f9626f14fe",
+      "7b80ddb5-5937-47a6-0fc4-34abe34b5582",
+      "8ecb702d-073d-2ad8-6437-62855da16b0b",
+      "0313cb1e-e6a0-6eb8-7181-077885fa1d19"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "cartesian_plane"
+        ],
+        "has_dynamic_range": true,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "observed_outputs": [
+          "point_positions",
+          "distance_if_aligned"
+        ],
+        "minimal_viable_sim_code": "if x1==x2: return abs(y2-y1); if y1==y2: return abs(x2-x1); else: return 'Not aligned'"
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Switches x and y coordinates when plotting.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Graphing Points in All Four Quadrants of the Coordinate Plane to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.C.8"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.4.6",
+      "standard": "NC.6.NS.C.8",
+      "keySkills": [
+        "Plot points (x, y) in all four quadrants",
+        "Understand the meaning of coordinates in context"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "7c6d7417-0d41-527d-2d28-a68caec4a475": {
+    "id": "7c6d7417-0d41-527d-2d28-a68caec4a475",
+    "concept_name": "Finding Distances Between Points in the Coordinate Plane",
+    "canonical_definition": "Finding Distances Between Points in the Coordinate Plane. Find distances between points with the same first or second coordinate by applying absolute value",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 16,
+      "typical_misconception": [
+        "Switches x and y coordinates when plotting.",
+        "Counts grid squares from origin instead of using absolute difference for distance."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "8171ce7d-099f-1f52-9a85-12486f7845fc",
+      "03d14df7-8383-eefd-a8d4-e6eba9a487ce",
+      "c71674a2-292b-c95f-b61e-9161ee1a7688",
+      "935a35e5-7285-e414-3b98-9e27e13796dd",
+      "9ce59f43-43ec-2239-b2b0-6b200bdbd964",
+      "7ba69a27-90ff-2dc3-da45-404344310be8",
+      "f3a843bf-77cd-ae88-6c6f-60191dc03a56",
+      "b108afc7-fb62-daa8-a66c-ab0fcf2c01a5",
+      "39f0e34a-6b9c-b9d3-7561-f9c137d26957",
+      "3e2ead86-9aaa-80eb-5224-11438df5b14a",
+      "e62ea90b-0756-28f5-f082-6a34321415bb",
+      "8c0cf9b7-b44b-2fe1-8c3b-e7f9626f14fe",
+      "7b80ddb5-5937-47a6-0fc4-34abe34b5582",
+      "8ecb702d-073d-2ad8-6437-62855da16b0b",
+      "0313cb1e-e6a0-6eb8-7181-077885fa1d19",
+      "0fe22fc0-4e17-da7e-4c6d-2f36449f38bd"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "cartesian_plane"
+        ],
+        "has_dynamic_range": true,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "observed_outputs": [
+          "point_positions",
+          "distance_if_aligned"
+        ],
+        "minimal_viable_sim_code": "if x1==x2: return abs(y2-y1); if y1==y2: return abs(x2-x1); else: return 'Not aligned'"
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Switches x and y coordinates when plotting.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Finding Distances Between Points in the Coordinate Plane to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.NS.C.8"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.NS.4.7",
+      "standard": "NC.6.NS.C.8",
+      "keySkills": [
+        "Find distances between points with the same first or second coordinate by applying absolute value"
+      ],
+      "unitTopic": "The Number System"
+    },
+    "_unit_topic": "The Number System"
+  },
+  "dfbaba19-8f6e-124a-93f6-b6362536ad87": {
+    "id": "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+    "concept_name": "Understanding Ratios (Definition and Different Forms)",
+    "canonical_definition": "Understanding Ratios (Definition and Different Forms). Define a ratio as a comparison of two quantities Write ratios in fraction form, with a colon, or with the word \"to\"",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 0,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Ratios (Definition and Different Forms) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Ratios (Definition and Different Forms) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Ratios (Definition and Different Forms) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.1.1",
+      "standard": "NC.6.RP.A.1",
+      "keySkills": [
+        "Define a ratio as a comparison of two quantities",
+        "Write ratios in fraction form, with a colon, or with the word \"to\""
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "7d020c61-6856-ec7e-c79e-b06df95e43db": {
+    "id": "7d020c61-6856-ec7e-c79e-b06df95e43db",
+    "concept_name": "Understanding Rates and Unit Rates",
+    "canonical_definition": "Understanding Rates and Unit Rates. Define a rate as a ratio comparing quantities with different units Define a unit rate as a rate with a denominator of 1",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 1,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Rates and Unit Rates and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Rates and Unit Rates and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Rates and Unit Rates to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.2"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.1.2",
+      "standard": "NC.6.RP.A.2",
+      "keySkills": [
+        "Define a rate as a ratio comparing quantities with different units",
+        "Define a unit rate as a rate with a denominator of 1"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "39d873ad-c119-44e2-8d14-b66c1801a0be": {
+    "id": "39d873ad-c119-44e2-8d14-b66c1801a0be",
+    "concept_name": "Calculating Unit Rates (from Ratios and Rates)",
+    "canonical_definition": "Calculating Unit Rates (from Ratios and Rates). Compute unit rates associated with ratios of whole numbers, fractions, and decimals",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 2,
+      "typical_misconception": [
+        "Misunderstands the relationship between Calculating Unit Rates (from Ratios and Rates) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Calculating Unit Rates (from Ratios and Rates) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Calculating Unit Rates (from Ratios and Rates) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.2"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.1.3",
+      "standard": "NC.6.RP.A.2",
+      "keySkills": [
+        "Compute unit rates associated with ratios of whole numbers, fractions, and decimals"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "12fae080-375c-74d6-b67a-29b041cb434f": {
+    "id": "12fae080-375c-74d6-b67a-29b041cb434f",
+    "concept_name": "Using Ratio Reasoning in Tables and Tape Diagrams",
+    "canonical_definition": "Using Ratio Reasoning in Tables and Tape Diagrams. Use tables of equivalent ratios or tape diagrams to solve ratio problems",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 3,
+      "typical_misconception": [
+        "Misunderstands the relationship between Using Ratio Reasoning in Tables and Tape Diagrams and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Using Ratio Reasoning in Tables and Tape Diagrams and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Using Ratio Reasoning in Tables and Tape Diagrams to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.2.1",
+      "standard": "NC.6.RP.A.3",
+      "keySkills": [
+        "Use tables of equivalent ratios or tape diagrams to solve ratio problems"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "90efacd5-6f8b-ec6e-c7ec-30270224ed78": {
+    "id": "90efacd5-6f8b-ec6e-c7ec-30270224ed78",
+    "concept_name": "Using Ratio Reasoning with Double Number Lines and Equations",
+    "canonical_definition": "Using Ratio Reasoning with Double Number Lines and Equations. Use double number line diagrams or write simple equations to solve ratio problems",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 4,
+      "typical_misconception": [
+        "Misunderstands the relationship between Using Ratio Reasoning with Double Number Lines and Equations and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be",
+      "12fae080-375c-74d6-b67a-29b041cb434f"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Using Ratio Reasoning with Double Number Lines and Equations and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Using Ratio Reasoning with Double Number Lines and Equations to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.2.2",
+      "standard": "NC.6.RP.A.3",
+      "keySkills": [
+        "Use double number line diagrams or write simple equations to solve ratio problems"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "0dea853f-645f-f959-bc57-56f547997e43": {
+    "id": "0dea853f-645f-f959-bc57-56f547997e43",
+    "concept_name": "Solving Real-World Ratio Problems",
+    "canonical_definition": "Solving Real-World Ratio Problems. Apply ratio reasoning to solve various real-world problems (e.g., mixing paint colors, calculating ingredients)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 5,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving Real-World Ratio Problems and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be",
+      "12fae080-375c-74d6-b67a-29b041cb434f",
+      "90efacd5-6f8b-ec6e-c7ec-30270224ed78"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving Real-World Ratio Problems and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving Real-World Ratio Problems to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.2.3",
+      "standard": "NC.6.RP.A.3",
+      "keySkills": [
+        "Apply ratio reasoning to solve various real-world problems (e.g., mixing paint colors, calculating ingredients)"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "9c68832b-bbf6-a63c-4fa2-19f28d4462d8": {
+    "id": "9c68832b-bbf6-a63c-4fa2-19f28d4462d8",
+    "concept_name": "Understanding Percentages as Rates Per 100",
+    "canonical_definition": "Understanding Percentages as Rates Per 100. Define a percentage as a rate per 100 Understand percent as \"per hundred\"",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 6,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Percentages as Rates Per 100 and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be",
+      "12fae080-375c-74d6-b67a-29b041cb434f",
+      "90efacd5-6f8b-ec6e-c7ec-30270224ed78",
+      "0dea853f-645f-f959-bc57-56f547997e43"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Percentages as Rates Per 100 and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Percentages as Rates Per 100 to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.3.1",
+      "standard": "NC.6.RP.A.3c",
+      "keySkills": [
+        "Define a percentage as a rate per 100",
+        "Understand percent as \"per hundred\""
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "f4570e22-80ca-7482-8862-347af9ebf119": {
+    "id": "f4570e22-80ca-7482-8862-347af9ebf119",
+    "concept_name": "Finding a Percent of a Quantity",
+    "canonical_definition": "Finding a Percent of a Quantity. Calculate a given percent of a number (e.g., find 30% of 200)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 7,
+      "typical_misconception": [
+        "Misunderstands the relationship between Finding a Percent of a Quantity and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be",
+      "12fae080-375c-74d6-b67a-29b041cb434f",
+      "90efacd5-6f8b-ec6e-c7ec-30270224ed78",
+      "0dea853f-645f-f959-bc57-56f547997e43",
+      "9c68832b-bbf6-a63c-4fa2-19f28d4462d8"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Finding a Percent of a Quantity and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Finding a Percent of a Quantity to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.3.2",
+      "standard": "NC.6.RP.A.3c",
+      "keySkills": [
+        "Calculate a given percent of a number (e.g., find 30% of 200)"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "f0c96025-6944-e59e-cbfb-019f2d1dbb2f": {
+    "id": "f0c96025-6944-e59e-cbfb-019f2d1dbb2f",
+    "concept_name": "Solving Percentage Problems (Finding the Whole or the Part)",
+    "canonical_definition": "Solving Percentage Problems (Finding the Whole or the Part). Solve problems involving finding the whole, given a part and the percent Find what percent one number is of another",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 8,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving Percentage Problems (Finding the Whole or the Part) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be",
+      "12fae080-375c-74d6-b67a-29b041cb434f",
+      "90efacd5-6f8b-ec6e-c7ec-30270224ed78",
+      "0dea853f-645f-f959-bc57-56f547997e43",
+      "9c68832b-bbf6-a63c-4fa2-19f28d4462d8",
+      "f4570e22-80ca-7482-8862-347af9ebf119"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving Percentage Problems (Finding the Whole or the Part) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving Percentage Problems (Finding the Whole or the Part) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.3.3",
+      "standard": "NC.6.RP.A.3c",
+      "keySkills": [
+        "Solve problems involving finding the whole, given a part and the percent",
+        "Find what percent one number is of another"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "aa47e3bf-4022-8cc4-e495-4a59942d83d7": {
+    "id": "aa47e3bf-4022-8cc4-e495-4a59942d83d7",
+    "concept_name": "Converting Between Fractions, Decimals, and Percentages",
+    "canonical_definition": "Converting Between Fractions, Decimals, and Percentages. Convert between fraction, decimal, and percent forms of numbers",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 9,
+      "typical_misconception": [
+        "Misaligns decimal points when adding/subtracting.",
+        "Forgets to place decimal point in product (multiplies as whole numbers then guesses)."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be",
+      "12fae080-375c-74d6-b67a-29b041cb434f",
+      "90efacd5-6f8b-ec6e-c7ec-30270224ed78",
+      "0dea853f-645f-f959-bc57-56f547997e43",
+      "9c68832b-bbf6-a63c-4fa2-19f28d4462d8",
+      "f4570e22-80ca-7482-8862-347af9ebf119",
+      "f0c96025-6944-e59e-cbfb-019f2d1dbb2f"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misaligns decimal points when adding/subtracting.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Converting Between Fractions, Decimals, and Percentages to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.3.4",
+      "standard": "NC.6.RP.A.3c",
+      "keySkills": [
+        "Convert between fraction, decimal, and percent forms of numbers"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "c31b0921-b6f3-8104-fdb1-1f77a4349f6f": {
+    "id": "c31b0921-b6f3-8104-fdb1-1f77a4349f6f",
+    "concept_name": "Using Ratio and Rate Reasoning to Solve Measurement Problems",
+    "canonical_definition": "Using Ratio and Rate Reasoning to Solve Measurement Problems. Apply ratio and rate reasoning to convert measurement units by multiplying or dividing by ratios",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 10,
+      "typical_misconception": [
+        "Misunderstands the relationship between Using Ratio and Rate Reasoning to Solve Measurement Problems and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "dfbaba19-8f6e-124a-93f6-b6362536ad87",
+      "7d020c61-6856-ec7e-c79e-b06df95e43db",
+      "39d873ad-c119-44e2-8d14-b66c1801a0be",
+      "12fae080-375c-74d6-b67a-29b041cb434f",
+      "90efacd5-6f8b-ec6e-c7ec-30270224ed78",
+      "0dea853f-645f-f959-bc57-56f547997e43",
+      "9c68832b-bbf6-a63c-4fa2-19f28d4462d8",
+      "f4570e22-80ca-7482-8862-347af9ebf119",
+      "f0c96025-6944-e59e-cbfb-019f2d1dbb2f",
+      "aa47e3bf-4022-8cc4-e495-4a59942d83d7"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Using Ratio and Rate Reasoning to Solve Measurement Problems and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Using Ratio and Rate Reasoning to Solve Measurement Problems to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.RP.A.3d"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.RP.4.1",
+      "standard": "NC.6.RP.A.3d",
+      "keySkills": [
+        "Apply ratio and rate reasoning to convert measurement units by multiplying or dividing by ratios"
+      ],
+      "unitTopic": "Ratio & Proportional Relationships"
+    },
+    "_unit_topic": "Ratio & Proportional Relationships"
+  },
+  "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86": {
+    "id": "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+    "concept_name": "Understanding Numerical Expressions with Whole-Number Exponents",
+    "canonical_definition": "Understanding Numerical Expressions with Whole-Number Exponents. Write and evaluate numerical expressions involving whole-number exponents (e.g., 3\u00b2 + 5)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 0,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Numerical Expressions with Whole-Number Exponents and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Numerical Expressions with Whole-Number Exponents and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Numerical Expressions with Whole-Number Exponents to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.1.1",
+      "standard": "NC.6.EE.A.1",
+      "keySkills": [
+        "Write and evaluate numerical expressions involving whole-number exponents (e.g., 3\u00b2 + 5)"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "879cc8d9-ae11-c477-a404-6027d036ae68": {
+    "id": "879cc8d9-ae11-c477-a404-6027d036ae68",
+    "concept_name": "Writing Algebraic Expressions from Verbal Descriptions",
+    "canonical_definition": "Writing Algebraic Expressions from Verbal Descriptions. Translate verbal phrases into algebraic expressions (e.g., \"the sum of 5 and a number x\")",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 1,
+      "typical_misconception": [
+        "Misunderstands the relationship between Writing Algebraic Expressions from Verbal Descriptions and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Writing Algebraic Expressions from Verbal Descriptions and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Writing Algebraic Expressions from Verbal Descriptions to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.A.2a"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.1.2",
+      "standard": "NC.6.EE.A.2a",
+      "keySkills": [
+        "Translate verbal phrases into algebraic expressions (e.g., \"the sum of 5 and a number x\")"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "ac91a514-f3f4-36ca-757f-cb744b510451": {
+    "id": "ac91a514-f3f4-36ca-757f-cb744b510451",
+    "concept_name": "Identifying Parts of an Algebraic Expression",
+    "canonical_definition": "Identifying Parts of an Algebraic Expression. Identify terms, factors, coefficients, and exponents within an expression",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 2,
+      "typical_misconception": [
+        "Misunderstands the relationship between Identifying Parts of an Algebraic Expression and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Identifying Parts of an Algebraic Expression and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Identifying Parts of an Algebraic Expression to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.A.2b"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.1.3",
+      "standard": "NC.6.EE.A.2b",
+      "keySkills": [
+        "Identify terms, factors, coefficients, and exponents within an expression"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "ed09f26e-a34c-8c02-37a6-a1283dd51ca0": {
+    "id": "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+    "concept_name": "Evaluating Algebraic Expressions",
+    "canonical_definition": "Evaluating Algebraic Expressions. Substitute given values for variables and evaluate expressions (e.g., if x=3, find 2x+1)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 3,
+      "typical_misconception": [
+        "Misunderstands the relationship between Evaluating Algebraic Expressions and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Evaluating Algebraic Expressions and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Evaluating Algebraic Expressions to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.A.2c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.1.4",
+      "standard": "NC.6.EE.A.2c",
+      "keySkills": [
+        "Substitute given values for variables and evaluate expressions (e.g., if x=3, find 2x+1)"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "20522960-2203-42fb-882d-e43c41c187f2": {
+    "id": "20522960-2203-42fb-882d-e43c41c187f2",
+    "concept_name": "Applying the Distributive Property to Generate Equivalent Expressions",
+    "canonical_definition": "Applying the Distributive Property to Generate Equivalent Expressions. Use the distributive property to rewrite expressions (e.g., 3(x+2) = 3x+6)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 4,
+      "typical_misconception": [
+        "Misunderstands the relationship between Applying the Distributive Property to Generate Equivalent Expressions and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Applying the Distributive Property to Generate Equivalent Expressions and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Applying the Distributive Property to Generate Equivalent Expressions to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.A.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.2.1",
+      "standard": "NC.6.EE.A.3",
+      "keySkills": [
+        "Use the distributive property to rewrite expressions (e.g., 3(x+2) = 3x+6)"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "9f1fe218-aa6f-6108-db77-ca6d2f2be526": {
+    "id": "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+    "concept_name": "Combining Like Terms to Generate Equivalent Expressions",
+    "canonical_definition": "Combining Like Terms to Generate Equivalent Expressions. Identify like terms Combine like terms to simplify expressions (e.g., 2x + 3y + 5x = 7x + 3y)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 5,
+      "typical_misconception": [
+        "Misunderstands the relationship between Combining Like Terms to Generate Equivalent Expressions and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Combining Like Terms to Generate Equivalent Expressions and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Combining Like Terms to Generate Equivalent Expressions to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.A.3"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.2.2",
+      "standard": "NC.6.EE.A.3",
+      "keySkills": [
+        "Identify like terms",
+        "Combine like terms to simplify expressions (e.g., 2x + 3y + 5x = 7x + 3y)"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "0ce35ec9-1a35-2931-1d56-81388d340562": {
+    "id": "0ce35ec9-1a35-2931-1d56-81388d340562",
+    "concept_name": "Understanding What it Means to Solve an Equation or Inequality",
+    "canonical_definition": "Understanding What it Means to Solve an Equation or Inequality. Understand that solutions make the equation/inequality true Use substitution to check solutions",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 6,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding What it Means to Solve an Equation or Inequality and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding What it Means to Solve an Equation or Inequality and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding What it Means to Solve an Equation or Inequality to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.B.5"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.3.1",
+      "standard": "NC.6.EE.B.5",
+      "keySkills": [
+        "Understand that solutions make the equation/inequality true",
+        "Use substitution to check solutions"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "633ea75f-3f81-992f-fd74-f3c1c7936276": {
+    "id": "633ea75f-3f81-992f-fd74-f3c1c7936276",
+    "concept_name": "Solving One-Step Equations with Addition or Subtraction (x+p=q)",
+    "canonical_definition": "Solving One-Step Equations with Addition or Subtraction (x+p=q). Solve equations of the form x+p=q using inverse operations (e.g., x+5=12)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 7,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving One-Step Equations with Addition or Subtraction (x+p=q) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving One-Step Equations with Addition or Subtraction (x+p=q) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving One-Step Equations with Addition or Subtraction (x+p=q) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.B.7"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.3.2",
+      "standard": "NC.6.EE.B.7",
+      "keySkills": [
+        "Solve equations of the form x+p=q using inverse operations (e.g., x+5=12)"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "e030ec55-ead6-0769-0464-b803a864abc8": {
+    "id": "e030ec55-ead6-0769-0464-b803a864abc8",
+    "concept_name": "Solving One-Step Equations with Multiplication or Division (px=q)",
+    "canonical_definition": "Solving One-Step Equations with Multiplication or Division (px=q). Solve equations of the form px=q using inverse operations (e.g., 3x=15)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 8,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving One-Step Equations with Multiplication or Division (px=q) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving One-Step Equations with Multiplication or Division (px=q) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving One-Step Equations with Multiplication or Division (px=q) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.B.7"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.3.3",
+      "standard": "NC.6.EE.B.7",
+      "keySkills": [
+        "Solve equations of the form px=q using inverse operations (e.g., 3x=15)"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03": {
+    "id": "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03",
+    "concept_name": "Writing Equations to Solve Real-World Problems",
+    "canonical_definition": "Writing Equations to Solve Real-World Problems. Translate word problems into one-step equations (e.g., \"If I have 10 apples and give away x, I have 3 left, write the equation\")",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 9,
+      "typical_misconception": [
+        "Misunderstands the relationship between Writing Equations to Solve Real-World Problems and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276",
+      "e030ec55-ead6-0769-0464-b803a864abc8"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Writing Equations to Solve Real-World Problems and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Writing Equations to Solve Real-World Problems to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.B.6"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.3.4",
+      "standard": "NC.6.EE.B.6",
+      "keySkills": [
+        "Translate word problems into one-step equations (e.g., \"If I have 10 apples and give away x, I have 3 left, write the equation\")"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "cf65308b-3178-61cb-83dc-ab819359ad1c": {
+    "id": "cf65308b-3178-61cb-83dc-ab819359ad1c",
+    "concept_name": "Writing Inequalities to Represent Constraints (x>c, x<c, etc.)",
+    "canonical_definition": "Writing Inequalities to Represent Constraints (x>c, x<c, etc.). Write inequalities to express conditions in real-world situations (e.g., \"speed limit is 55 mph, so s \u2264 55\")",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 10,
+      "typical_misconception": [
+        "Misunderstands the relationship between Writing Inequalities to Represent Constraints (x>c, x<c, etc.) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276",
+      "e030ec55-ead6-0769-0464-b803a864abc8",
+      "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Writing Inequalities to Represent Constraints (x>c, x<c, etc.) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Writing Inequalities to Represent Constraints (x>c, x<c, etc.) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.B.8"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.4.1",
+      "standard": "NC.6.EE.B.8",
+      "keySkills": [
+        "Write inequalities to express conditions in real-world situations (e.g., \"speed limit is 55 mph, so s \u2264 55\")"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "19a89a12-d5fe-b1d3-8d57-14bb6a901162": {
+    "id": "19a89a12-d5fe-b1d3-8d57-14bb6a901162",
+    "concept_name": "Representing Solutions of Inequalities on Number Lines",
+    "canonical_definition": "Representing Solutions of Inequalities on Number Lines. Graph the solution set of an inequality (e.g., x > 2) on a number line",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 11,
+      "typical_misconception": [
+        "Misunderstands the relationship between Representing Solutions of Inequalities on Number Lines and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276",
+      "e030ec55-ead6-0769-0464-b803a864abc8",
+      "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03",
+      "cf65308b-3178-61cb-83dc-ab819359ad1c"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "cartesian_plane"
+        ],
+        "has_dynamic_range": true,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "observed_outputs": [
+          "point_positions",
+          "distance_if_aligned"
+        ],
+        "minimal_viable_sim_code": "if x1==x2: return abs(y2-y1); if y1==y2: return abs(x2-x1); else: return 'Not aligned'"
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Representing Solutions of Inequalities on Number Lines and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Representing Solutions of Inequalities on Number Lines to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.B.8"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.4.2",
+      "standard": "NC.6.EE.B.8",
+      "keySkills": [
+        "Graph the solution set of an inequality (e.g., x > 2) on a number line"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "2ae77379-e9cf-bb05-11eb-988cd5f6fef1": {
+    "id": "2ae77379-e9cf-bb05-11eb-988cd5f6fef1",
+    "concept_name": "Solving Real-World Problems Involving Linear Inequalities",
+    "canonical_definition": "Solving Real-World Problems Involving Linear Inequalities. Construct inequalities from word problems (e.g., \"At most $15\", \"at least $12\")",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 12,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving Real-World Problems Involving Linear Inequalities and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276",
+      "e030ec55-ead6-0769-0464-b803a864abc8",
+      "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03",
+      "cf65308b-3178-61cb-83dc-ab819359ad1c",
+      "19a89a12-d5fe-b1d3-8d57-14bb6a901162"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving Real-World Problems Involving Linear Inequalities and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving Real-World Problems Involving Linear Inequalities to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.B.4b"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.4.3",
+      "standard": "NC.6.EE.B.4b",
+      "keySkills": [
+        "Construct inequalities from word problems (e.g., \"At most $15\", \"at least $12\")"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "89ebefb8-5bf7-ad4a-5c75-2c7e85647774": {
+    "id": "89ebefb8-5bf7-ad4a-5c75-2c7e85647774",
+    "concept_name": "Using Variables to Represent Two Quantities in a Real-World Relationship",
+    "canonical_definition": "Using Variables to Represent Two Quantities in a Real-World Relationship. Identify dependent and independent variables in a real-world context Represent them with variables",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 13,
+      "typical_misconception": [
+        "Misunderstands the relationship between Using Variables to Represent Two Quantities in a Real-World Relationship and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276",
+      "e030ec55-ead6-0769-0464-b803a864abc8",
+      "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03",
+      "cf65308b-3178-61cb-83dc-ab819359ad1c",
+      "19a89a12-d5fe-b1d3-8d57-14bb6a901162",
+      "2ae77379-e9cf-bb05-11eb-988cd5f6fef1"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Using Variables to Represent Two Quantities in a Real-World Relationship and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Using Variables to Represent Two Quantities in a Real-World Relationship to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.C.9"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.5.1",
+      "standard": "NC.6.EE.C.9",
+      "keySkills": [
+        "Identify dependent and independent variables in a real-world context",
+        "Represent them with variables"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "770309cb-0a63-16b6-2ecb-42acf89c5b1a": {
+    "id": "770309cb-0a63-16b6-2ecb-42acf89c5b1a",
+    "concept_name": "Writing Equations to Express Relationships Between Dependent and Independent Variables",
+    "canonical_definition": "Writing Equations to Express Relationships Between Dependent and Independent Variables. Write an equation to represent a relationship between two quantities (e.g., distance = rate \u00d7 time)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 14,
+      "typical_misconception": [
+        "Misunderstands the relationship between Writing Equations to Express Relationships Between Dependent and Independent Variables and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276",
+      "e030ec55-ead6-0769-0464-b803a864abc8",
+      "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03",
+      "cf65308b-3178-61cb-83dc-ab819359ad1c",
+      "19a89a12-d5fe-b1d3-8d57-14bb6a901162",
+      "2ae77379-e9cf-bb05-11eb-988cd5f6fef1",
+      "89ebefb8-5bf7-ad4a-5c75-2c7e85647774"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Writing Equations to Express Relationships Between Dependent and Independent Variables and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Writing Equations to Express Relationships Between Dependent and Independent Variables to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.C.9"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.5.2",
+      "standard": "NC.6.EE.C.9",
+      "keySkills": [
+        "Write an equation to represent a relationship between two quantities (e.g., distance = rate \u00d7 time)"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "b934603e-c20f-97e1-914f-db21299dbbb7": {
+    "id": "b934603e-c20f-97e1-914f-db21299dbbb7",
+    "concept_name": "Analyzing Relationships Between Dependent and Independent Variables Using Graphs and Tables",
+    "canonical_definition": "Analyzing Relationships Between Dependent and Independent Variables Using Graphs and Tables. Use graphs and tables to analyze how a change in the independent variable affects the dependent variable",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 15,
+      "typical_misconception": [
+        "Misunderstands the relationship between Analyzing Relationships Between Dependent and Independent Variables Using Graphs and Tables and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "f1fc69e1-9d4a-e3ff-5811-3c3af1573f86",
+      "879cc8d9-ae11-c477-a404-6027d036ae68",
+      "ac91a514-f3f4-36ca-757f-cb744b510451",
+      "ed09f26e-a34c-8c02-37a6-a1283dd51ca0",
+      "20522960-2203-42fb-882d-e43c41c187f2",
+      "9f1fe218-aa6f-6108-db77-ca6d2f2be526",
+      "0ce35ec9-1a35-2931-1d56-81388d340562",
+      "633ea75f-3f81-992f-fd74-f3c1c7936276",
+      "e030ec55-ead6-0769-0464-b803a864abc8",
+      "ba8b7bcb-627c-8ed2-f5d9-d17ec150ac03",
+      "cf65308b-3178-61cb-83dc-ab819359ad1c",
+      "19a89a12-d5fe-b1d3-8d57-14bb6a901162",
+      "2ae77379-e9cf-bb05-11eb-988cd5f6fef1",
+      "89ebefb8-5bf7-ad4a-5c75-2c7e85647774",
+      "770309cb-0a63-16b6-2ecb-42acf89c5b1a"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "cartesian_plane"
+        ],
+        "has_dynamic_range": true,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "observed_outputs": [
+          "point_positions",
+          "distance_if_aligned"
+        ],
+        "minimal_viable_sim_code": "if x1==x2: return abs(y2-y1); if y1==y2: return abs(x2-x1); else: return 'Not aligned'"
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Analyzing Relationships Between Dependent and Independent Variables Using Graphs and Tables and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Analyzing Relationships Between Dependent and Independent Variables Using Graphs and Tables to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.EE.C.9"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.EE.5.3",
+      "standard": "NC.6.EE.C.9",
+      "keySkills": [
+        "Use graphs and tables to analyze how a change in the independent variable affects the dependent variable"
+      ],
+      "unitTopic": "Expressions & Equations"
+    },
+    "_unit_topic": "Expressions & Equations"
+  },
+  "98b4e916-db3c-5122-a913-0e812e153268": {
+    "id": "98b4e916-db3c-5122-a913-0e812e153268",
+    "concept_name": "Understanding Area of Triangles",
+    "canonical_definition": "Understanding Area of Triangles. Find the area of triangles by composing into rectangles or decomposing into right triangles. Use the formula A = \u00bdbh to calculate area.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 0,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Area of Triangles and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Area of Triangles and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Area of Triangles to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.1.1",
+      "standard": "NC.6.G.A.1",
+      "keySkills": [
+        "Find the area of triangles by composing into rectangles or decomposing into right triangles.",
+        "Use the formula A = \u00bdbh to calculate area."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "f2354824-70cf-98fe-540d-055cd317ee1f": {
+    "id": "f2354824-70cf-98fe-540d-055cd317ee1f",
+    "concept_name": "Understanding Area of Quadrilaterals (Parallelograms)",
+    "canonical_definition": "Understanding Area of Quadrilaterals (Parallelograms). Find the area of parallelograms by composing into rectangles or decomposing. Use the formula A = bh to calculate area.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 1,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Area of Quadrilaterals (Parallelograms) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Area of Quadrilaterals (Parallelograms) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Area of Quadrilaterals (Parallelograms) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.1.2",
+      "standard": "NC.6.G.A.1",
+      "keySkills": [
+        "Find the area of parallelograms by composing into rectangles or decomposing.",
+        "Use the formula A = bh to calculate area."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "5741fd58-711d-ec17-fa0a-bb0bc857a0fe": {
+    "id": "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+    "concept_name": "Understanding Area of Quadrilaterals (Trapezoids)",
+    "canonical_definition": "Understanding Area of Quadrilaterals (Trapezoids). Find the area of trapezoids by composing into rectangles or decomposing into triangles and rectangles. Use the formula A = \u00bd(b\u2081+b\u2082)h to calculate area.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 2,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Area of Quadrilaterals (Trapezoids) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Area of Quadrilaterals (Trapezoids) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Area of Quadrilaterals (Trapezoids) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.1.3",
+      "standard": "NC.6.G.A.1",
+      "keySkills": [
+        "Find the area of trapezoids by composing into rectangles or decomposing into triangles and rectangles.",
+        "Use the formula A = \u00bd(b\u2081+b\u2082)h to calculate area."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "a7260456-4ef3-cfa2-987f-d7186c6e6ca8": {
+    "id": "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+    "concept_name": "Finding Areas of Other Polygons (Composing and Decomposing)",
+    "canonical_definition": "Finding Areas of Other Polygons (Composing and Decomposing). Find areas of complex polygons by decomposing them into triangles, rectangles, and other known shapes. Recompose shapes to form new polygons with known area formulas.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 3,
+      "typical_misconception": [
+        "Misunderstands the relationship between Finding Areas of Other Polygons (Composing and Decomposing) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Finding Areas of Other Polygons (Composing and Decomposing) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Finding Areas of Other Polygons (Composing and Decomposing) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.1.4",
+      "standard": "NC.6.G.A.1",
+      "keySkills": [
+        "Find areas of complex polygons by decomposing them into triangles, rectangles, and other known shapes.",
+        "Recompose shapes to form new polygons with known area formulas."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "d75d1e7a-48f0-0cb4-8678-626bcb632cd9": {
+    "id": "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+    "concept_name": "Understanding Polyhedra and Nets",
+    "canonical_definition": "Understanding Polyhedra and Nets. Define polyhedra as three-dimensional figures composed of polygons Draw and analyze nets of cubes, prisms, and pyramids.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 4,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Polyhedra and Nets and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Polyhedra and Nets and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Polyhedra and Nets to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.2.1",
+      "standard": "NC.6.G.A.4",
+      "keySkills": [
+        "Define polyhedra as three-dimensional figures composed of polygons",
+        "Draw and analyze nets of cubes, prisms, and pyramids."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "d8591bbf-daf6-a8fb-f9bb-468a865a89ac": {
+    "id": "d8591bbf-daf6-a8fb-f9bb-468a865a89ac",
+    "concept_name": "Calculating Surface Area of 3D Figures using Nets",
+    "canonical_definition": "Calculating Surface Area of 3D Figures using Nets. Find the surface area of cubes and right prisms using their nets. Calculate the area of each face and sum them.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 5,
+      "typical_misconception": [
+        "Misunderstands the relationship between Calculating Surface Area of 3D Figures using Nets and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Calculating Surface Area of 3D Figures using Nets and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Calculating Surface Area of 3D Figures using Nets to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.2.2",
+      "standard": "NC.6.G.A.4",
+      "keySkills": [
+        "Find the surface area of cubes and right prisms using their nets.",
+        "Calculate the area of each face and sum them."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe": {
+    "id": "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe",
+    "concept_name": "Calculating Surface Area of Right Pyramids using Nets",
+    "canonical_definition": "Calculating Surface Area of Right Pyramids using Nets. Find the surface area of right pyramids using their nets, by calculating the area of the base and all triangular faces.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 6,
+      "typical_misconception": [
+        "Misunderstands the relationship between Calculating Surface Area of Right Pyramids using Nets and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+      "d8591bbf-daf6-a8fb-f9bb-468a865a89ac"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Calculating Surface Area of Right Pyramids using Nets and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Calculating Surface Area of Right Pyramids using Nets to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.2.3",
+      "standard": "NC.6.G.A.4",
+      "keySkills": [
+        "Find the surface area of right pyramids using their nets, by calculating the area of the base and all triangular faces."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "e14401a7-1915-9ac9-dff0-c032f7008940": {
+    "id": "e14401a7-1915-9ac9-dff0-c032f7008940",
+    "concept_name": "Understanding Volume of Right Rectangular Prisms",
+    "canonical_definition": "Understanding Volume of Right Rectangular Prisms. Understand that the volume of a right rectangular prism is found by packing it with unit cubes.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 7,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Volume of Right Rectangular Prisms and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+      "d8591bbf-daf6-a8fb-f9bb-468a865a89ac",
+      "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Volume of Right Rectangular Prisms and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Volume of Right Rectangular Prisms to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.2"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.3.1",
+      "standard": "NC.6.G.A.2",
+      "keySkills": [
+        "Understand that the volume of a right rectangular prism is found by packing it with unit cubes."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "b50ff6cb-7c7b-29cd-3497-569d1b382d32": {
+    "id": "b50ff6cb-7c7b-29cd-3497-569d1b382d32",
+    "concept_name": "Calculating Volume of Right Rectangular Prisms with Whole-Number Edge Lengths",
+    "canonical_definition": "Calculating Volume of Right Rectangular Prisms with Whole-Number Edge Lengths. Apply the formula V=lwh or V=Bh to calculate the volume of prisms with whole-number dimensions.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 8,
+      "typical_misconception": [
+        "Misunderstands the relationship between Calculating Volume of Right Rectangular Prisms with Whole-Number Edge Lengths and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+      "d8591bbf-daf6-a8fb-f9bb-468a865a89ac",
+      "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe",
+      "e14401a7-1915-9ac9-dff0-c032f7008940"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Calculating Volume of Right Rectangular Prisms with Whole-Number Edge Lengths and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Calculating Volume of Right Rectangular Prisms with Whole-Number Edge Lengths to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.2"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.3.2",
+      "standard": "NC.6.G.A.2",
+      "keySkills": [
+        "Apply the formula V=lwh or V=Bh to calculate the volume of prisms with whole-number dimensions."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "6240fd18-6fe4-47cc-fb92-7d656434976d": {
+    "id": "6240fd18-6fe4-47cc-fb92-7d656434976d",
+    "concept_name": "Calculating Volume of Right Rectangular Prisms with Fractional Edge Lengths",
+    "canonical_definition": "Calculating Volume of Right Rectangular Prisms with Fractional Edge Lengths. Calculate the volume of right rectangular prisms with fractional side lengths by packing with fractional unit cubes. Apply the formulas V=lwh and V=Bh.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 9,
+      "typical_misconception": [
+        "Thinks dividing fractions means 'divide numerators and denominators separately'.",
+        "Confuses 'invert and multiply' with 'multiply and invert'."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+      "d8591bbf-daf6-a8fb-f9bb-468a865a89ac",
+      "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe",
+      "e14401a7-1915-9ac9-dff0-c032f7008940",
+      "b50ff6cb-7c7b-29cd-3497-569d1b382d32"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Thinks dividing fractions means 'divide numerators and denominators separately'.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Calculating Volume of Right Rectangular Prisms with Fractional Edge Lengths to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.2"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.3.3",
+      "standard": "NC.6.G.A.2",
+      "keySkills": [
+        "Calculate the volume of right rectangular prisms with fractional side lengths by packing with fractional unit cubes.",
+        "Apply the formulas V=lwh and V=Bh."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "6d79e76f-4a5c-335f-3a91-cc614c7bacf7": {
+    "id": "6d79e76f-4a5c-335f-3a91-cc614c7bacf7",
+    "concept_name": "Solving Real-World Problems Involving Area",
+    "canonical_definition": "Solving Real-World Problems Involving Area. Solve real-world and mathematical problems involving area of triangles, quadrilaterals, and other polygons.",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 10,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving Real-World Problems Involving Area and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+      "d8591bbf-daf6-a8fb-f9bb-468a865a89ac",
+      "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe",
+      "e14401a7-1915-9ac9-dff0-c032f7008940",
+      "b50ff6cb-7c7b-29cd-3497-569d1b382d32",
+      "6240fd18-6fe4-47cc-fb92-7d656434976d"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving Real-World Problems Involving Area and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving Real-World Problems Involving Area to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.4.1",
+      "standard": "NC.6.G.A.1",
+      "keySkills": [
+        "Solve real-world and mathematical problems involving area of triangles, quadrilaterals, and other polygons."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "cbc8dbf5-0740-79f2-1d26-170a8ecded89": {
+    "id": "cbc8dbf5-0740-79f2-1d26-170a8ecded89",
+    "concept_name": "Solving Real-World Problems Involving Surface Area",
+    "canonical_definition": "Solving Real-World Problems Involving Surface Area. Solve real-world problems involving surface area of cubes, prisms, and pyramids (e.g., painting a room, wrapping a gift).",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 11,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving Real-World Problems Involving Surface Area and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+      "d8591bbf-daf6-a8fb-f9bb-468a865a89ac",
+      "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe",
+      "e14401a7-1915-9ac9-dff0-c032f7008940",
+      "b50ff6cb-7c7b-29cd-3497-569d1b382d32",
+      "6240fd18-6fe4-47cc-fb92-7d656434976d",
+      "6d79e76f-4a5c-335f-3a91-cc614c7bacf7"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving Real-World Problems Involving Surface Area and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving Real-World Problems Involving Surface Area to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.4.2",
+      "standard": "NC.6.G.A.4",
+      "keySkills": [
+        "Solve real-world problems involving surface area of cubes, prisms, and pyramids (e.g., painting a room, wrapping a gift)."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "b2614eeb-0c30-0c2f-397c-cbaec69c9c08": {
+    "id": "b2614eeb-0c30-0c2f-397c-cbaec69c9c08",
+    "concept_name": "Solving Real-World Problems Involving Volume",
+    "canonical_definition": "Solving Real-World Problems Involving Volume. Solve real-world problems involving volume of right rectangular prisms (e.g., finding capacity of a box, filling a container).",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Apply"
+      ],
+      "prerequisite_depth": 12,
+      "typical_misconception": [
+        "Misunderstands the relationship between Solving Real-World Problems Involving Volume and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "98b4e916-db3c-5122-a913-0e812e153268",
+      "f2354824-70cf-98fe-540d-055cd317ee1f",
+      "5741fd58-711d-ec17-fa0a-bb0bc857a0fe",
+      "a7260456-4ef3-cfa2-987f-d7186c6e6ca8",
+      "d75d1e7a-48f0-0cb4-8678-626bcb632cd9",
+      "d8591bbf-daf6-a8fb-f9bb-468a865a89ac",
+      "8f7d1f20-18ea-f4e6-ba23-ede1f98e8cbe",
+      "e14401a7-1915-9ac9-dff0-c032f7008940",
+      "b50ff6cb-7c7b-29cd-3497-569d1b382d32",
+      "6240fd18-6fe4-47cc-fb92-7d656434976d",
+      "6d79e76f-4a5c-335f-3a91-cc614c7bacf7",
+      "cbc8dbf5-0740-79f2-1d26-170a8ecded89"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "shape_diagram"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "length",
+          "width",
+          "height"
+        ],
+        "observed_outputs": [
+          "area",
+          "volume"
+        ],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Solving Real-World Problems Involving Volume and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Solving Real-World Problems Involving Volume to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.G.A.2"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.GEO.4.3",
+      "standard": "NC.6.G.A.2",
+      "keySkills": [
+        "Solve real-world problems involving volume of right rectangular prisms (e.g., finding capacity of a box, filling a container)."
+      ],
+      "unitTopic": "Geometry"
+    },
+    "_unit_topic": "Geometry"
+  },
+  "b0fb93b9-1f05-4819-d820-a0e291be5398": {
+    "id": "b0fb93b9-1f05-4819-d820-a0e291be5398",
+    "concept_name": "Understanding Statistical Questions",
+    "canonical_definition": "Understanding Statistical Questions. Define a statistical question (one that anticipates variability in data) Differentiate from non-statistical questions",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 0,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Statistical Questions and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Statistical Questions and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Statistical Questions to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.1.1",
+      "standard": "NC.6.SP.A.1",
+      "keySkills": [
+        "Define a statistical question (one that anticipates variability in data)",
+        "Differentiate from non-statistical questions"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6": {
+    "id": "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+    "concept_name": "Understanding Data Distributions and Data Sets",
+    "canonical_definition": "Understanding Data Distributions and Data Sets. Recognize a data set as a collection of numerical or categorical data Understand variability in data",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 1,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Data Distributions and Data Sets and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Data Distributions and Data Sets and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Data Distributions and Data Sets to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.A.1"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.1.2",
+      "standard": "NC.6.SP.A.1",
+      "keySkills": [
+        "Recognize a data set as a collection of numerical or categorical data",
+        "Understand variability in data"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "345c20c0-26f3-719b-62f2-33f5e4b4426e": {
+    "id": "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+    "concept_name": "Representing Data on Dot Plots and Histograms",
+    "canonical_definition": "Representing Data on Dot Plots and Histograms. Create dot plots and histograms to display numerical data Interpret basic features of these plots",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand"
+      ],
+      "prerequisite_depth": 2,
+      "typical_misconception": [
+        "Misunderstands the relationship between Representing Data on Dot Plots and Histograms and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "cartesian_plane"
+        ],
+        "has_dynamic_range": true,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "observed_outputs": [
+          "point_positions",
+          "distance_if_aligned"
+        ],
+        "minimal_viable_sim_code": "if x1==x2: return abs(y2-y1); if y1==y2: return abs(x2-x1); else: return 'Not aligned'"
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Representing Data on Dot Plots and Histograms and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Representing Data on Dot Plots and Histograms to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.2.1",
+      "standard": "NC.6.SP.B.4",
+      "keySkills": [
+        "Create dot plots and histograms to display numerical data",
+        "Interpret basic features of these plots"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "7fa09a57-6f91-4dfa-d799-94130f9a0e00": {
+    "id": "7fa09a57-6f91-4dfa-d799-94130f9a0e00",
+    "concept_name": "Representing Data on Box Plots (Box-and-Whisker Plots)",
+    "canonical_definition": "Representing Data on Box Plots (Box-and-Whisker Plots). Create box plots to display numerical data Identify five-number summary (min, Q1, median, Q3, max)",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 3,
+      "typical_misconception": [
+        "Misunderstands the relationship between Representing Data on Box Plots (Box-and-Whisker Plots) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "cartesian_plane"
+        ],
+        "has_dynamic_range": true,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [
+          "x1",
+          "y1",
+          "x2",
+          "y2"
+        ],
+        "observed_outputs": [
+          "point_positions",
+          "distance_if_aligned"
+        ],
+        "minimal_viable_sim_code": "if x1==x2: return abs(y2-y1); if y1==y2: return abs(x2-x1); else: return 'Not aligned'"
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Representing Data on Box Plots (Box-and-Whisker Plots) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Representing Data on Box Plots (Box-and-Whisker Plots) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.4"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.2.2",
+      "standard": "NC.6.SP.B.4",
+      "keySkills": [
+        "Create box plots to display numerical data",
+        "Identify five-number summary (min, Q1, median, Q3, max)"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "4403dcbd-3f45-7aaa-49df-9c698f0d95ef": {
+    "id": "4403dcbd-3f45-7aaa-49df-9c698f0d95ef",
+    "concept_name": "Summarizing Data Distributions: Understanding Center (Mean, Median, Mode)",
+    "canonical_definition": "Summarizing Data Distributions: Understanding Center (Mean, Median, Mode). Calculate mean, median, and mode for a numerical data set Interpret each as a measure of center",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand"
+      ],
+      "prerequisite_depth": 4,
+      "typical_misconception": [
+        "Misunderstands the relationship between Summarizing Data Distributions: Understanding Center (Mean, Median, Mode) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+      "7fa09a57-6f91-4dfa-d799-94130f9a0e00"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Summarizing Data Distributions: Understanding Center (Mean, Median, Mode) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Summarizing Data Distributions: Understanding Center (Mean, Median, Mode) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.5c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.3.1",
+      "standard": "NC.6.SP.B.5c",
+      "keySkills": [
+        "Calculate mean, median, and mode for a numerical data set",
+        "Interpret each as a measure of center"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "678f3584-6aa0-f69f-d80f-05524e753239": {
+    "id": "678f3584-6aa0-f69f-d80f-05524e753239",
+    "concept_name": "Summarizing Data Distributions: Understanding Variability (Range, IQR)",
+    "canonical_definition": "Summarizing Data Distributions: Understanding Variability (Range, IQR). Calculate range and interquartile range (IQR) for a numerical data set Interpret as measures of variability",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand"
+      ],
+      "prerequisite_depth": 5,
+      "typical_misconception": [
+        "Misunderstands the relationship between Summarizing Data Distributions: Understanding Variability (Range, IQR) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+      "7fa09a57-6f91-4dfa-d799-94130f9a0e00",
+      "4403dcbd-3f45-7aaa-49df-9c698f0d95ef"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Summarizing Data Distributions: Understanding Variability (Range, IQR) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Summarizing Data Distributions: Understanding Variability (Range, IQR) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.5c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.3.2",
+      "standard": "NC.6.SP.B.5c",
+      "keySkills": [
+        "Calculate range and interquartile range (IQR) for a numerical data set",
+        "Interpret as measures of variability"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "ac6f3d93-d785-e26c-ff07-fe827d208cff": {
+    "id": "ac6f3d93-d785-e26c-ff07-fe827d208cff",
+    "concept_name": "Understanding Mean Absolute Deviation (MAD)",
+    "canonical_definition": "Understanding Mean Absolute Deviation (MAD). Calculate MAD for a numerical data set as a measure of variation Interpret what it means about typical deviation from the mean",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand"
+      ],
+      "prerequisite_depth": 6,
+      "typical_misconception": [
+        "Misunderstands the relationship between Understanding Mean Absolute Deviation (MAD) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+      "7fa09a57-6f91-4dfa-d799-94130f9a0e00",
+      "4403dcbd-3f45-7aaa-49df-9c698f0d95ef",
+      "678f3584-6aa0-f69f-d80f-05524e753239"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Understanding Mean Absolute Deviation (MAD) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Understanding Mean Absolute Deviation (MAD) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.5c"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.3.3",
+      "standard": "NC.6.SP.B.5c",
+      "keySkills": [
+        "Calculate MAD for a numerical data set as a measure of variation",
+        "Interpret what it means about typical deviation from the mean"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "aea82851-bb0f-91d7-5673-5a1b87288398": {
+    "id": "aea82851-bb0f-91d7-5673-5a1b87288398",
+    "concept_name": "Describing the Overall Shape of Data Distributions (Symmetry, Skew, Peaks)",
+    "canonical_definition": "Describing the Overall Shape of Data Distributions (Symmetry, Skew, Peaks). Describe data distributions by their shape (e.g., symmetric, skewed left/right, peaks) Identify clusters and gaps",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 7,
+      "typical_misconception": [
+        "Misunderstands the relationship between Describing the Overall Shape of Data Distributions (Symmetry, Skew, Peaks) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+      "7fa09a57-6f91-4dfa-d799-94130f9a0e00",
+      "4403dcbd-3f45-7aaa-49df-9c698f0d95ef",
+      "678f3584-6aa0-f69f-d80f-05524e753239",
+      "ac6f3d93-d785-e26c-ff07-fe827d208cff"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Describing the Overall Shape of Data Distributions (Symmetry, Skew, Peaks) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Describing the Overall Shape of Data Distributions (Symmetry, Skew, Peaks) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.5b"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.4.1",
+      "standard": "NC.6.SP.B.5b",
+      "keySkills": [
+        "Describe data distributions by their shape (e.g., symmetric, skewed left/right, peaks)",
+        "Identify clusters and gaps"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "cb7c7698-98b0-7e65-90c0-d786bc1736ba": {
+    "id": "cb7c7698-98b0-7e65-90c0-d786bc1736ba",
+    "concept_name": "Identifying Outliers in Data Distributions",
+    "canonical_definition": "Identifying Outliers in Data Distributions. Recognize outliers as data points significantly different from others Explain their potential impact on measures of center and variability",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Remember"
+      ],
+      "prerequisite_depth": 8,
+      "typical_misconception": [
+        "Misunderstands the relationship between Identifying Outliers in Data Distributions and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+      "7fa09a57-6f91-4dfa-d799-94130f9a0e00",
+      "4403dcbd-3f45-7aaa-49df-9c698f0d95ef",
+      "678f3584-6aa0-f69f-d80f-05524e753239",
+      "ac6f3d93-d785-e26c-ff07-fe827d208cff",
+      "aea82851-bb0f-91d7-5673-5a1b87288398"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Identifying Outliers in Data Distributions and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Identifying Outliers in Data Distributions to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.5a"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.4.2",
+      "standard": "NC.6.SP.B.5a",
+      "keySkills": [
+        "Recognize outliers as data points significantly different from others",
+        "Explain their potential impact on measures of center and variability"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "1ad1ee50-5695-263e-1b0b-2b38bad93b0a": {
+    "id": "1ad1ee50-5695-263e-1b0b-2b38bad93b0a",
+    "concept_name": "Summarizing Numerical Data Sets in Relation to their Context (Part 1)",
+    "canonical_definition": "Summarizing Numerical Data Sets in Relation to their Context (Part 1). Report the number of observations Describe the context that generated the data",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand"
+      ],
+      "prerequisite_depth": 9,
+      "typical_misconception": [
+        "Misunderstands the relationship between Summarizing Numerical Data Sets in Relation to their Context (Part 1) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+      "7fa09a57-6f91-4dfa-d799-94130f9a0e00",
+      "4403dcbd-3f45-7aaa-49df-9c698f0d95ef",
+      "678f3584-6aa0-f69f-d80f-05524e753239",
+      "ac6f3d93-d785-e26c-ff07-fe827d208cff",
+      "aea82851-bb0f-91d7-5673-5a1b87288398",
+      "cb7c7698-98b0-7e65-90c0-d786bc1736ba"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [
+          "bar_chart",
+          "double_number_line"
+        ],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Summarizing Numerical Data Sets in Relation to their Context (Part 1) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Summarizing Numerical Data Sets in Relation to their Context (Part 1) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.5a, NC.6.SP.B.5b"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.5.1",
+      "standard": "NC.6.SP.B.5a, NC.6.SP.B.5b",
+      "keySkills": [
+        "Report the number of observations",
+        "Describe the context that generated the data"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  },
+  "5b9ea7b8-93a2-cc5b-f11c-79dd581ccf64": {
+    "id": "5b9ea7b8-93a2-cc5b-f11c-79dd581ccf64",
+    "concept_name": "Summarizing Numerical Data Sets in Relation to their Context (Part 2)",
+    "canonical_definition": "Summarizing Numerical Data Sets in Relation to their Context (Part 2). Relate the choice of measures of center and variability to the shape of the data distribution and the context",
+    "pedagogical_fingerprint": {
+      "blooms_level": [
+        "Understand",
+        "Apply"
+      ],
+      "prerequisite_depth": 10,
+      "typical_misconception": [
+        "Misunderstands the relationship between Summarizing Numerical Data Sets in Relation to their Context (Part 2) and prior knowledge."
+      ],
+      "cognitive_load": 2,
+      "semantic_density": 0.5
+    },
+    "prerequisite_ids": [
+      "b0fb93b9-1f05-4819-d820-a0e291be5398",
+      "9063feec-1bd2-11c8-bbb2-2b8ae1e746f6",
+      "345c20c0-26f3-719b-62f2-33f5e4b4426e",
+      "7fa09a57-6f91-4dfa-d799-94130f9a0e00",
+      "4403dcbd-3f45-7aaa-49df-9c698f0d95ef",
+      "678f3584-6aa0-f69f-d80f-05524e753239",
+      "ac6f3d93-d785-e26c-ff07-fe827d208cff",
+      "aea82851-bb0f-91d7-5673-5a1b87288398",
+      "cb7c7698-98b0-7e65-90c0-d786bc1736ba",
+      "1ad1ee50-5695-263e-1b0b-2b38bad93b0a"
+    ],
+    "affordances": {
+      "text": {
+        "canonical_definition": "",
+        "alternative_explanations": [],
+        "analogies": []
+      },
+      "visual": {
+        "preferred_chart_types": [],
+        "has_dynamic_range": false,
+        "color_scheme_suggestion": null
+      },
+      "interactive_sim": {
+        "requires_physics_engine": false,
+        "user_parameters": [],
+        "observed_outputs": [],
+        "minimal_viable_sim_code": ""
+      }
+    },
+    "assessment_hooks": [
+      {
+        "difficulty": 2,
+        "type": "misconception_check",
+        "template": "A student says 'Misunderstands the relationship between Summarizing Numerical Data Sets in Relation to their Context (Part 2) and prior knowledge.' Which explanation would correct them?"
+      },
+      {
+        "difficulty": 3,
+        "type": "transfer_problem",
+        "template": "Use your understanding of Summarizing Numerical Data Sets in Relation to their Context (Part 2) to solve a new problem: [scenario]"
+      }
+    ],
+    "cross_realm_connections": {
+      "math": [
+        "NC.6.SP.B.5d"
+      ],
+      "physics": [],
+      "art": []
+    },
+    "version": {
+      "created_at": "2026-04-22T00:00:00Z",
+      "last_validated_at": "2026-04-22T00:00:00Z",
+      "validation_method": "automated_heuristic",
+      "deprecation_status": "active"
+    },
+    "_original_metadata": {
+      "lessonNumber": "M6.SP.5.2",
+      "standard": "NC.6.SP.B.5d",
+      "keySkills": [
+        "Relate the choice of measures of center and variability to the shape of the data distribution and the context"
+      ],
+      "unitTopic": "Statistics and Probability"
+    },
+    "_unit_topic": "Statistics and Probability"
+  }
+}

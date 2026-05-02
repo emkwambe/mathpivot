@@ -1,183 +1,213 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getMyEarnings } from "@/app/actions/payroll";
-import type { TutorPayoutRow, TutorRateRow } from "@/types/views";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Badge,
+} from "@/components/ui";
+import { formatDate } from "@/lib/utils";
 
 const statusColors: Record<string, string> = {
-  draft: "bg-slate-100 text-slate-700",
-  pending_approval: "bg-amber-100 text-amber-700",
+  pending: "bg-amber-100 text-amber-700",
   approved: "bg-blue-100 text-blue-700",
   paid: "bg-green-100 text-green-700",
+  disputed: "bg-red-100 text-red-700",
 };
 
-export default async function TutorEarningsPage() {
+export default async function CoachEarningsPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { payouts, rates, error } = await getMyEarnings();
+  const { data: earnings } = await supabase
+    .from("coach_earnings")
+    .select("*")
+    .eq("coach_id", user.id)
+    .order("period_start", { ascending: false })
+    .limit(12);
 
-  const totalEarned = payouts
-    .filter((p: TutorPayoutRow) => p.status === "paid")
-    .reduce((s: number, p: TutorPayoutRow) => s + p.total_amount_cents, 0);
-  const totalPending = payouts
-    .filter(
-      (p: TutorPayoutRow) => p.status !== "paid" && p.status !== "rejected",
-    )
-    .reduce((s: number, p: TutorPayoutRow) => s + p.total_amount_cents, 0);
-  const totalSessions = payouts.reduce(
-    (s: number, p: TutorPayoutRow) => s + p.sessions_count,
-    0,
+  const { data: activeEnrollments } = await supabase
+    .from("program_enrollments")
+    .select("id, program_id")
+    .eq("coach_id", user.id)
+    .eq("status", "active");
+
+  const programIds = [
+    ...new Set((activeEnrollments || []).map((e) => e.program_id)),
+  ];
+  const { data: programs } =
+    programIds.length > 0
+      ? await supabase
+          .from("coaching_programs")
+          .select("id, monthly_price_cents")
+          .in("id", programIds)
+      : { data: [] };
+
+  const priceMap = new Map(
+    (programs || []).map((p) => [p.id, p.monthly_price_cents]),
   );
 
+  const coachShare = 0.6;
+  const currentMonthlyRevenue = (activeEnrollments || []).reduce((sum, e) => {
+    return sum + (priceMap.get(e.program_id) || 0);
+  }, 0);
+  const currentMonthlyEarnings = Math.round(currentMonthlyRevenue * coachShare);
+
+  const totalPaid = (earnings || [])
+    .filter((e) => e.status === "paid")
+    .reduce((sum, e) => sum + e.coach_earnings_cents, 0);
+
+  const totalPending = (earnings || [])
+    .filter((e) => e.status === "pending" || e.status === "approved")
+    .reduce((sum, e) => sum + e.coach_earnings_cents, 0);
+
+  const activeStudents = (activeEnrollments || []).length;
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">My Earnings</h1>
-        <p className="text-sm text-slate-500">
-          Track your payouts and pay rates
+        <p className="text-slate-600">
+          Revenue share from your coaching portfolio
         </p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-          <p className="text-red-700 text-sm">{error}</p>
-        </div>
-      )}
-
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide">
-            Total Earned
-          </p>
-          <p className="text-2xl font-bold text-green-600 mt-1">
-            ${(totalEarned / 100).toFixed(2)}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide">
-            Pending
-          </p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">
-            ${(totalPending / 100).toFixed(2)}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide">
-            Total Sessions
-          </p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">
-            {totalSessions}
-          </p>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="pt-5 text-center">
+            <p className="text-2xl font-bold text-emerald-600">
+              ${(currentMonthlyEarnings / 100).toFixed(0)}
+            </p>
+            <p className="text-xs text-slate-500">Est. This Month</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5 text-center">
+            <p className="text-2xl font-bold text-green-600">
+              ${(totalPaid / 100).toFixed(0)}
+            </p>
+            <p className="text-xs text-slate-500">Total Paid</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5 text-center">
+            <p className="text-2xl font-bold text-amber-600">
+              ${(totalPending / 100).toFixed(0)}
+            </p>
+            <p className="text-xs text-slate-500">Pending</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5 text-center">
+            <p className="text-2xl font-bold text-blue-600">{activeStudents}</p>
+            <p className="text-xs text-slate-500">Active Students</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Pay Rates */}
-      {rates.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6">
-          <h2 className="font-semibold text-slate-900 mb-3">Your Pay Rates</h2>
-          <div className="space-y-2">
-            {rates.map((r: TutorRateRow) => (
-              <div
-                key={r.id}
-                className="flex items-center justify-between text-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-900 font-medium">{r.label}</span>
-                  {r.is_default && (
-                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
-                      default
-                    </span>
-                  )}
-                </div>
-                <span className="text-slate-700">
-                  ${(r.rate_cents / 100).toFixed(2)} /{" "}
-                  {r.rate_type.replace("per_", "")}
-                </span>
-              </div>
-            ))}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">How Your Earnings Work</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="p-3 bg-slate-50 rounded-lg">
+              <p className="font-medium text-slate-900">Revenue Share</p>
+              <p className="text-slate-600 mt-1">
+                You earn <strong>60%</strong> of each enrolled student&apos;s
+                monthly program fee.
+              </p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-lg">
+              <p className="font-medium text-slate-900">Monthly Cycle</p>
+              <p className="text-slate-600 mt-1">
+                Earnings are calculated at month-end, reviewed by admin, then
+                paid out.
+              </p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-lg">
+              <p className="font-medium text-slate-900">Growth Path</p>
+              <p className="text-slate-600 mt-1">
+                15 students x $399/mo avg = <strong>$3,593/mo</strong> at 60%
+                share.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        </CardContent>
+      </Card>
 
-      {/* Payout History */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-200">
-          <h2 className="font-semibold text-slate-900">Payout History</h2>
-        </div>
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium text-slate-600">
-                Period
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-slate-600">
-                Sessions
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-slate-600">
-                Hours
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-slate-600">
-                Amount
-              </th>
-              <th className="text-left px-4 py-3 font-medium text-slate-600">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {payouts.length === 0 && (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="px-4 py-12 text-center text-slate-400"
-                >
-                  No payouts yet. Earnings will appear here after your sessions
-                  are processed.
-                </td>
-              </tr>
-            )}
-            {payouts.map((p: TutorPayoutRow) => (
-              <tr key={p.id}>
-                <td className="px-4 py-3 text-slate-900">
-                  {p.period ? (
-                    <>
-                      {new Date(p.period.period_start).toLocaleDateString(
-                        "en-US",
-                        { month: "short", day: "numeric" },
-                      )}
-                      {" - "}
-                      {new Date(p.period.period_end).toLocaleDateString(
-                        "en-US",
-                        { month: "short", day: "numeric" },
-                      )}
-                    </>
-                  ) : (
-                    "N/A"
-                  )}
-                </td>
-                <td className="px-4 py-3 text-slate-700">{p.sessions_count}</td>
-                <td className="px-4 py-3 text-slate-700">
-                  {Number(p.total_hours).toFixed(1)}
-                </td>
-                <td className="px-4 py-3 font-medium text-slate-900">
-                  ${(p.total_amount_cents / 100).toFixed(2)}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[p.status] || "bg-slate-100"}`}
-                  >
-                    {p.status.replace("_", " ")}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Earnings History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {earnings && earnings.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-slate-200">
+                  <tr>
+                    <th className="text-left py-2 pr-4 font-medium text-slate-600">
+                      Period
+                    </th>
+                    <th className="text-left py-2 pr-4 font-medium text-slate-600">
+                      Students
+                    </th>
+                    <th className="text-left py-2 pr-4 font-medium text-slate-600">
+                      Sessions
+                    </th>
+                    <th className="text-left py-2 pr-4 font-medium text-slate-600">
+                      Revenue
+                    </th>
+                    <th className="text-left py-2 pr-4 font-medium text-slate-600">
+                      Your Share
+                    </th>
+                    <th className="text-left py-2 font-medium text-slate-600">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {earnings.map((e) => (
+                    <tr key={e.id}>
+                      <td className="py-3 pr-4 text-slate-900">
+                        {formatDate(e.period_start, "MMM yyyy")}
+                      </td>
+                      <td className="py-3 pr-4 text-slate-700">
+                        {e.active_students}
+                      </td>
+                      <td className="py-3 pr-4 text-slate-700">
+                        {e.sessions_delivered}
+                      </td>
+                      <td className="py-3 pr-4 text-slate-700">
+                        ${(e.total_revenue_cents / 100).toFixed(0)}
+                      </td>
+                      <td className="py-3 pr-4 font-medium text-slate-900">
+                        ${(e.coach_earnings_cents / 100).toFixed(0)}
+                      </td>
+                      <td className="py-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[e.status] || "bg-slate-100"}`}
+                        >
+                          {e.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500 text-center py-8">
+              No earnings recorded yet. Earnings will appear after your first
+              month with enrolled students.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
