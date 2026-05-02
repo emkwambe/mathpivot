@@ -228,12 +228,6 @@ export async function endSession(
     .update({ status: "completed" })
     .eq("id", session.booking_id);
 
-  // Deduct credit from family
-  await supabase.rpc("decrement_family_credits", {
-    p_family_id: booking.family_id,
-    p_amount: 1,
-  });
-
   // Emit event
   await emitEvent({
     type: "session.completed.v1",
