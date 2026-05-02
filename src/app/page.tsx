@@ -3,9 +3,9 @@ import LandingPageClient from "./landing-page-client";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MathPivot – The Operating System for Coaching Centers",
+  title: "MathPivot – Sports builds character. MathPivot builds careers.",
   description:
-    "Schedule sessions, track mastery, bill parents, and power AI-assisted learning — all in one platform for math and CS education.",
+    "The academic performance system that applies athletic-level coaching, structured programs, and mastery tracking to prepare students for high-impact careers. Named coaches. Measurable outcomes. Mathathlon competitions.",
   openGraph: {
     images: ["/og-image.png"],
   },
@@ -18,5 +18,5 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
 
-  return <LandingPageClient isLoggedIn={isLoggedIn} />;
+  return <LandingPageClient />;
 }
