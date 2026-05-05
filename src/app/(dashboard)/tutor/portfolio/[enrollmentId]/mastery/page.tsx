@@ -41,6 +41,24 @@ async function updateMasteryAction(
     { onConflict: "student_id,concept_id" },
   );
 
+  if (level === "mastered" || level === "proficient") {
+    const { data: concept } = await supabase
+      .from("atomic_concepts")
+      .select("title")
+      .eq("id", conceptId)
+      .single();
+
+    import("@/app/actions/mastery-notifications").then(
+      ({ sendMasteryLevelUpNotification }) => {
+        sendMasteryLevelUpNotification(
+          enrollment.student_id,
+          concept?.title || "a concept",
+          level,
+        ).catch(() => {});
+      },
+    );
+  }
+
   revalidatePath(`/tutor/portfolio/${enrollmentId}/mastery`);
 }
 
