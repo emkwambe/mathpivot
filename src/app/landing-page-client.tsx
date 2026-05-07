@@ -305,24 +305,24 @@ export default function LandingPage() {
             {[
               {
                 name: "Foundation",
-                price: "$249",
-                sessions: "4 sessions/month",
+                price: "$349",
+                sessions: "2x per week (8 sessions/month)",
                 grades: "Grades 5-8",
                 color: "border-blue-200 bg-blue-50",
                 accent: "text-blue-600",
                 badge: "bg-blue-100 text-blue-800",
                 features: [
                   "Named coach for the duration",
+                  "45-minute focused sessions",
                   "Mastery tracking dashboard",
                   "Career exposure modules",
                   "Weekly progress reports",
-                  "Practice accountability",
                 ],
               },
               {
                 name: "Acceleration",
-                price: "$399",
-                sessions: "6 sessions/month",
+                price: "$549",
+                sessions: "3x per week (12 sessions/month)",
                 grades: "Grades 6-10",
                 color: "border-amber-200 bg-amber-50",
                 accent: "text-amber-600",
@@ -338,8 +338,8 @@ export default function LandingPage() {
               },
               {
                 name: "Elite",
-                price: "$699",
-                sessions: "8 sessions/month",
+                price: "$799",
+                sessions: "4x per week (16 sessions/month)",
                 grades: "Grades 7-12",
                 color: "border-purple-200 bg-purple-50",
                 accent: "text-purple-600",
@@ -537,20 +537,20 @@ export default function LandingPage() {
                 {[
                   {
                     students: 5,
-                    avg: 299,
-                    monthly: "$897",
+                    avg: 349,
+                    monthly: "$1,047",
                     label: "Getting started",
                   },
                   {
                     students: 10,
-                    avg: 349,
-                    monthly: "$2,094",
+                    avg: 449,
+                    monthly: "$2,694",
                     label: "Part-time income",
                   },
                   {
-                    students: 15,
-                    avg: 399,
-                    monthly: "$3,591",
+                    students: 12,
+                    avg: 499,
+                    monthly: "$3,593",
                     label: "Full portfolio",
                   },
                 ].map((tier) => (

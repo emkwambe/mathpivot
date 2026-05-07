@@ -39,21 +39,21 @@ const trackDescriptions: Record<string, string> = {
 const trackFeatures: Record<string, string[]> = {
   foundation: [
     "Named coach for the duration",
-    "4 sessions per month",
+    "2x per week (45-min sessions)",
     "Mastery tracking dashboard",
     "Career exposure modules",
-    "Progress reports for parents",
+    "Weekly progress reports",
   ],
   acceleration: [
     "Everything in Foundation",
-    "6 sessions per month",
+    "3x per week (45-min sessions)",
     "Mathathlon competition prep",
     "AMC 8 / MATHCOUNTS readiness",
     "Applied math projects",
   ],
   elite: [
     "Everything in Acceleration",
-    "8 sessions per month",
+    "4x per week (45-min sessions)",
     "1-on-1 intensive coaching",
     "AMC 10/12 and AIME prep",
     "College readiness portfolio",

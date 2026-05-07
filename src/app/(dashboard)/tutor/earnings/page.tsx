@@ -132,7 +132,7 @@ export default async function CoachEarningsPage() {
             <div className="p-3 bg-slate-50 rounded-lg">
               <p className="font-medium text-slate-900">Growth Path</p>
               <p className="text-slate-600 mt-1">
-                15 students x $399/mo avg = <strong>$3,593/mo</strong> at 60%
+                12 students x $499/mo avg = <strong>$3,593/mo</strong> at 60%
                 share.
               </p>
             </div>
