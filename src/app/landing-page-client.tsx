@@ -313,7 +313,7 @@ export default function LandingPage() {
                 badge: "bg-blue-100 text-blue-800",
                 features: [
                   "Named coach for the duration",
-                  "45-minute focused sessions",
+                  "60-minute coaching sessions",
                   "Mastery tracking dashboard",
                   "Career exposure modules",
                   "Weekly progress reports",
