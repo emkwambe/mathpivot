@@ -20,7 +20,7 @@ export default async function CoachPortfolioPage() {
   const { data: enrollments } = await supabase
     .from("program_enrollments")
     .select(
-      "id, student_id, program_id, status, enrolled_at, current_course_id",
+      "id, student_id, program_id, status, enrolled_at, current_course_id, onboarding_status",
     )
     .eq("coach_id", user.id)
     .in("status", ["active", "paused"])
@@ -172,6 +172,14 @@ export default async function CoachPortfolioPage() {
                           </p>
                         )}
                       </div>
+                      {enrollment.onboarding_status !== "completed" && (
+                        <Link
+                          href={`/tutor/portfolio/${enrollment.id}/onboarding`}
+                          className="px-3 py-1.5 bg-amber-500 text-white text-xs font-medium rounded-lg hover:bg-amber-600 transition-colors"
+                        >
+                          Onboard
+                        </Link>
+                      )}
                       <Link
                         href={`/tutor/portfolio/${enrollment.id}/mastery`}
                         className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"

@@ -219,11 +219,21 @@ export default async function SessionDetailPage({ params }: Props) {
             {formatDate(booking.start_at, "h:mm a")}
           </p>
         </div>
-        <Badge
-          variant={isCompleted ? "success" : isActive ? "warning" : "secondary"}
-        >
-          {isCompleted ? "Completed" : isActive ? "In Progress" : "Scheduled"}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/tutor/sessions/${sessionId}/prep`}
+            className="px-3 py-1.5 text-xs font-medium bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+          >
+            Prep Brief
+          </Link>
+          <Badge
+            variant={
+              isCompleted ? "success" : isActive ? "warning" : "secondary"
+            }
+          >
+            {isCompleted ? "Completed" : isActive ? "In Progress" : "Scheduled"}
+          </Badge>
+        </div>
       </div>
 
       {/* Session Info */}
