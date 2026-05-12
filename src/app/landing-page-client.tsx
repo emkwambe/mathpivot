@@ -146,7 +146,7 @@ export default function LandingPage() {
           <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
             We bring the discipline of athletic training to academic and career
             success — with a named coach, structured programs, and measurable
-            mastery. Not hourly tutoring. A development pathway.
+            mastery. Not hourly sessions. A development pathway.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -186,12 +186,10 @@ export default function LandingPage() {
       {/* The Problem */}
       <section className="py-20 px-4 bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold">
-            The problem with tutoring
-          </h2>
+          <h2 className="text-3xl sm:text-4xl font-bold">The tutoring trap</h2>
           <p className="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
             Families spend $6.8 billion on tutoring every year. Most of it buys
-            hours, not outcomes.
+            hours, not outcomes. Here&apos;s what changes.
           </p>
 
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -521,7 +519,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
-                href="/signup"
+                href="/careers"
                 className="mt-8 inline-flex items-center gap-2 bg-emerald-600 text-white font-medium px-6 py-3 rounded-xl hover:bg-emerald-700 transition-colors"
               >
                 Apply as a Coach
@@ -598,7 +596,7 @@ export default function LandingPage() {
               <ArrowRight size={18} />
             </Link>
             <Link
-              href="/signup"
+              href="/careers"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/10 text-white font-medium px-8 py-3.5 rounded-xl border border-white/20 hover:bg-white/20 transition-colors text-base"
             >
               Apply as a Coach
@@ -622,14 +620,17 @@ export default function LandingPage() {
               training.
             </p>
             <div className="flex items-center gap-6 text-sm">
-              <Link href="/login" className="hover:text-white">
-                Sign In
+              <Link href="/about" className="hover:text-white">
+                About
               </Link>
-              <Link href="/signup" className="hover:text-white">
-                Get Started
+              <Link href="/careers" className="hover:text-white">
+                Careers
               </Link>
               <Link href="/pricing" className="hover:text-white">
                 Pricing
+              </Link>
+              <Link href="/login" className="hover:text-white">
+                Sign In
               </Link>
             </div>
           </div>

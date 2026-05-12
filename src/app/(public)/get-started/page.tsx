@@ -84,8 +84,9 @@ export default function GetStartedPage() {
               Unlock Your Student&apos;s Math Potential
             </h1>
             <p className="text-lg text-slate-600 mb-8">
-              Expert 1-on-1 tutoring in mathematics and computational sciences.
-              From Algebra to AP Calculus, from Python to Data Science.
+              Structured math coaching with a named coach who knows your child.
+              From mastery tracking to competition prep — a real development
+              pathway, not hourly sessions.
             </p>
 
             <div className="space-y-4">
@@ -295,7 +296,7 @@ export default function GetStartedPage() {
 
               <p className="text-[11px] text-slate-400 text-center">
                 By submitting, you agree to be contacted about MathPivot&apos;s
-                tutoring services.
+                coaching programs.
               </p>
             </form>
           </div>

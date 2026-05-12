@@ -21,17 +21,17 @@ const CONSENT_DESCRIPTIONS: Record<
   account_creation: {
     title: "Account Creation Consent",
     description:
-      "I consent to the creation of a student account for my child on MathPivot TutorOS. I understand this involves storing their name, email, grade level, and learning data.",
+      "I consent to the creation of a student account for my child on MathPivot. I understand this involves storing their name, email, grade level, and learning data.",
   },
   data_collection: {
     title: "Data Collection Consent",
     description:
-      "I consent to the collection and processing of my child's educational data including session records, skill assessments, homework submissions, and progress tracking for the purpose of providing personalized tutoring services.",
+      "I consent to the collection and processing of my child's educational data including session records, skill assessments, homework submissions, and progress tracking for the purpose of providing personalized coaching services.",
   },
   photo_video: {
     title: "Photo/Video Consent",
     description:
-      "I consent to the recording of tutoring sessions for quality assurance and review purposes. Recordings are stored securely and accessible only to authorized staff.",
+      "I consent to the recording of coaching sessions for quality assurance and review purposes. Recordings are stored securely and accessible only to authorized staff.",
   },
 };
 

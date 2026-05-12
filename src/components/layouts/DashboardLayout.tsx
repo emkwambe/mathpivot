@@ -1078,7 +1078,7 @@ const studentNavItems: NavItem[] = [
     ),
   },
   {
-    label: "AI Tutor",
+    label: "AI Coach",
     href: "/student/ai-tutor",
     icon: (
       <svg

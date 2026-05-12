@@ -1,16 +1,17 @@
 /**
- * Email service for MathPivot TutorOS
+ * Email service for MathPivot
  * Uses Resend if configured, falls back to console logging in dev
  */
-import { Resend } from 'resend';
-import { isDev } from '@/lib/utils';
+import { Resend } from "resend";
+import { isDev } from "@/lib/utils";
 
 // Initialize Resend if API key is available
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 // Default from address
-const FROM_EMAIL = process.env.EMAIL_FROM || 'MathPivot <noreply@mathpivot.com>';
+const FROM_EMAIL =
+  process.env.EMAIL_FROM || "MathPivot <noreply@mathpivot.com>";
 
 export interface SendEmailParams {
   to: string | string[];
@@ -29,19 +30,21 @@ export interface SendEmailResult {
 /**
  * Send an email using Resend, or log to console in dev/without API key
  */
-export async function sendEmail(params: SendEmailParams): Promise<SendEmailResult> {
+export async function sendEmail(
+  params: SendEmailParams,
+): Promise<SendEmailResult> {
   const { to, subject, html, text, replyTo } = params;
 
   // If Resend is not configured, log to console
   if (!resend) {
     if (isDev()) {
-      console.log('=== EMAIL (DEV MODE) ===');
-      console.log('To:', to);
-      console.log('Subject:', subject);
-      console.log('HTML:', html.substring(0, 500) + '...');
-      console.log('========================');
+      console.log("=== EMAIL (DEV MODE) ===");
+      console.log("To:", to);
+      console.log("Subject:", subject);
+      console.log("HTML:", html.substring(0, 500) + "...");
+      console.log("========================");
     } else {
-      console.warn('Email not sent (Resend not configured):', subject);
+      console.warn("Email not sent (Resend not configured):", subject);
     }
     return { success: true, id: `dev-${Date.now()}` };
   }
@@ -57,14 +60,14 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
     });
 
     if (error) {
-      console.error('Resend error:', error);
+      console.error("Resend error:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, id: data?.id };
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Email send error:', errorMessage);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    console.error("Email send error:", errorMessage);
     return { success: false, error: errorMessage };
   }
 }
@@ -74,14 +77,14 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
  */
 function htmlToText(html: string): string {
   return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .trim();
@@ -114,12 +117,12 @@ export const emailTemplates = {
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Booking Confirmed!</h2>
-        <p>Your tutoring session has been confirmed.</p>
+        <p>Your coaching session has been confirmed.</p>
         <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p><strong>Student:</strong> ${studentName}</p>
           <p><strong>Tutor:</strong> ${tutorName}</p>
           <p><strong>Date & Time:</strong> ${dateTime}</p>
-          <p><strong>Format:</strong> ${modality === 'online' ? 'Online' : 'In Person'}</p>
+          <p><strong>Format:</strong> ${modality === "online" ? "Online" : "In Person"}</p>
         </div>
         <p>You'll receive a reminder 24 hours and 2 hours before the session.</p>
         <p>Best,<br>MathPivot Team</p>
@@ -145,7 +148,7 @@ export const emailTemplates = {
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2563eb;">Session Reminder</h2>
-        <p>Your tutoring session is coming up in ${hoursUntil} hours!</p>
+        <p>Your coaching session is coming up in ${hoursUntil} hours!</p>
         <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p><strong>Student:</strong> ${studentName}</p>
           <p><strong>Tutor:</strong> ${tutorName}</p>
@@ -189,9 +192,9 @@ export const emailTemplates = {
           skillsWorkedOn && skillsWorkedOn.length > 0
             ? `
           <h3>Skills Worked On</h3>
-          <ul>${skillsWorkedOn.map((s) => `<li>${s}</li>`).join('')}</ul>
+          <ul>${skillsWorkedOn.map((s) => `<li>${s}</li>`).join("")}</ul>
         `
-            : ''
+            : ""
         }
         ${
           nextSteps
@@ -199,7 +202,7 @@ export const emailTemplates = {
           <h3>Next Steps</h3>
           <p>${nextSteps}</p>
         `
-            : ''
+            : ""
         }
         <p>Best,<br>MathPivot Team</p>
       </div>
@@ -243,10 +246,10 @@ export const emailTemplates = {
             ? `
           <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 20px 0;">
             <strong style="color: #dc2626;">⚠️ Attention Needed</strong>
-            <ul>${atRiskReasons?.map((r) => `<li>${r}</li>`).join('') || ''}</ul>
+            <ul>${atRiskReasons?.map((r) => `<li>${r}</li>`).join("") || ""}</ul>
           </div>
         `
-            : ''
+            : ""
         }
 
         <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -259,18 +262,18 @@ export const emailTemplates = {
           skillsSummary.length > 0
             ? `
           <h3>Skills Practiced</h3>
-          <ul>${skillsSummary.map((s) => `<li>${s}</li>`).join('')}</ul>
+          <ul>${skillsSummary.map((s) => `<li>${s}</li>`).join("")}</ul>
         `
-            : ''
+            : ""
         }
 
         ${
           masteryUpdates.length > 0
             ? `
           <h3>Mastery Progress</h3>
-          <ul>${masteryUpdates.map((m) => `<li><strong>${m.skill}:</strong> ${m.from} → ${m.to}</li>`).join('')}</ul>
+          <ul>${masteryUpdates.map((m) => `<li><strong>${m.skill}:</strong> ${m.from} → ${m.to}</li>`).join("")}</ul>
         `
-            : ''
+            : ""
         }
 
         ${
@@ -279,7 +282,7 @@ export const emailTemplates = {
           <h3>Recommendations</h3>
           <p>${recommendations}</p>
         `
-            : ''
+            : ""
         }
 
         <p>Best,<br>MathPivot Team</p>
@@ -307,7 +310,7 @@ export const emailTemplates = {
 
         <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #dc2626;">Reasons</h3>
-          <ul>${reasons.map((r) => `<li>${r}</li>`).join('')}</ul>
+          <ul>${reasons.map((r) => `<li>${r}</li>`).join("")}</ul>
         </div>
 
         <h3>Recommended Actions</h3>
