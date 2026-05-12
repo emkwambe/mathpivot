@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS survey_schedule (
   enrollment_id UUID NOT NULL REFERENCES program_enrollments(id),
   next_due_at TIMESTAMPTZ NOT NULL,
   last_completed_at TIMESTAMPTZ,
-  is_overdue BOOLEAN GENERATED ALWAYS AS (next_due_at < now() AND last_completed_at IS NULL OR last_completed_at < next_due_at) STORED,
   created_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(template_id, enrollment_id)
 );
@@ -66,7 +65,7 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_survey_responses_enrollment ON survey_responses(enrollment_id);
 CREATE INDEX IF NOT EXISTS idx_survey_responses_student ON survey_responses(student_id);
 CREATE INDEX IF NOT EXISTS idx_survey_responses_template ON survey_responses(template_id);
-CREATE INDEX IF NOT EXISTS idx_survey_schedule_overdue ON survey_schedule(next_due_at) WHERE last_completed_at IS NULL OR last_completed_at < next_due_at;
+CREATE INDEX IF NOT EXISTS idx_survey_schedule_due ON survey_schedule(next_due_at);
 
 -- RLS
 ALTER TABLE survey_templates ENABLE ROW LEVEL SECURITY;
