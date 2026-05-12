@@ -155,6 +155,136 @@ export default async function SessionPrepPage({
         </Card>
       </div>
 
+      {brief.sessionCheckin.lastEnergy && (
+        <div className="mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <h2 className="text-sm font-semibold text-slate-700 mb-2">
+            Last Session Check-in
+          </h2>
+          <div className="flex items-center gap-4 text-sm">
+            <span>
+              Energy:{" "}
+              {{ low: "😴", okay: "😐", focused: "🎯", fired_up: "🔥" }[
+                brief.sessionCheckin.lastEnergy
+              ] || brief.sessionCheckin.lastEnergy}
+            </span>
+            {brief.sessionCheckin.lastConfidence && (
+              <span>
+                Confidence:{" "}
+                {{
+                  down: "↓ Down",
+                  same: "→ Same",
+                  up: "↑ Up",
+                  breakthrough: "⚡ Breakthrough",
+                }[brief.sessionCheckin.lastConfidence] ||
+                  brief.sessionCheckin.lastConfidence}
+              </span>
+            )}
+            {brief.sessionCheckin.lastBlocker && (
+              <span className="text-amber-700">
+                Blocker: {brief.sessionCheckin.lastBlocker}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {brief.schoolContext.currentTopic && (
+        <div className="mb-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-blue-600 font-semibold uppercase tracking-wide">
+                  In School Right Now
+                </p>
+                <p className="text-sm font-medium text-slate-900 mt-1">
+                  {brief.schoolContext.currentTopic}
+                </p>
+              </div>
+              {brief.schoolContext.topicUpdatedAt && (
+                <span className="text-xs text-blue-400">
+                  {new Date(
+                    brief.schoolContext.topicUpdatedAt,
+                  ).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          </div>
+          {brief.schoolContext.aheadConcepts.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-2">
+                What&apos;s Next — Stay Ahead of School
+              </h2>
+              <div className="space-y-2">
+                {brief.schoolContext.aheadConcepts.map((c) => (
+                  <div
+                    key={c.title}
+                    className="bg-green-50 border border-green-200 rounded-lg p-3"
+                  >
+                    <p className="font-medium text-slate-900 text-sm">
+                      {c.title}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {c.unitTitle}
+                      {c.lessonNumber ? ` · Lesson ${c.lessonNumber}` : ""}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-green-600 mt-2">
+                Teaching these now means the student walks into class already
+                confident.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {brief.careerTouchpoint.isDue && brief.careerTouchpoint.type && (
+        <div className="mb-6 bg-purple-50 border border-purple-200 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-purple-600 font-bold text-sm">
+              {brief.careerTouchpoint.type === "quarterly_deepdive"
+                ? "Career Deep-Dive Due"
+                : "Career Check-in Due"}
+            </span>
+            <span className="text-xs text-purple-400">
+              {brief.careerTouchpoint.type === "quarterly_deepdive"
+                ? "15 min · quarterly"
+                : "5 min · monthly"}
+            </span>
+          </div>
+          {brief.careerTouchpoint.type === "quarterly_deepdive" ? (
+            <p className="text-xs text-slate-600">
+              Run the Career Interest survey (10 questions) with the student.
+              Review their top career matches and discuss one pathway in depth.
+            </p>
+          ) : (
+            <p className="text-xs text-slate-600">
+              Connect today&apos;s math to a career. Ask what interests them and
+              tie the current concept to a real job.
+            </p>
+          )}
+          {brief.careerTouchpoint.topCareers.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {brief.careerTouchpoint.topCareers.map((c) => (
+                <span
+                  key={c}
+                  className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"
+                >
+                  {c}
+                </span>
+              ))}
+            </div>
+          )}
+          {brief.careerTouchpoint.strongestDomains.length > 0 && (
+            <p className="text-xs text-purple-500 mt-1">
+              Strongest domains:{" "}
+              {brief.careerTouchpoint.strongestDomains.join(", ")}
+            </p>
+          )}
+        </div>
+      )}
+
       {brief.focusAreas.length > 0 && (
         <div className="mb-6">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
