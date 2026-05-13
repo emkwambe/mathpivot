@@ -81,7 +81,7 @@ export default async function ParentReportsPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Weekly Reports</h1>
         <p className="text-slate-600">
-          Progress updates from your students&apos; tutors
+          Progress updates from your students&apos; math coaches
         </p>
       </div>
 
