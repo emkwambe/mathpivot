@@ -120,13 +120,13 @@ export default function SurveyRunner({
     <div>
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 text-sm text-green-800">
-          {success} submitted successfully.
+          {success} check-in completed.
         </div>
       )}
 
       <div className="mb-6">
         <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-          Session Surveys
+          Session Check-ins
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {surveyGroups.session.map((t) => (
@@ -150,7 +150,7 @@ export default function SurveyRunner({
 
       <div>
         <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-          Periodic Surveys
+          Periodic Check-ins
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {surveyGroups.periodic.map((t) => (

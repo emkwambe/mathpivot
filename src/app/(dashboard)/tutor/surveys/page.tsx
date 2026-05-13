@@ -66,16 +66,16 @@ export default async function CoachSurveysPage() {
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Surveys</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Check-ins</h1>
         <p className="text-slate-600 text-sm mt-1">
-          Session check-ins, school pulse, parent confidence, and career
+          Session reflections, school pulse, parent confidence, and career
           interest assessments for your students.
         </p>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6">
         <h2 className="text-sm font-semibold text-slate-700 mb-3">
-          Available Survey Templates
+          Check-in Templates
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {templates.map((t) => (
@@ -94,8 +94,8 @@ export default async function CoachSurveysPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-slate-500">
-              No students enrolled yet. Surveys will be available once students
-              are assigned to you.
+              No students enrolled yet. Check-ins will be available once
+              students are assigned to you.
             </p>
           </CardContent>
         </Card>
@@ -138,7 +138,7 @@ export default async function CoachSurveysPage() {
                             )}
                             {lastResponseDate && (
                               <span className="text-xs text-slate-400">
-                                Last survey: {lastResponseDate}
+                                Last check-in: {lastResponseDate}
                               </span>
                             )}
                           </div>

@@ -87,10 +87,10 @@ export default async function SurveysPage({
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">
-          Surveys: {studentProfile?.full_name || "Student"}
+          Check-ins: {studentProfile?.full_name || "Student"}
         </h1>
         <p className="text-slate-600 text-sm mt-1">
-          Check-ins, school pulse, and career interest assessments.
+          Session reflections, school pulse, and career interest assessments.
         </p>
       </div>
 
@@ -126,7 +126,7 @@ export default async function SurveysPage({
       {recentResponses.length > 0 && (
         <div className="mt-8">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
-            Recent Responses
+            Recent Check-ins
           </h2>
           <div className="space-y-2">
             {recentResponses.map((response) => (

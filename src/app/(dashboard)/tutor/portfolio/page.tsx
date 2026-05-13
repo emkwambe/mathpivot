@@ -184,7 +184,7 @@ export default async function CoachPortfolioPage() {
                         href={`/tutor/portfolio/${enrollment.id}/surveys`}
                         className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg hover:bg-slate-200 transition-colors"
                       >
-                        Survey
+                        Check-in
                       </Link>
                       <Link
                         href={`/tutor/portfolio/${enrollment.id}/mastery`}
