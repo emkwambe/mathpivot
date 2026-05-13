@@ -1,68 +1,87 @@
-import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
-import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Badge,
+} from "@/components/ui";
+import { formatDate, formatCurrency } from "@/lib/utils";
 
-type PurchaseStatus = 'pending' | 'completed' | 'failed' | 'refunded';
+type PurchaseStatus = "pending" | "completed" | "failed" | "refunded";
 
-const STATUS_COLORS: Record<PurchaseStatus, 'warning' | 'success' | 'danger' | 'secondary'> = {
-  pending: 'warning',
-  completed: 'success',
-  failed: 'danger',
-  refunded: 'secondary',
+const STATUS_COLORS: Record<
+  PurchaseStatus,
+  "warning" | "success" | "danger" | "secondary"
+> = {
+  pending: "warning",
+  completed: "success",
+  failed: "danger",
+  refunded: "secondary",
 };
 
 export default async function ParentBillingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   // Get family info
   const { data: familyMember } = await supabase
-    .from('family_members')
-    .select('family_id')
-    .eq('user_id', user.id)
+    .from("family_members")
+    .select("family_id")
+    .eq("user_id", user.id)
     .single();
 
   const familyId = familyMember?.family_id;
 
   // Get purchase history
   const { data: purchases } = await supabase
-    .from('purchases')
-    .select(`
+    .from("purchases")
+    .select(
+      `
       *,
       product:products(name, product_type, description)
-    `)
-    .eq('family_id', familyId || '')
-    .order('created_at', { ascending: false })
+    `,
+    )
+    .eq("family_id", familyId || "")
+    .order("created_at", { ascending: false })
     .limit(50);
 
   // Get credit ledger
   const { data: creditLedger } = await supabase
-    .from('credit_ledger')
-    .select('*')
-    .eq('family_id', familyId || '')
-    .order('created_at', { ascending: false })
+    .from("credit_ledger")
+    .select("*")
+    .eq("family_id", familyId || "")
+    .order("created_at", { ascending: false })
     .limit(20);
 
   // Get current balance
   const currentBalance = creditLedger?.[0]?.balance_after || 0;
 
   // Calculate stats
-  const totalSpent = purchases
-    ?.filter(p => p.status === 'completed')
-    .reduce((sum, p) => sum + (p.amount_cents || 0), 0) || 0;
-  const totalCreditsUsed = creditLedger
-    ?.filter(l => l.change_amount < 0)
-    .reduce((sum, l) => sum + Math.abs(l.change_amount), 0) || 0;
+  const totalSpent =
+    purchases
+      ?.filter((p) => p.status === "completed")
+      .reduce((sum, p) => sum + (p.amount_cents || 0), 0) || 0;
+  const totalCreditsUsed =
+    creditLedger
+      ?.filter((l) => l.change_amount < 0)
+      .reduce((sum, l) => sum + Math.abs(l.change_amount), 0) || 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Billing & Credits</h1>
-          <p className="text-slate-600">View your purchase history and credit transactions</p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Billing & Credits
+          </h1>
+          <p className="text-slate-600">
+            View your purchase history and credit transactions
+          </p>
         </div>
         <Link
           href="/parent/purchase"
@@ -78,7 +97,9 @@ export default async function ParentBillingPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-sm text-slate-600">Current Balance</p>
-              <p className="text-3xl font-bold text-emerald-600">{currentBalance}</p>
+              <p className="text-3xl font-bold text-emerald-600">
+                {currentBalance}
+              </p>
               <p className="text-xs text-slate-500">credits</p>
             </div>
           </CardContent>
@@ -88,7 +109,9 @@ export default async function ParentBillingPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-sm text-slate-600">Total Spent</p>
-              <p className="text-3xl font-bold text-slate-900">{formatCurrency(totalSpent)}</p>
+              <p className="text-3xl font-bold text-slate-900">
+                {formatCurrency(totalSpent)}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -97,7 +120,9 @@ export default async function ParentBillingPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-sm text-slate-600">Credits Used</p>
-              <p className="text-3xl font-bold text-blue-600">{totalCreditsUsed}</p>
+              <p className="text-3xl font-bold text-blue-600">
+                {totalCreditsUsed}
+              </p>
               <p className="text-xs text-slate-500">all time</p>
             </div>
           </CardContent>
@@ -113,7 +138,11 @@ export default async function ParentBillingPage() {
           {purchases && purchases.length > 0 ? (
             <div className="space-y-3">
               {purchases.map((purchase) => {
-                const product = purchase.product as { name: string; product_type: string; description: string } | null;
+                const product = purchase.product as {
+                  name: string;
+                  product_type: string;
+                  description: string;
+                } | null;
 
                 return (
                   <div
@@ -122,23 +151,45 @@ export default async function ParentBillingPage() {
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        <svg
+                          className="w-5 h-5 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                          />
                         </svg>
                       </div>
                       <div>
-                        <h4 className="font-medium text-slate-900">{product?.name || 'Credit Purchase'}</h4>
-                        <p className="text-sm text-slate-500">{formatDate(purchase.created_at)}</p>
+                        <h4 className="font-medium text-slate-900">
+                          {product?.name || "Credit Purchase"}
+                        </h4>
+                        <p className="text-sm text-slate-500">
+                          {formatDate(purchase.created_at)}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="font-semibold text-slate-900">{formatCurrency(purchase.amount_cents)}</p>
+                        <p className="font-semibold text-slate-900">
+                          {formatCurrency(purchase.amount_cents)}
+                        </p>
                         {purchase.credits_amount && (
-                          <p className="text-xs text-slate-500">+{purchase.credits_amount} credits</p>
+                          <p className="text-xs text-slate-500">
+                            +{purchase.credits_amount} credits
+                          </p>
                         )}
                       </div>
-                      <Badge variant={STATUS_COLORS[purchase.status as PurchaseStatus]}>
+                      <Badge
+                        variant={
+                          STATUS_COLORS[purchase.status as PurchaseStatus]
+                        }
+                      >
                         {purchase.status}
                       </Badge>
                     </div>
@@ -149,12 +200,26 @@ export default async function ParentBillingPage() {
           ) : (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                <svg
+                  className="w-8 h-8 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                  />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No Purchases Yet</h3>
-              <p className="text-slate-500 mb-4">Purchase credits to book tutoring sessions.</p>
+              <h3 className="text-lg font-medium text-slate-900 mb-2">
+                No Purchases Yet
+              </h3>
+              <p className="text-slate-500 mb-4">
+                Purchase credits to book coaching sessions.
+              </p>
               <Link
                 href="/parent/purchase"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
@@ -186,19 +251,30 @@ export default async function ParentBillingPage() {
                 <tbody className="text-sm">
                   {creditLedger.map((entry) => (
                     <tr key={entry.id} className="border-b border-slate-100">
-                      <td className="py-3 text-slate-600">{formatDate(entry.created_at)}</td>
-                      <td className="py-3 text-slate-900">{entry.reason || 'Credit transaction'}</td>
-                      <td className={`py-3 text-right font-medium ${entry.change_amount >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {entry.change_amount >= 0 ? '+' : ''}{entry.change_amount}
+                      <td className="py-3 text-slate-600">
+                        {formatDate(entry.created_at)}
                       </td>
-                      <td className="py-3 text-right text-slate-900">{entry.balance_after}</td>
+                      <td className="py-3 text-slate-900">
+                        {entry.reason || "Credit transaction"}
+                      </td>
+                      <td
+                        className={`py-3 text-right font-medium ${entry.change_amount >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                      >
+                        {entry.change_amount >= 0 ? "+" : ""}
+                        {entry.change_amount}
+                      </td>
+                      <td className="py-3 text-right text-slate-900">
+                        {entry.balance_after}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="text-center text-slate-500 py-4">No credit transactions yet.</p>
+            <p className="text-center text-slate-500 py-4">
+              No credit transactions yet.
+            </p>
           )}
         </CardContent>
       </Card>

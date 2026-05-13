@@ -167,7 +167,7 @@ export default async function CreditsPage() {
           Credits & Packages
         </h1>
         <p className="text-slate-600">
-          Manage your tutoring credits and explore programs
+          Manage your coaching credits and explore programs
         </p>
       </div>
 
@@ -411,8 +411,8 @@ export default async function CreditsPage() {
             </h3>
             <p className="text-slate-600 mt-2 max-w-md mx-auto">
               Premium programs with specialized guides are available based on
-              eligibility assessments. Ask your tutor to complete an eligibility
-              assessment to unlock these programs.
+              eligibility assessments. Ask your math coach to complete an
+              eligibility assessment to unlock these programs.
             </p>
           </CardContent>
         </Card>

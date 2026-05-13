@@ -130,7 +130,7 @@ export default async function ParentDashboardPage() {
             </h1>
             <p className="text-blue-100 mt-1">
               Here&apos;s what&apos;s happening with your family&apos;s
-              tutoring.
+              coaching.
             </p>
           </div>
           <Link

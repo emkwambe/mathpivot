@@ -145,7 +145,7 @@ export default async function BookPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Book a Session</h1>
           <p className="text-slate-600">
-            Schedule a tutoring session for your student
+            Schedule a coaching session for your student
           </p>
         </div>
         <div className="text-right">
@@ -239,7 +239,7 @@ export default async function BookPage() {
                 </svg>
               </div>
               <p className="text-slate-500">
-                No tutors are currently available
+                No coaches are currently available
               </p>
               <p className="text-sm text-slate-400 mt-1">
                 Please check back later

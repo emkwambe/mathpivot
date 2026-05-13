@@ -370,7 +370,7 @@ export default async function StudentDashboardPage() {
                 </svg>
                 <p className="text-slate-500">No skills tracked yet</p>
                 <p className="text-sm text-slate-400 mt-1">
-                  Your tutor will track your progress
+                  Your math coach will track your progress
                 </p>
               </div>
             )}

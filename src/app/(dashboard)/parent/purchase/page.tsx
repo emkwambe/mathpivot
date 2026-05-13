@@ -1,7 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '@/components/ui';
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Button,
+  Badge,
+} from "@/components/ui";
 
 interface Product {
   id: string;
@@ -25,8 +32,8 @@ export default function PurchasePage() {
       try {
         // Fetch products and family info
         const [productsRes, familyRes] = await Promise.all([
-          fetch('/api/products'),
-          fetch('/api/family'),
+          fetch("/api/products"),
+          fetch("/api/family"),
         ]);
 
         if (productsRes.ok) {
@@ -39,8 +46,8 @@ export default function PurchasePage() {
           setFamilyId(data.familyId);
         }
       } catch (err) {
-        console.error('Failed to load data:', err);
-        setError('Failed to load products');
+        console.error("Failed to load data:", err);
+        setError("Failed to load products");
       } finally {
         setLoading(false);
       }
@@ -51,7 +58,7 @@ export default function PurchasePage() {
 
   async function handlePurchase(productId: string) {
     if (!familyId) {
-      setError('Family not found');
+      setError("Family not found");
       return;
     }
 
@@ -59,16 +66,16 @@ export default function PurchasePage() {
     setError(null);
 
     try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, familyId }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Checkout failed');
+        throw new Error(data.error || "Checkout failed");
       }
 
       // Redirect to Stripe Checkout
@@ -76,7 +83,7 @@ export default function PurchasePage() {
         window.location.href = data.url;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Purchase failed');
+      setError(err instanceof Error ? err.message : "Purchase failed");
       setPurchasing(null);
     }
   }
@@ -89,14 +96,14 @@ export default function PurchasePage() {
     );
   }
 
-  const packages = products.filter((p) => p.product_type === 'package');
+  const packages = products.filter((p) => p.product_type === "package");
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Purchase Credits</h1>
         <p className="text-gray-600 mt-2">
-          Choose a credit package to book tutoring sessions for your students.
+          Choose a credit package to book coaching sessions for your students.
         </p>
       </div>
 
@@ -114,7 +121,7 @@ export default function PurchasePage() {
           return (
             <Card
               key={product.id}
-              className={isPopular ? 'border-blue-500 border-2 relative' : ''}
+              className={isPopular ? "border-blue-500 border-2 relative" : ""}
             >
               {isPopular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -132,9 +139,7 @@ export default function PurchasePage() {
                   <div className="text-4xl font-bold">
                     ${(product.price_cents / 100).toFixed(0)}
                   </div>
-                  <div className="text-gray-500">
-                    {product.credits} credits
-                  </div>
+                  <div className="text-gray-500">{product.credits} credits</div>
                   <div className="text-sm text-gray-400">
                     ${pricePerCredit.toFixed(2)} per session
                   </div>
@@ -195,13 +200,13 @@ export default function PurchasePage() {
                   onClick={() => handlePurchase(product.id)}
                   disabled={purchasing !== null || !product.stripe_price_id}
                   className="w-full"
-                  variant={isPopular ? 'default' : 'outline'}
+                  variant={isPopular ? "default" : "outline"}
                 >
                   {purchasing === product.id
-                    ? 'Processing...'
+                    ? "Processing..."
                     : !product.stripe_price_id
-                      ? 'Coming Soon'
-                      : 'Buy Now'}
+                      ? "Coming Soon"
+                      : "Buy Now"}
                 </Button>
               </CardContent>
             </Card>
