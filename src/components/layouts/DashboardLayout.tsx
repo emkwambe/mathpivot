@@ -1097,7 +1097,7 @@ const studentNavItems: NavItem[] = [
     ),
   },
   {
-    label: "Math Coach",
+    label: "AI Math Tutor",
     href: "/student/ai-tutor",
     icon: (
       <svg
@@ -1209,7 +1209,7 @@ export function DashboardLayout({ user, children }: DashboardLayoutProps) {
                   {user.fullName}
                 </p>
                 <p className="text-xs text-slate-500 capitalize">
-                  {user.role === "tutor" ? "Coach" : user.role}
+                  {user.role === "tutor" ? "Math Coach" : user.role}
                 </p>
               </div>
               <form action={logoutAction}>
