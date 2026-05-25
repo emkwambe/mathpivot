@@ -488,6 +488,116 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Summer Clinics */}
+      <section className="py-20 px-4 bg-slate-900 text-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
+                />
+              </svg>
+              Summer 2026 — Spots Closing Soon
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold">
+              Summer Math Clinics
+            </h2>
+            <p className="mt-4 text-slate-400 max-w-2xl mx-auto">
+              Intensive 8–11 day clinics targeting the most heavily tested EOG
+              and EOC topics. Your child walks into the next school year
+              prepared — not catching up.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                name: "Propel Math 7",
+                price: "$249",
+                days: "8 days",
+                focus: "Ratios & Proportional Relationships",
+                weight: "24–28% of Grade 7 EOG",
+                color: "blue",
+              },
+              {
+                name: "Advantage Math 8",
+                price: "$399",
+                days: "9 days",
+                focus: "Functions & Relations",
+                weight: "28–32% of Grade 8 EOG",
+                color: "purple",
+              },
+              {
+                name: "Ignite Math 1",
+                price: "$349",
+                days: "10 days",
+                focus: "Algebra + Functions",
+                weight: "68–76% of Math 1 EOC",
+                color: "amber",
+                featured: true,
+              },
+              {
+                name: "Ascent Pre-Calc",
+                price: "$449",
+                days: "11 days",
+                focus: "Functions, Trig, Pre-Calc",
+                weight: "College & SAT readiness",
+                color: "emerald",
+              },
+            ].map((clinic) => (
+              <div
+                key={clinic.name}
+                className={`rounded-2xl border p-5 ${
+                  clinic.featured
+                    ? "border-amber-400/50 bg-amber-400/10"
+                    : "border-white/10 bg-white/5"
+                }`}
+              >
+                <p className="text-sm font-bold text-white">{clinic.name}</p>
+                <div className="flex items-end gap-1.5 mt-2">
+                  <span className="text-2xl font-bold">{clinic.price}</span>
+                  <span className="text-xs text-slate-400 pb-0.5">
+                    / {clinic.days}
+                  </span>
+                </div>
+                <p className="text-xs text-blue-300 mt-3 font-medium">
+                  {clinic.focus}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">{clinic.weight}</p>
+                {clinic.featured && (
+                  <span className="inline-block mt-3 text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">
+                    Most Popular
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center space-y-3">
+            <p className="text-sm text-emerald-300">
+              100% of the clinic fee is credited if you enroll in coaching
+              within 14 days.
+            </p>
+            <Link
+              href="/summer"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white font-medium px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors text-base"
+            >
+              Join the Summer Waitlist
+              <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* For Coaches */}
       <section id="coaches" className="py-20 px-4 bg-emerald-50">
         <div className="max-w-5xl mx-auto">
