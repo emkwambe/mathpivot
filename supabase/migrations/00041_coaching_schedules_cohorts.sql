@@ -64,13 +64,22 @@ CREATE TABLE IF NOT EXISTS diagnostic_assessments (
 
 -- Lead status tracking (extends existing leads table)
 DO $$ BEGIN
-  ALTER TABLE leads
-    ADD COLUMN lead_status TEXT DEFAULT 'new' CHECK (lead_status IN ('new','contacted','diagnostic_scheduled','diagnostic_complete','enrolled','declined','waitlisted')),
-    ADD COLUMN assigned_to UUID REFERENCES auth.users(id),
-    ADD COLUMN contacted_at TIMESTAMPTZ,
-    ADD COLUMN diagnostic_id UUID REFERENCES diagnostic_assessments(id),
-    ADD COLUMN cohort_id UUID REFERENCES coaching_schedules(id),
-    ADD COLUMN follow_up_at TIMESTAMPTZ;
+  ALTER TABLE leads ADD COLUMN lead_status TEXT DEFAULT 'new';
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE leads ADD COLUMN assigned_to UUID;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE leads ADD COLUMN contacted_at TIMESTAMPTZ;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER TABLE leads ADD COLUMN follow_up_at TIMESTAMPTZ;
 EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 
@@ -82,7 +91,10 @@ CREATE INDEX IF NOT EXISTS idx_cohort_schedule ON cohort_enrollments(schedule_id
 CREATE INDEX IF NOT EXISTS idx_cohort_student ON cohort_enrollments(student_id);
 CREATE INDEX IF NOT EXISTS idx_cohort_status ON cohort_enrollments(status) WHERE status IN ('waitlisted','confirmed','active');
 CREATE INDEX IF NOT EXISTS idx_diagnostic_student ON diagnostic_assessments(student_id);
-CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(lead_status) WHERE lead_status NOT IN ('enrolled','declined');
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(lead_status);
+EXCEPTION WHEN undefined_column THEN NULL;
+END $$;
 
 -- RLS
 ALTER TABLE coaching_schedules ENABLE ROW LEVEL SECURITY;
