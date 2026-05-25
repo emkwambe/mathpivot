@@ -71,6 +71,12 @@ export default function LandingPage() {
               >
                 For Coaches
               </a>
+              <Link
+                href="/summer"
+                className="text-sm font-semibold text-orange-500 hover:text-orange-600"
+              >
+                Summer Programs
+              </Link>
             </div>
 
             <div className="hidden md:flex items-center gap-3">

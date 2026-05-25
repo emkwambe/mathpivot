@@ -66,272 +66,296 @@ export default function SummerProgramsPage() {
   const [state, formAction, isPending] = useActionState(captureLeadAction, {});
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      <section className="relative overflow-hidden px-6 py-16 md:px-10 lg:px-20 bg-gradient-to-br from-blue-50 via-white to-orange-50/30">
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <div className="mb-3">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 text-sm"
-              >
-                <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">M</span>
-                </div>
+    <div className="min-h-screen bg-white">
+      {/* Hero */}
+      <section className="relative overflow-hidden px-6 pt-12 pb-20 md:px-10 lg:px-20">
+        <div className="absolute inset-0 bg-[#F8FAFC]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/40 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-orange-100/30 rounded-full blur-[100px]" />
+
+        <div className="relative mx-auto max-w-7xl">
+          {/* Nav */}
+          <div className="flex items-center justify-between mb-16">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">M</span>
+              </div>
+              <span className="font-bold text-slate-800 text-lg">
                 MathPivot
-              </Link>
-            </div>
-
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-50 px-4 py-2 text-sm text-orange-800 font-medium">
-              <Sparkles className="h-4 w-4 text-orange-500" /> Summer 2026 Math
-              Clinics
-            </div>
-
-            <h1 className="max-w-3xl text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl text-slate-900">
-              Focused summer math prep that turns weak spots into{" "}
-              <span className="text-blue-600">momentum.</span>
-            </h1>
-
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-              MathPivot summer clinics target the highest-impact math areas
-              students face on EOG, EOC, and advanced-course readiness pathways.
-            </p>
-
-            <div className="mt-5 inline-flex items-center gap-2 rounded-lg bg-orange-50 border border-orange-200 px-4 py-2.5">
-              <AlertTriangle className="h-4 w-4 text-orange-500" />
-              <span className="text-sm text-orange-800">
-                <strong>Spots closing soon.</strong> Small groups of 6-8
-                students only.
               </span>
-            </div>
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-                <TrendingUp className="mb-3 h-5 w-5 text-blue-600" />
-                <p className="text-sm font-semibold text-slate-900">
-                  High-impact topics
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Built around the most heavily tested EOG/EOC domains.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-                <Clock className="mb-3 h-5 w-5 text-blue-600" />
-                <p className="text-sm font-semibold text-slate-900">
-                  8–11 day clinics
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Short, focused, easier to commit to than a full program.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-orange-200 bg-orange-50/50 p-4">
-                <ShieldCheck className="mb-3 h-5 w-5 text-orange-500" />
-                <p className="text-sm font-semibold text-slate-900">
-                  100% fee credit
-                </p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Clinic fee credits toward year-round coaching within 14 days.
-                </p>
-              </div>
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/pricing"
+                className="text-sm text-slate-600 hover:text-slate-900"
+              >
+                Year-Round Programs
+              </Link>
+              <Link
+                href="/login"
+                className="text-sm text-slate-600 hover:text-slate-900"
+              >
+                Sign In
+              </Link>
+              <a
+                href="#waitlist"
+                className="text-sm font-semibold bg-orange-500 text-white px-5 py-2.5 rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
+              >
+                Join Waitlist
+              </a>
             </div>
           </div>
 
-          <div>
-            <div className="rounded-3xl border border-blue-200 bg-white shadow-xl shadow-blue-600/5">
-              <div className="p-6 md:p-8">
-                {state.success ? (
-                  <div className="py-12 text-center">
-                    <CheckCircle2 className="mx-auto h-16 w-16 text-emerald-500" />
-                    <h2 className="mt-5 text-3xl font-bold text-slate-900">
-                      You&apos;re on the list!
-                    </h2>
-                    <p className="mt-3 text-slate-600">
-                      We&apos;ll follow up within 48 hours with schedule
-                      details, placement guidance, and next steps.
-                    </p>
-                    <Link
-                      href="/"
-                      className="mt-6 inline-block text-blue-600 hover:text-blue-800 font-medium text-sm"
-                    >
-                      Back to Home
-                    </Link>
-                  </div>
-                ) : (
-                  <form action={formAction} className="space-y-5">
-                    <input
-                      type="hidden"
-                      name="source"
-                      value="summer_clinic_waitlist"
-                    />
+          <div className="grid items-start gap-14 lg:grid-cols-[1.1fr_0.9fr]">
+            {/* Left — copy */}
+            <div className="pt-4">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-orange-50 border border-orange-200 px-4 py-2 text-sm text-orange-700 font-medium">
+                <Sparkles className="h-4 w-4 text-orange-500" />
+                Summer 2026 Math Clinics
+              </div>
 
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                        Join the waitlist
-                      </p>
-                      <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                        Save your child&apos;s spot
+              <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-[3.5rem] leading-[1.1] text-slate-800">
+                Focused summer math prep that turns weak spots into{" "}
+                <span className="text-blue-700">momentum.</span>
+              </h1>
+
+              <p className="mt-6 text-lg leading-8 text-slate-600 max-w-xl">
+                Intensive clinics targeting the most heavily tested EOG and EOC
+                math domains. Named math coach. Mastery tracking from day one.
+              </p>
+
+              <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-orange-50 border border-orange-200 px-4 py-2.5">
+                <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                <span className="text-sm text-orange-800">
+                  <strong>Spots closing soon.</strong> Limited to 6–8 students
+                  per clinic.
+                </span>
+              </div>
+
+              <div className="mt-10 grid gap-5 sm:grid-cols-3">
+                <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                  <TrendingUp className="mb-3 h-5 w-5 text-blue-700" />
+                  <p className="text-sm font-semibold text-slate-800">
+                    High-impact topics
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Built around heavily tested EOG/EOC domains.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                  <Clock className="mb-3 h-5 w-5 text-blue-700" />
+                  <p className="text-sm font-semibold text-slate-800">
+                    8–11 day clinics
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Short, focused, easier to commit to.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                  <ShieldCheck className="mb-3 h-5 w-5 text-orange-500" />
+                  <p className="text-sm font-semibold text-slate-800">
+                    100% fee credit
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Credited toward coaching within 14 days.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right — waitlist form */}
+            <div id="waitlist" className="scroll-mt-8">
+              <div className="rounded-2xl bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-100">
+                <div className="p-7 md:p-9">
+                  {state.success ? (
+                    <div className="py-14 text-center">
+                      <CheckCircle2 className="mx-auto h-16 w-16 text-emerald-500" />
+                      <h2 className="mt-5 text-2xl font-bold text-slate-800">
+                        You&apos;re on the list!
                       </h2>
-                      <p className="mt-2 text-slate-500 text-sm">
+                      <p className="mt-3 text-slate-500">
                         We&apos;ll follow up within 48 hours with schedule
                         details and placement guidance.
                       </p>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <input
-                        name="parentName"
-                        required
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                        placeholder="Parent name *"
-                      />
-                      <input
-                        name="parentEmail"
-                        type="email"
-                        required
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                        placeholder="Email address *"
-                      />
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <input
-                        name="parentPhone"
-                        type="tel"
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                        placeholder="Phone number"
-                      />
-                      <select
-                        name="studentGrade"
-                        required
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                      <Link
+                        href="/"
+                        className="mt-6 inline-block text-blue-700 hover:text-blue-800 font-medium text-sm"
                       >
-                        <option value="">Student grade *</option>
-                        {[5, 6, 7, 8, 9, 10, 11].map((g) => (
-                          <option key={g} value={g}>
-                            Grade {g}
-                          </option>
-                        ))}
-                      </select>
+                        Back to Home
+                      </Link>
                     </div>
+                  ) : (
+                    <form action={formAction} className="space-y-5">
+                      <input
+                        type="hidden"
+                        name="source"
+                        value="summer_clinic_waitlist"
+                      />
 
-                    <input
-                      name="studentName"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                      placeholder="Student name"
-                    />
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+                          Join the waitlist
+                        </p>
+                        <h2 className="mt-2 text-2xl font-bold text-slate-800">
+                          Save your child&apos;s spot
+                        </h2>
+                        <p className="mt-1.5 text-slate-500 text-sm">
+                          48-hour follow-up with schedule and placement
+                          guidance.
+                        </p>
+                      </div>
 
-                    <div>
-                      <p className="text-sm font-medium text-slate-700 mb-2">
-                        Which clinic? *
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input
+                          name="parentName"
+                          required
+                          placeholder="Parent name *"
+                          className="rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10 transition-all"
+                        />
+                        <input
+                          name="parentEmail"
+                          type="email"
+                          required
+                          placeholder="Email *"
+                          className="rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10 transition-all"
+                        />
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input
+                          name="parentPhone"
+                          type="tel"
+                          placeholder="Phone"
+                          className="rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10 transition-all"
+                        />
+                        <select
+                          name="studentGrade"
+                          required
+                          className="rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-700 text-slate-700"
+                        >
+                          <option value="">Student grade *</option>
+                          {[5, 6, 7, 8, 9, 10, 11].map((g) => (
+                            <option key={g} value={g}>
+                              Grade {g}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <input
+                        name="studentName"
+                        placeholder="Student name"
+                        className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10 transition-all"
+                      />
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-700 mb-2">
+                          Which clinic? *
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {programs.map((p) => (
+                            <label
+                              key={p.slug}
+                              className="flex items-start gap-2.5 text-sm border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer hover:border-blue-300 has-[:checked]:border-blue-700 has-[:checked]:bg-blue-50/50 transition-all"
+                            >
+                              <input
+                                type="checkbox"
+                                name="subjectsInterested"
+                                value={p.name}
+                                className="rounded text-blue-700 mt-0.5"
+                              />
+                              <span>
+                                <span className="font-medium text-slate-800 block leading-tight">
+                                  {p.name}
+                                </span>
+                                <span className="text-xs text-slate-400">
+                                  {p.audience}
+                                </span>
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      <textarea
+                        name="goals"
+                        rows={2}
+                        placeholder="Anything we should know about your student's math goals?"
+                        className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10 transition-all"
+                      />
+
+                      {state.error && (
+                        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3">
+                          <p className="text-sm text-red-700">{state.error}</p>
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={isPending}
+                        className="w-full rounded-lg bg-orange-500 py-3.5 text-base font-semibold text-white hover:bg-orange-600 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        {isPending ? "Joining..." : "Join the Summer Waitlist"}
+                        {!isPending && <ArrowRight className="h-5 w-5" />}
+                      </button>
+
+                      <p className="text-[11px] text-slate-400 text-center">
+                        No payment required. First-come, first-served.
                       </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {programs.map((p) => (
-                          <label
-                            key={p.slug}
-                            className="flex items-center gap-2 text-sm border border-slate-200 rounded-xl px-3 py-2.5 cursor-pointer hover:bg-blue-50 hover:border-blue-300 has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400 transition-all"
-                          >
-                            <input
-                              type="checkbox"
-                              name="subjectsInterested"
-                              value={p.name}
-                              className="rounded text-blue-600"
-                            />
-                            <span>
-                              <span className="font-medium block text-slate-900">
-                                {p.name}
-                              </span>
-                              <span className="text-xs text-slate-400">
-                                {p.audience}
-                              </span>
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <textarea
-                      name="goals"
-                      rows={2}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
-                      placeholder="What should we know about your student's math goals?"
-                    />
-
-                    <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800">
-                      <strong>100% credit promise:</strong> Enroll in coaching
-                      within 14 days after the clinic and your clinic fee is
-                      fully credited.
-                    </div>
-
-                    {state.error && (
-                      <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
-                        <p className="text-sm text-red-700">{state.error}</p>
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={isPending}
-                      className="w-full rounded-xl bg-blue-600 py-4 text-base font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25"
-                    >
-                      {isPending ? "Joining..." : "Join the Summer Waitlist"}
-                      {!isPending && <ArrowRight className="h-5 w-5" />}
-                    </button>
-
-                    <p className="text-[11px] text-slate-400 text-center">
-                      No payment required. Spots held first-come, first-served.
-                    </p>
-                  </form>
-                )}
+                    </form>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-16 md:px-10 lg:px-20 bg-white">
+      {/* Clinic Cards */}
+      <section className="px-6 py-24 md:px-10 lg:px-20 bg-white">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                Choose a clinic
-              </p>
-              <h2 className="mt-2 text-3xl font-bold md:text-4xl text-slate-900">
-                Four focused paths. One clear goal.
-              </h2>
-            </div>
-            <p className="max-w-xl text-slate-500">
+          <div className="mb-12 max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-widest text-blue-700 mb-2">
+              Choose a clinic
+            </p>
+            <h2 className="text-3xl font-bold text-slate-800 md:text-4xl">
+              Four focused paths. One clear goal: stronger readiness.
+            </h2>
+            <p className="mt-4 text-slate-500">
               Each clinic is priced below a full month of coaching, then
-              credited back if your family continues into MathPivot coaching.
+              credited back if your family continues into year-round coaching.
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {programs.map((program) => (
               <div
                 key={program.name}
-                className={`relative rounded-2xl border-2 p-6 ${
+                className={`relative rounded-2xl p-6 transition-shadow hover:shadow-lg ${
                   program.featured
-                    ? "border-orange-300 bg-orange-50/30 ring-1 ring-orange-200"
-                    : "border-slate-200 bg-white"
+                    ? "bg-white shadow-[0_4px_24px_rgba(0,0,0,0.08)] ring-2 ring-orange-400"
+                    : "bg-[#F8FAFC] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                 }`}
               >
                 {program.featured && (
-                  <div className="absolute right-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white">
-                    Popular
+                  <div className="absolute -top-3 right-5">
+                    <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                      Popular
+                    </span>
                   </div>
                 )}
 
-                <GraduationCap className="mb-4 h-7 w-7 text-blue-600" />
-                <h3 className="text-xl font-bold text-slate-900">
+                <GraduationCap className="mb-4 h-7 w-7 text-blue-700" />
+                <h3 className="text-xl font-bold text-slate-800">
                   {program.name}
                 </h3>
-                <p className="mt-0.5 text-xs text-blue-600 font-medium">
+                <p className="mt-0.5 text-xs font-semibold text-blue-700">
                   {program.audience}
                 </p>
                 <p className="mt-2 text-sm text-slate-500">{program.pitch}</p>
 
-                <div className="mt-5 flex items-end gap-2">
-                  <span className="text-3xl font-bold text-slate-900">
+                <div className="mt-5 flex items-end gap-1.5">
+                  <span className="text-3xl font-bold text-slate-800">
                     {program.price}
                   </span>
                   <span className="pb-0.5 text-slate-400 text-sm">
@@ -341,14 +365,14 @@ export default function SummerProgramsPage() {
 
                 <div className="mt-5 space-y-3 text-sm">
                   <p className="text-slate-600">
-                    <strong className="text-slate-900">Focus:</strong>{" "}
+                    <strong className="text-slate-800">Focus:</strong>{" "}
                     {program.focus}
                   </p>
                   <p className="text-slate-600">
-                    <strong className="text-slate-900">Test impact:</strong>{" "}
+                    <strong className="text-slate-800">Test impact:</strong>{" "}
                     {program.weight}
                   </p>
-                  <p className="rounded-xl bg-blue-50 border border-blue-100 p-3 text-blue-700 text-xs">
+                  <p className="rounded-lg bg-blue-50 p-3 text-blue-800 text-xs font-medium">
                     {program.creditExample}
                   </p>
                 </div>
@@ -358,42 +382,66 @@ export default function SummerProgramsPage() {
         </div>
       </section>
 
-      <section className="px-6 py-16 md:px-10 lg:px-20 bg-slate-50">
-        <div className="mx-auto max-w-5xl rounded-2xl border border-blue-200 bg-white p-8 md:p-10">
-          <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-orange-500">
-                Parent-friendly pricing
-              </p>
-              <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                The clinic is a low-risk starting point.
-              </h2>
-            </div>
-            <div className="space-y-4 text-slate-600">
-              <p>
-                Summer clinics are priced 30–55% below a typical month of
-                coaching.
-              </p>
-              <p>
-                Then MathPivot makes the decision easier:{" "}
-                <strong className="text-slate-900">
-                  100% of the clinic fee is credited toward coaching enrollment
-                  within 14 days.
-                </strong>
-              </p>
-              <p className="rounded-xl bg-orange-50 border border-orange-200 p-4 text-orange-800">
-                Example: $249 Propel Math 7 → credited toward $349/mo Foundation
-                = net $100 for your first month.
-              </p>
+      {/* Pricing Logic */}
+      <section className="px-6 py-24 md:px-10 lg:px-20 bg-[#F8FAFC]">
+        <div className="mx-auto max-w-5xl">
+          <div className="rounded-2xl bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-10 md:p-14">
+            <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-widest text-orange-500 mb-2">
+                  Parent-friendly pricing
+                </p>
+                <h2 className="text-3xl font-bold text-slate-800">
+                  The clinic is a low-risk starting point.
+                </h2>
+              </div>
+              <div className="space-y-4 text-slate-600">
+                <p>
+                  Summer clinics are priced 30–55% below a typical month of
+                  year-round coaching.
+                </p>
+                <p>
+                  Then MathPivot makes the decision easier:{" "}
+                  <strong className="text-slate-800">
+                    100% of the clinic fee is credited toward coaching
+                    enrollment within 14 days.
+                  </strong>
+                </p>
+                <div className="rounded-xl bg-orange-50 border border-orange-200 p-5">
+                  <p className="text-orange-800 font-medium">
+                    Example: $249 Propel Math 7 → credited toward $349/mo
+                    Foundation = net $100 for your first month.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="bg-slate-900 text-slate-400 py-10 px-6">
+      {/* Final CTA */}
+      <section className="px-6 py-20 md:px-10 lg:px-20 bg-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-slate-800">
+            Ready to prepare your child for the next school year?
+          </h2>
+          <p className="mt-4 text-slate-500">
+            Spots are limited. Join the waitlist today — no payment required.
+          </p>
+          <a
+            href="#waitlist"
+            className="mt-8 inline-flex items-center gap-2 bg-orange-500 text-white font-semibold px-8 py-4 rounded-xl hover:bg-orange-600 transition-colors shadow-sm text-lg"
+          >
+            Join the Summer Waitlist
+            <ArrowRight className="h-5 w-5" />
+          </a>
+        </div>
+      </section>
+
+      <footer className="bg-slate-800 text-slate-400 py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+            <div className="w-6 h-6 bg-blue-700 rounded flex items-center justify-center">
               <span className="text-white font-bold text-xs">M</span>
             </div>
             <span className="text-sm text-slate-500">MathPivot</span>
