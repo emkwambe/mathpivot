@@ -494,23 +494,22 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="text-xs font-semibold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
-                For Coaches
+                For Math Coaches
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mt-4">
-                Earn $3,500–$5,000/month coaching math
+                You could earn up to $5,000/month coaching math
               </h2>
               <p className="mt-4 text-slate-600 leading-relaxed">
-                Not hourly scrambling. Stable monthly income from a portfolio of
-                students who stay with you for years. You&apos;re a professional
-                mentor, not a homework helper.
+                Not hourly scrambling. A stable portfolio of students who stay
+                with you for years. Professional tools, structured curriculum,
+                and the recognition you deserve.
               </p>
               <div className="mt-8 space-y-3">
                 {[
-                  "60% revenue share — you earn the majority",
-                  "Max 15 students — quality over quantity",
-                  "System-generated curriculum — less prep time",
-                  "Performance dashboard — track your impact",
-                  "Professional identity — you're a MathPivot Coach",
+                  "Named math coach — students know you by name",
+                  "Stable monthly income from your student portfolio",
+                  "All tools provided — prep briefs, mastery tracking, parent reports",
+                  "Professional development and certification pathway",
                 ].map((point) => (
                   <div key={point} className="flex items-center gap-3">
                     <Check size={16} className="text-emerald-600" />
@@ -522,55 +521,45 @@ export default function LandingPage() {
                 href="/careers"
                 className="mt-8 inline-flex items-center gap-2 bg-emerald-600 text-white font-medium px-6 py-3 rounded-xl hover:bg-emerald-700 transition-colors"
               >
-                Apply as a Coach
+                Learn More &amp; Apply
                 <ArrowRight size={16} />
               </Link>
             </div>
 
             <div className="bg-white rounded-2xl border border-emerald-200 p-8">
-              <h3 className="font-semibold text-slate-900 mb-6">
-                Coach Earnings Calculator
+              <h3 className="font-semibold text-slate-900 mb-2">
+                Why coaches choose MathPivot
               </h3>
+              <p className="text-sm text-slate-500 mb-6">
+                Everything you need to run a professional coaching practice.
+              </p>
               <div className="space-y-4">
                 {[
                   {
-                    students: 5,
-                    avg: 349,
-                    monthly: "$1,047",
-                    label: "Getting started",
+                    title: "Your students, your portfolio",
+                    desc: "3-15 students who stay with you long-term. No random assignments.",
                   },
                   {
-                    students: 10,
-                    avg: 449,
-                    monthly: "$2,694",
-                    label: "Part-time income",
+                    title: "Structured 60-minute sessions",
+                    desc: "Pre-built prep briefs, session templates, and mastery tracking.",
                   },
                   {
-                    students: 12,
-                    avg: 499,
-                    monthly: "$3,593",
-                    label: "Full portfolio",
+                    title: "Competitive compensation",
+                    desc: "Earn based on your portfolio size and program mix. Details on the careers page.",
                   },
-                ].map((tier) => (
-                  <div
-                    key={tier.students}
-                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">
-                        {tier.students} students x ${tier.avg}/mo avg
-                      </p>
-                      <p className="text-xs text-slate-500">{tier.label}</p>
-                    </div>
-                    <p className="text-lg font-bold text-emerald-600">
-                      {tier.monthly}
+                  {
+                    title: "Career growth",
+                    desc: "Certifications, performance dashboards, and a path to lead coach roles.",
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="p-3 bg-slate-50 rounded-lg">
+                    <p className="text-sm font-medium text-slate-900">
+                      {item.title}
                     </p>
+                    <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-slate-400 mt-4 text-center">
-                At 60% revenue share. Coaches keep the majority.
-              </p>
             </div>
           </div>
         </div>
