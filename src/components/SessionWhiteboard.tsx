@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 interface SessionWhiteboardProps {
   sessionId: string;
@@ -8,127 +8,142 @@ interface SessionWhiteboardProps {
   readonly?: boolean;
 }
 
-/**
- * Session Whiteboard - Math Whiteboard Integration
- *
- * Uses mathwhiteboard.com for collaborative math tutoring.
- * Features: handwriting recognition, graphing, LaTeX support.
- *
- * Note: Use alongside video call (Zoom/Meet) for voice communication.
- */
-export function SessionWhiteboard({ sessionId, studentName, readonly = false }: SessionWhiteboardProps) {
-  const [showDesmos, setShowDesmos] = useState(false);
+export function SessionWhiteboard({
+  sessionId,
+  studentName,
+  readonly = false,
+}: SessionWhiteboardProps) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"whiteboard" | "calculator">(
+    "whiteboard",
+  );
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const openWhiteboard = () => {
-    window.open('https://mathwhiteboard.com', '_blank', 'noopener,noreferrer');
-  };
+  const whiteboardUrl = "https://mathwhiteboard.com";
+  const desmosUrl = "https://www.desmos.com/calculator";
 
   return (
-    <div className="w-full space-y-4">
-      {/* Main Whiteboard Section */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6">
-        <div className="flex flex-col items-center justify-center py-8 space-y-6">
-          {/* Icon */}
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
+    <div
+      className={`rounded-xl border border-slate-200 overflow-hidden bg-white ${
+        isFullscreen ? "fixed inset-0 z-50 rounded-none border-0" : ""
+      }`}
+    >
+      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setActiveTab("whiteboard")}
+            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === "whiteboard"
+                ? "bg-blue-700 text-white"
+                : "text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            Whiteboard
+          </button>
+          <button
+            onClick={() => setActiveTab("calculator")}
+            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+              activeTab === "calculator"
+                ? "bg-green-600 text-white"
+                : "text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            Graphing Calculator
+          </button>
+        </div>
 
-          {/* Title & Description */}
-          <div className="text-center max-w-md">
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Math Whiteboard
-            </h3>
-            <p className="text-slate-600 text-sm">
-              Collaborative whiteboard with handwriting recognition, graphing calculator,
-              and LaTeX equation support. Perfect for math tutoring sessions.
-            </p>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-lg">
-            <FeatureBadge icon="✍️" label="Handwriting" />
-            <FeatureBadge icon="📈" label="Graphing" />
-            <FeatureBadge icon="∑" label="LaTeX" />
-            <FeatureBadge icon="📄" label="PDF Import" />
-          </div>
-
-          {/* Action Buttons */}
-          {!readonly && (
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={openWhiteboard}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                Open Whiteboard {studentName ? `with ${studentName}` : ''}
-              </button>
-
-              <button
-                onClick={() => setShowDesmos(!showDesmos)}
-                className={`inline-flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg transition-all ${
-                  showDesmos
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                </svg>
-                {showDesmos ? 'Hide Calculator' : 'Desmos Calculator'}
-              </button>
-            </div>
+        <div className="flex items-center gap-2">
+          {studentName && (
+            <span className="text-xs text-slate-400">
+              Session with {studentName}
+            </span>
           )}
-
-          {/* Instructions */}
-          <div className="text-center">
-            <p className="text-xs text-slate-500">
-              Tip: Share the whiteboard URL with your student. Use Zoom/Meet for voice communication.
-            </p>
-          </div>
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                />
+              </svg>
+            )}
+          </button>
+          <a
+            href={activeTab === "whiteboard" ? whiteboardUrl : desmosUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+            title="Open in new window"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </a>
         </div>
       </div>
 
-      {/* Desmos Calculator (toggleable) */}
-      {showDesmos && (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-              </svg>
-              <span className="font-medium text-slate-700">Desmos Graphing Calculator</span>
+      <div className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-2 border-blue-700 border-t-transparent rounded-full animate-spin" />
+              <p className="text-sm text-slate-500">
+                Loading{" "}
+                {activeTab === "whiteboard" ? "whiteboard" : "calculator"}...
+              </p>
             </div>
-            <button
-              onClick={() => setShowDesmos(false)}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
-          <iframe
-            src="https://www.desmos.com/calculator"
-            className="w-full h-[450px]"
-            title="Desmos Graphing Calculator"
-            allow="clipboard-write"
-            loading="lazy"
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
 
-function FeatureBadge({ icon, label }: { icon: string; label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-1 p-3 bg-slate-50 rounded-lg">
-      <span className="text-xl">{icon}</span>
-      <span className="text-xs text-slate-600 font-medium">{label}</span>
+        <iframe
+          key={activeTab}
+          src={activeTab === "whiteboard" ? whiteboardUrl : desmosUrl}
+          className={`w-full border-0 ${isFullscreen ? "h-[calc(100vh-45px)]" : "h-[600px]"}`}
+          onLoad={() => setIsLoading(false)}
+          allow="clipboard-write"
+          title={
+            activeTab === "whiteboard"
+              ? "Math Whiteboard"
+              : "Desmos Graphing Calculator"
+          }
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+        />
+      </div>
     </div>
   );
 }
