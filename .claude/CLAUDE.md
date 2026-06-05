@@ -1,50 +1,67 @@
 # MathPivot
 
+## Strategic Directive
+
+**Read `docs/infrastructure-directive.md` before any work.** Every feature, recommendation, and decision must pass the 7-layer infrastructure test defined there. MathPivot is not a tutoring business — it is a coaching infrastructure company.
+
 ## Overview
 
-MathPivot is a structured math coaching platform — "the travel ball of math." Named coaches, mastery tracking, Mathathlon competitions, and career exposure. Built with Next.js 16 and Supabase.
+MathPivot builds the infrastructure that enables excellent math coaches to consistently produce strong student outcomes at scale. Named coaches, mastery tracking, Mathathlon competitions, career exposure, diagnostic-driven placement, and a licensable coaching method.
 
-**Important:** This is NOT a tutoring platform. Coaches are not tutors. We sell structured programs (Foundation $349/mo, Acceleration $549/mo, Elite $799/mo), not hourly sessions. All user-facing copy should use "coach/coaching" never "tutor/tutoring."
+**Hierarchy:** Human = "Math Coach" (premium). AI = "AI Math Tutor" (tool). Never call coaches "tutors" in user-facing text.
+
+## Business Model
+
+- **Direct coaching:** Foundation ($349/mo), Acceleration ($549/mo), Elite ($799/mo)
+- **Summer clinics:** Propel Math 7 ($249), Advantage Math 8 ($399), Ignite Math 1 ($349), Ascent Pre-Calc ($449)
+- **Future:** Coach certification ($1,500-2,500), platform licensing ($199/mo + 15% royalty)
+- **Cohorts:** 5-6 students per group, max 3 cohorts per coach, same-program default
+- **Sessions:** 60 minutes + 10-min grace max. Mon-Thu 5:30-7:45 PM, Sat 10:00-12:15 PM
 
 ## Tech Stack
 
 - **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4
 - **Backend:** Supabase (PostgreSQL + Auth + RLS)
-- **UI:** shadcn/ui components
+- **UI:** shadcn/ui components, Lucide icons
 - **AI:** Claude API, Gemini API
 - **Email:** Resend (noreply@mathpivot.com)
 - **Monitoring:** Sentry
+- **Colors:** Royal Blue (#1D4ED8/blue-700), Slate (#334155/slate-700), Orange accent (#F97316/orange-500 — isolated to CTAs only)
 
 ## Project Structure
 
 ```
 mathpivot/
 ├── src/
-│   ├── app/              # Next.js App Router
-│   │   ├── (dashboard)/  # Role-based dashboards
-│   │   │   ├── student/  # Student dashboard
-│   │   │   ├── parent/   # Parent dashboard
-│   │   │   ├── tutor/    # Coach dashboard (route says "tutor", DB role is "tutor")
-│   │   │   └── admin/    # Admin dashboard
-│   │   ├── (public)/     # Public pages (get-started, pricing, careers, about)
-│   │   ├── actions/      # Server actions
-│   │   └── api/          # API routes
-│   ├── components/       # React components
-│   ├── lib/              # Utilities
-│   └── types/            # TypeScript types
-├── supabase/             # Database migrations (00001-00039)
-├── docs/                 # Strategic docs, sprint plans
-└── public/               # Static assets
+│   ├── app/
+│   │   ├── (dashboard)/     # Role-based dashboards (student, parent, tutor, admin)
+│   │   ├── (public)/        # Public pages (get-started, pricing, careers, about, summer)
+│   │   ├── actions/         # Server actions
+│   │   └── api/             # API routes
+│   ├── components/          # React components
+│   ├── lib/                 # Utilities
+│   └── types/               # TypeScript types
+├── supabase/                # Database migrations (00001-00041)
+├── docs/                    # Strategic docs (infrastructure-directive.md, sprint plans)
+└── public/                  # Static assets
 ```
 
-## Key Concepts
+## Key Systems Built
 
-- **Programs:** Foundation (2x/week), Acceleration (3x/week), Elite (4x/week)
-- **Sessions:** 60 minutes standard + 10-min grace extension max
-- **Mastery levels:** not_started → introduced → developing → proficient → mastered
-- **Onboarding:** 6-step protocol before coaches start regular sessions
-- **Revenue share:** Coaches earn 60% of program revenue
-- **DB role "tutor":** The database uses "tutor" as the role name. Do NOT rename in DB — only change user-facing text to "coach"
+- **Mastery tracking:** 179+ atomic concepts, 5-level progression
+- **Coach OS:** Onboarding protocol, session prep briefs, check-in surveys, school pulse, career touchpoints
+- **Proactive anticipation:** "What's Next" maps school curriculum to coach prep
+- **Diagnostic engine:** Domain scoring, placement recommendations
+- **Scheduling:** Coaching schedules, cohort enrollments, capacity management (5 default/6 max)
+- **Survey/Check-in engine:** Session, school pulse, parent confidence, RIASEC career interest
+- **Homeschool compliance:** Attendance logs, mastery portfolios, transcripts
+- **Summer clinic pipeline:** Waitlist → triage → diagnostic → placement → coaching → conversion
+
+## DB Notes
+
+- Role "tutor" in database — do NOT rename. User-facing = "Math Coach"
+- Migrations: 00001-00041 (latest: coaching_schedules + cohort system)
+- Views: coach_schedule_overview (fill status, enrollment counts)
 
 ## Development Commands
 
@@ -54,10 +71,15 @@ npm run dev                        # Start dev server
 NODE_ENV=production npm run build  # Build (required in this environment)
 ```
 
-## For Claude Code
+## Decision Framework
 
-When starting work:
-1. Read this file first
-2. Run `NODE_ENV=production npm run build` to verify state
-3. Always use "coach/coaching" in user-facing text, never "tutor/tutoring"
-4. Session duration is 60 minutes (not 45)
+Before building anything, ask:
+1. Does this improve student outcomes?
+2. Does this strengthen the MathPivot Method?
+3. Does this help another coach succeed?
+4. Does this increase scalability beyond the founder?
+5. Does this create reusable IP?
+6. Does this generate valuable data?
+7. Could this work with a trained coach in any state?
+
+If most answers are no, reconsider.
