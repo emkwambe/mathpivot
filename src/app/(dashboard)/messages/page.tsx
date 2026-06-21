@@ -81,7 +81,7 @@ export default async function MessagesPage() {
             No conversations yet
           </h2>
           <p className="text-slate-500 mb-4">
-            Start a conversation with your tutor or parent to get started.
+            Start a conversation with your coach or parent to get started.
           </p>
           {contacts.length > 0 && (
             <NewConversationDialog contacts={contacts} students={students} />

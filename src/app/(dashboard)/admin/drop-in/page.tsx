@@ -36,7 +36,7 @@ export default async function AdminDropInPage() {
             Drop-In Sessions
           </h1>
           <p className="text-sm text-slate-500">
-            Manage open lab / walk-in tutoring slots
+            Manage open lab / walk-in coaching slots
           </p>
         </div>
       </div>

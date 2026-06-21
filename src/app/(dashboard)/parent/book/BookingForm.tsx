@@ -203,7 +203,7 @@ export function BookingForm({
             Session Booked!
           </h2>
           <p className="text-slate-600">
-            Your tutoring session has been scheduled successfully.
+            Your coaching session has been scheduled successfully.
           </p>
         </div>
 

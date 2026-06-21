@@ -260,7 +260,7 @@ export default async function StudentDashboardPage() {
                         </p>
                         <p className="text-sm text-slate-600">
                           {formatDate(session.start_at, "h:mm a")} with{" "}
-                          {tutorNameMap.get(session.tutor_user_id) || "Tutor"}
+                          {tutorNameMap.get(session.tutor_user_id) || "Coach"}
                         </p>
                       </div>
                       <Badge

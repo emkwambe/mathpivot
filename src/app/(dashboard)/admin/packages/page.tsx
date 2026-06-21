@@ -78,7 +78,7 @@ export default async function AdminPackagesPage() {
             Service Packages
           </h1>
           <p className="text-slate-600">
-            Manage tutoring, coaching, and mentorship offerings
+            Manage coaching and mentorship offerings
           </p>
         </div>
         <Link

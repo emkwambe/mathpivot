@@ -219,7 +219,7 @@ export default async function StudentProgressPage() {
               No progress tracked yet
             </h3>
             <p className="text-slate-500">
-              Your tutor will track your skill progress during sessions.
+              Your math coach will track your skill progress during sessions.
             </p>
             <p className="text-sm text-slate-400 mt-2">
               Keep working hard and you&apos;ll see your progress here!

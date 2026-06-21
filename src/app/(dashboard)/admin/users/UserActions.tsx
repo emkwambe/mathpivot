@@ -108,7 +108,7 @@ export function UserActions({ users, roleColors }: UserActionsProps) {
                       <option value="super_admin">super_admin</option>
                     )}
                     <option value="admin">admin</option>
-                    <option value="tutor">tutor</option>
+                    <option value="tutor">coach</option>
                     <option value="parent">parent</option>
                     <option value="student">student</option>
                   </select>
