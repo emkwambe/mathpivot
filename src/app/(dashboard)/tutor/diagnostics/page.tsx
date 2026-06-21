@@ -64,13 +64,22 @@ export default async function CoachDiagnosticsPage() {
             Administer placement assessments and view student results.
           </p>
         </div>
-        <Link
-          href="/diagnostic"
-          target="_blank"
-          className="px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
-        >
-          Public Diagnostic Link
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/diagnostic/math1-print"
+            target="_blank"
+            className="px-4 py-2 bg-white text-blue-700 border border-blue-700 text-sm font-medium rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            Print Diagnostic (PDF)
+          </Link>
+          <Link
+            href="/diagnostic"
+            target="_blank"
+            className="px-4 py-2 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 transition-colors"
+          >
+            Public Diagnostic Link
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
