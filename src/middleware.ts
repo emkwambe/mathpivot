@@ -15,6 +15,7 @@ const PUBLIC_ROUTES = [
   "/about",
   "/careers",
   "/diagnostic",
+  "/diagnostic/math1-print",
   "/flyer",
   "/share",
 ];
