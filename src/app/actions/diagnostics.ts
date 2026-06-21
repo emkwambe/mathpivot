@@ -138,8 +138,6 @@ export async function submitAssessment(
   durationMinutes: number,
 ): Promise<PlacementResult | null> {
   const user = await getCurrentUser();
-  if (!user) return null;
-
   const supabase = await createClient();
 
   const questionIds = Object.keys(answers);
@@ -196,28 +194,36 @@ export async function submitAssessment(
     }
   }
 
-  const { data: assessment, error } = await supabase
-    .from("diagnostic_assessments")
-    .insert({
-      student_id: studentId,
-      administered_by: user.id,
-      assessment_type: "placement",
-      questions: questionIds,
-      answers,
-      domain_scores: domainScores,
-      overall_score: overallScore,
-      recommended_program: recommendedProgram,
-      started_at: new Date(Date.now() - durationMinutes * 60000).toISOString(),
-      completed_at: new Date().toISOString(),
-      duration_minutes: durationMinutes,
-    })
-    .select("id")
-    .single();
+  let assessmentId = `local-${Date.now()}`;
 
-  if (error) return null;
+  if (user) {
+    const { data: assessment, error } = await supabase
+      .from("diagnostic_assessments")
+      .insert({
+        student_id: studentId,
+        administered_by: user.id,
+        assessment_type: "placement",
+        questions: questionIds,
+        answers,
+        domain_scores: domainScores,
+        overall_score: overallScore,
+        recommended_program: recommendedProgram,
+        started_at: new Date(
+          Date.now() - durationMinutes * 60000,
+        ).toISOString(),
+        completed_at: new Date().toISOString(),
+        duration_minutes: durationMinutes,
+      })
+      .select("id")
+      .single();
 
-  revalidatePath("/admin/summer-waitlist");
-  revalidatePath("/tutor/portfolio");
+    if (!error && assessment) {
+      assessmentId = assessment.id;
+    }
+
+    revalidatePath("/admin/summer-waitlist");
+    revalidatePath("/tutor/portfolio");
+  }
 
   return {
     recommendedProgram,
@@ -226,7 +232,7 @@ export async function submitAssessment(
     overallScore,
     weakestDomain,
     strongestDomain,
-    assessmentId: assessment.id,
+    assessmentId,
   };
 }
 
