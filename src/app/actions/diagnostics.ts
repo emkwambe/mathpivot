@@ -137,6 +137,9 @@ export async function submitAssessment(
   studentId: string,
   answers: Record<string, string>,
   durationMinutes: number,
+  parentEmail?: string,
+  parentName?: string,
+  studentName?: string,
 ): Promise<PlacementResult | null> {
   const user = await getCurrentUser();
   const supabase = await createClient();
@@ -226,7 +229,7 @@ export async function submitAssessment(
     revalidatePath("/tutor/portfolio");
   }
 
-  return {
+  const placementResult: PlacementResult = {
     recommendedProgram,
     programDescription,
     domainScores: domainScoreArray,
@@ -235,6 +238,38 @@ export async function submitAssessment(
     strongestDomain,
     assessmentId,
   };
+
+  if (parentEmail) {
+    try {
+      const template = emailTemplates.diagnosticResults({
+        parentName: parentName || "Parent",
+        studentName: studentName || "your child",
+        overallScore,
+        domainScores: domainScoreArray,
+        recommendedProgram,
+        programDescription,
+        strongestDomain,
+        weakestDomain,
+      });
+
+      const emailResult = await sendEmail({
+        to: parentEmail,
+        subject: template.subject,
+        html: template.html,
+      });
+
+      console.log(
+        "[diagnostic email] sent to",
+        parentEmail,
+        "result:",
+        emailResult,
+      );
+    } catch (err) {
+      console.error("[diagnostic email] failed:", err);
+    }
+  }
+
+  return placementResult;
 }
 
 export async function getStudentDiagnostics(studentId: string) {
@@ -250,28 +285,4 @@ export async function getStudentDiagnostics(studentId: string) {
     .limit(5);
 
   return data || [];
-}
-
-export async function sendDiagnosticResultsEmail(
-  parentEmail: string,
-  parentName: string,
-  studentName: string,
-  result: PlacementResult,
-) {
-  const template = emailTemplates.diagnosticResults({
-    parentName,
-    studentName,
-    overallScore: result.overallScore,
-    domainScores: result.domainScores,
-    recommendedProgram: result.recommendedProgram,
-    programDescription: result.programDescription,
-    strongestDomain: result.strongestDomain,
-    weakestDomain: result.weakestDomain,
-  });
-
-  await sendEmail({
-    to: parentEmail,
-    subject: template.subject,
-    html: template.html,
-  }).catch((err) => console.error("[diagnostic email]", err));
 }

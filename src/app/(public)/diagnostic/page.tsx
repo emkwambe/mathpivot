@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { captureLeadAction } from "@/app/actions/leads";
 import DiagnosticRunner from "@/components/DiagnosticRunner";
 import type { PlacementResult } from "@/app/actions/diagnostics";
-import { sendDiagnosticResultsEmail } from "@/app/actions/diagnostics";
 import { ArrowRight, GraduationCap } from "lucide-react";
 import { useActionState } from "react";
 
@@ -162,17 +161,12 @@ export default function PublicDiagnosticPage() {
           <DiagnosticRunner
             studentId={tempStudentId}
             gradeHint={studentInfo.grade}
+            parentEmail={parentInfo.email}
+            parentName={parentInfo.name}
+            studentName={studentInfo.name}
             onComplete={(r) => {
               setResult(r);
               setPhase("done");
-              if (parentInfo.email) {
-                sendDiagnosticResultsEmail(
-                  parentInfo.email,
-                  parentInfo.name,
-                  studentInfo.name,
-                  r,
-                );
-              }
             }}
           />
         )}

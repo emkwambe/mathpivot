@@ -15,10 +15,16 @@ export default function DiagnosticRunner({
   studentId,
   gradeHint,
   onComplete,
+  parentEmail,
+  parentName,
+  studentName,
 }: {
   studentId: string;
   gradeHint?: number;
   onComplete?: (result: PlacementResult) => void;
+  parentEmail?: string;
+  parentName?: string;
+  studentName?: string;
 }) {
   const [phase, setPhase] = useState<"intro" | "loading" | "active" | "result">(
     "intro",
@@ -63,6 +69,9 @@ export default function DiagnosticRunner({
         studentId,
         answers,
         durationMinutes,
+        parentEmail,
+        parentName,
+        studentName,
       );
       if (placementResult) {
         setResult(placementResult);
