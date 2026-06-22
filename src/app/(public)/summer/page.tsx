@@ -25,6 +25,8 @@ const programs = [
     weight: "24–28% of Grade 7 EOG",
     pitch: "Launch your 7th grade math score forward.",
     creditExample: "$249 credited toward Foundation coaching",
+    wave: 1,
+    dates: "July 6 – July 15",
   },
   {
     name: "Advantage Math 8",
@@ -36,6 +38,8 @@ const programs = [
     weight: "28–32% of Grade 8 EOG",
     pitch: "Get the edge on 8th grade functions.",
     creditExample: "$399 credited toward Acceleration coaching",
+    wave: 2,
+    dates: "July 20 – July 30",
   },
   {
     name: "Ignite Math 1",
@@ -48,6 +52,8 @@ const programs = [
     pitch: "Fire up your Algebra 1 EOC performance.",
     creditExample: "$349 clinic → credited toward $349/mo Foundation",
     featured: true,
+    wave: 1,
+    dates: "July 6 – July 17",
   },
   {
     name: "Ascent Pre-Calc",
@@ -59,6 +65,8 @@ const programs = [
     weight: "Built for readiness before the next math level",
     pitch: "Rise above into advanced math.",
     creditExample: "$449 credited toward Elite coaching",
+    wave: 2,
+    dates: "July 20 – August 1",
   },
 ];
 
@@ -123,6 +131,13 @@ export default function SummerProgramsPage() {
                 Intensive clinics targeting the most heavily tested EOG and EOC
                 math domains. Named math coach. Mastery tracking from day one.
               </p>
+
+              <div className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-4 py-2.5">
+                <Clock className="h-4 w-4 text-blue-700 flex-shrink-0" />
+                <span className="text-sm text-blue-800">
+                  <strong>Wave 1 starts July 6</strong> · Wave 2 starts July 20
+                </span>
+              </div>
 
               <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-orange-50 border border-orange-200 px-4 py-2.5">
                 <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
@@ -345,7 +360,12 @@ export default function SummerProgramsPage() {
                   </div>
                 )}
 
-                <GraduationCap className="mb-4 h-7 w-7 text-blue-700" />
+                <div className="flex items-center justify-between mb-4">
+                  <GraduationCap className="h-7 w-7 text-blue-700" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    Wave {program.wave}
+                  </span>
+                </div>
                 <h3 className="text-xl font-bold text-slate-800">
                   {program.name}
                 </h3>
@@ -354,7 +374,13 @@ export default function SummerProgramsPage() {
                 </p>
                 <p className="mt-2 text-sm text-slate-500">{program.pitch}</p>
 
-                <div className="mt-5 flex items-end gap-1.5">
+                <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
+                  <Clock className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                  <span className="font-medium">{program.dates}</span>
+                  <span className="text-slate-400">· {program.days}</span>
+                </div>
+
+                <div className="mt-4 flex items-end gap-1.5">
                   <span className="text-3xl font-bold text-slate-800">
                     {program.price}
                   </span>
