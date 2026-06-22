@@ -22,9 +22,9 @@ const programs = [
     days: "8 days",
     audience: "Rising 7th Graders",
     focus: "Ratios & Proportional Relationships",
-    weight: "24–28% of Grade 7 EOG",
-    pitch: "Launch your 7th grade math score forward.",
-    creditExample: "$249 credited toward Foundation coaching",
+    outcome: "Build confidence and readiness for Grade 7 mathematics.",
+    creditExample:
+      "Receive a $75 enrollment credit if you continue into Foundation Coaching.",
     wave: 1,
     dates: "July 6 – July 15",
   },
@@ -35,9 +35,10 @@ const programs = [
     days: "9 days",
     audience: "Rising 8th Graders",
     focus: "Functions & Relations",
-    weight: "28–32% of Grade 8 EOG",
-    pitch: "Get the edge on 8th grade functions.",
-    creditExample: "$399 credited toward Acceleration coaching",
+    outcome:
+      "Strengthen the concepts that drive success in Grade 8 mathematics.",
+    creditExample:
+      "Receive a $100 enrollment credit if you continue into Acceleration Coaching.",
     wave: 2,
     dates: "July 20 – July 30",
   },
@@ -47,10 +48,10 @@ const programs = [
     price: "$349",
     days: "10 days",
     audience: "Rising 9th Graders",
-    focus: "Number/Algebra + Functions",
-    weight: "68–76% of Math 1 EOC combined",
-    pitch: "Fire up your Algebra 1 EOC performance.",
-    creditExample: "$349 clinic → credited toward $349/mo Foundation",
+    focus: "Number Sense, Algebra, and Functions",
+    outcome: "Target the standards that drive Algebra 1 and EOC success.",
+    creditExample:
+      "Receive a $100 enrollment credit if you continue into Foundation Coaching.",
     featured: true,
     wave: 1,
     dates: "July 6 – July 17",
@@ -61,10 +62,11 @@ const programs = [
     price: "$449",
     days: "11 days",
     audience: "Rising 11th Graders",
-    focus: "Advanced Functions, Trig, Pre-Calculus",
-    weight: "Built for readiness before the next math level",
-    pitch: "Rise above into advanced math.",
-    creditExample: "$449 credited toward Elite coaching",
+    focus: "Advanced Functions, Trigonometry, and Pre-Calculus",
+    outcome:
+      "Prepare for advanced high school mathematics and future STEM coursework.",
+    creditExample:
+      "Receive a $150 enrollment credit if you continue into Elite Coaching.",
     wave: 2,
     dates: "July 20 – August 1",
   },
@@ -134,8 +136,9 @@ export default function SummerProgramsPage() {
               </h1>
 
               <p className="mt-6 text-lg leading-8 text-slate-600 max-w-xl">
-                Intensive clinics targeting the most heavily tested EOG and EOC
-                math domains. Named math coach. Mastery tracking from day one.
+                Diagnostic-driven clinics that identify gaps, build confidence,
+                and create an academic action plan — with a dedicated math coach
+                and mastery tracking from day one.
               </p>
 
               <div className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-4 py-2.5">
@@ -148,8 +151,8 @@ export default function SummerProgramsPage() {
               <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-orange-50 border border-orange-200 px-4 py-2.5">
                 <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
                 <span className="text-sm text-orange-800">
-                  <strong>Spots closing soon.</strong> Limited to 6–8 students
-                  per clinic.
+                  <strong>Spots closing soon.</strong> Limited to 5–6 students
+                  per cohort.
                 </span>
               </div>
 
@@ -157,10 +160,10 @@ export default function SummerProgramsPage() {
                 <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                   <TrendingUp className="mb-3 h-5 w-5 text-blue-700" />
                   <p className="text-sm font-semibold text-slate-800">
-                    High-impact topics
+                    Diagnose & strengthen
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
-                    Built around heavily tested EOG/EOC domains.
+                    Identify gaps and build readiness for the next grade level.
                   </p>
                 </div>
                 <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
@@ -169,16 +172,16 @@ export default function SummerProgramsPage() {
                     8–11 day clinics
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
-                    Short, focused, easier to commit to.
+                    Focused, structured, and designed for real outcomes.
                   </p>
                 </div>
                 <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                  <ShieldCheck className="mb-3 h-5 w-5 text-orange-500" />
+                  <ShieldCheck className="mb-3 h-5 w-5 text-blue-700" />
                   <p className="text-sm font-semibold text-slate-800">
-                    100% fee credit
+                    Coaching credit included
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
-                    Credited toward coaching within 14 days.
+                    Continue into year-round coaching with an enrollment credit.
                   </p>
                 </div>
               </div>
@@ -378,7 +381,7 @@ export default function SummerProgramsPage() {
                 <p className="mt-0.5 text-xs font-semibold text-blue-700">
                   {program.audience}
                 </p>
-                <p className="mt-2 text-sm text-slate-500">{program.pitch}</p>
+                <p className="mt-2 text-sm text-slate-500">{program.outcome}</p>
 
                 <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
                   <Clock className="h-4 w-4 text-slate-400 flex-shrink-0" />
@@ -400,10 +403,6 @@ export default function SummerProgramsPage() {
                     <strong className="text-slate-800">Focus:</strong>{" "}
                     {program.focus}
                   </p>
-                  <p className="text-slate-600">
-                    <strong className="text-slate-800">Test impact:</strong>{" "}
-                    {program.weight}
-                  </p>
                   <p className="rounded-lg bg-blue-50 p-3 text-blue-800 text-xs font-medium">
                     {program.creditExample}
                   </p>
@@ -414,35 +413,37 @@ export default function SummerProgramsPage() {
         </div>
       </section>
 
-      {/* Pricing Logic */}
+      {/* Clinic → Coaching Pathway */}
       <section className="px-6 py-24 md:px-10 lg:px-20 bg-[#F8FAFC]">
         <div className="mx-auto max-w-5xl">
           <div className="rounded-2xl bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-10 md:p-14">
             <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center">
               <div>
-                <p className="text-sm font-bold uppercase tracking-widest text-orange-500 mb-2">
-                  Parent-friendly pricing
+                <p className="text-sm font-bold uppercase tracking-widest text-blue-700 mb-2">
+                  The beginning of the journey
                 </p>
                 <h2 className="text-3xl font-bold text-slate-800">
-                  The clinic is a low-risk starting point.
+                  The clinic diagnoses. Coaching develops.
                 </h2>
               </div>
               <div className="space-y-4 text-slate-600">
                 <p>
-                  Summer clinics are priced 30–55% below a typical month of
-                  year-round coaching.
+                  Summer clinics identify readiness gaps, build confidence, and
+                  create an academic action plan — a complete standalone
+                  program.
                 </p>
                 <p>
-                  Then MathPivot makes the decision easier:{" "}
+                  For families who want to continue,{" "}
                   <strong className="text-slate-800">
-                    100% of the clinic fee is credited toward coaching
-                    enrollment within 14 days.
+                    clinic graduates receive an enrollment credit toward
+                    year-round coaching.
                   </strong>
                 </p>
-                <div className="rounded-xl bg-orange-50 border border-orange-200 p-5">
-                  <p className="text-orange-800 font-medium">
-                    Example: $249 Propel Math 7 → credited toward $349/mo
-                    Foundation = net $100 for your first month.
+                <div className="rounded-xl bg-blue-50 border border-blue-200 p-5">
+                  <p className="text-blue-800 font-medium">
+                    Year-round coaching provides long-term mastery,
+                    accountability, grade improvement, and ongoing progress
+                    monitoring with a dedicated math coach.
                   </p>
                 </div>
               </div>

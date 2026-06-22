@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pricing",
+  title: "Coaching Programs — MathPivot",
   description:
-    "MathPivot coaching programs: Foundation ($349/mo), Acceleration ($549/mo), Elite ($799/mo). Named coach, mastery tracking, competition prep.",
+    "MathPivot coaching programs: Foundation ($349/mo), Acceleration ($549/mo), Elite ($799/mo). Dedicated coach, mastery tracking, micro-cohort learning.",
 };
 
 const PROGRAMS = [
@@ -12,18 +12,18 @@ const PROGRAMS = [
     name: "Foundation",
     price: "349",
     sessions: "2x per week",
-    sessionsDetail: "8 sessions/month",
+    sessionsDetail: "8 coaching meetings/month",
     description:
-      "Build strong fundamentals with grade-level mastery. Perfect for students who need structured support and confidence building.",
+      "Build confidence and close foundational learning gaps. For students lacking confidence, performing below potential, or transitioning into higher-level mathematics.",
     features: [
-      "Named math coach for the duration",
-      "2x per week (60-min sessions)",
+      "Dedicated math coach",
+      "2 coaching meetings per week",
+      "Diagnostic assessment & learning roadmap",
       "Mastery tracking dashboard",
-      "Career exposure modules",
       "Weekly progress reports",
       "Parent communication rhythm",
     ],
-    grades: "Grades 5-12",
+    grades: "Grades 5–10",
     color: "blue",
     featured: false,
   },
@@ -31,37 +31,37 @@ const PROGRAMS = [
     name: "Acceleration",
     price: "549",
     sessions: "3x per week",
-    sessionsDetail: "12 sessions/month",
+    sessionsDetail: "12 coaching meetings/month",
     description:
-      "Push beyond grade level with competition prep and applied projects. For students ready to challenge themselves.",
+      "Move ahead of school expectations. For motivated learners preparing for honors-level coursework and seeking additional challenge.",
     features: [
       "Everything in Foundation",
-      "3x per week (60-min sessions)",
-      "Mathathlon competition prep",
-      "AMC 8 / MATHCOUNTS readiness",
-      "Applied math projects",
+      "3 coaching meetings per week",
+      "Academic acceleration pathway",
+      "Advanced problem-solving",
+      "Competition readiness",
       "School curriculum anticipation",
     ],
-    grades: "Grades 5-12",
+    grades: "Grades 6–12",
     color: "amber",
     featured: true,
   },
   {
     name: "Elite",
     price: "799",
-    sessions: "4x per week",
-    sessionsDetail: "16 sessions/month",
+    sessions: "2–3x per week",
+    sessionsDetail: "Additional opportunities & guidance",
     description:
-      "Intensive coaching for advanced students pursuing competition excellence and early career exposure.",
+      "Develop exceptional mathematical talent and future STEM readiness. Elite is defined by additional opportunities, guidance, and personalized development — not just more hours.",
     features: [
       "Everything in Acceleration",
-      "4x per week (60-min sessions)",
-      "1-on-1 intensive coaching",
-      "AMC 10/12 and AIME prep",
-      "College readiness portfolio",
-      "Quarterly career deep-dives",
+      "Advanced projects & challenges",
+      "Competition preparation (AMC, MATHCOUNTS)",
+      "Career exploration modules",
+      "Parent strategy reviews",
+      "Personalized academic planning",
     ],
-    grades: "Grades 6-12",
+    grades: "Grades 6–12",
     color: "purple",
     featured: false,
   },
@@ -149,12 +149,12 @@ export default function PricingPage() {
           Coaching Programs
         </p>
         <h1 className="text-4xl font-bold text-slate-900">
-          Invest in mastery, not hours
+          Build Confidence. Master Mathematics. Expand Opportunities.
         </h1>
         <p className="text-lg text-slate-600 mt-3 max-w-2xl mx-auto">
-          Every program includes a named math coach, structured curriculum,
-          mastery tracking, and career exposure. No rotating strangers. No
-          homework help by the hour.
+          MathPivot develops mathematical thinkers through personalized
+          roadmaps, dedicated coaches, mastery tracking, and micro-cohort
+          learning environments limited to 5–6 students.
         </p>
       </section>
 
@@ -242,32 +242,32 @@ export default function PricingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               {
-                title: "Named Math Coach",
-                desc: "Same coach for the entire program",
+                title: "Dedicated Math Coach",
+                desc: "Same coach throughout the program",
               },
               {
-                title: "60-Min Sessions",
-                desc: "Structured warm-up to wrap-up",
+                title: "Diagnostic Assessment",
+                desc: "Identifies gaps and builds your roadmap",
               },
               {
                 title: "Mastery Tracking",
                 desc: "Concept-level progress visibility",
               },
               {
-                title: "Career Exposure",
-                desc: "Math-to-career connection modules",
+                title: "Micro-Cohort Learning",
+                desc: "5–6 students for personalized attention",
               },
               {
-                title: "Parent Reports",
-                desc: "Weekly progress + mastery updates",
+                title: "Progress Reports",
+                desc: "Weekly mastery and growth updates",
               },
               {
-                title: "6-Step Onboarding",
-                desc: "Diagnostic + personalized plan",
+                title: "Personalized Roadmap",
+                desc: "Development pathway, not homework help",
               },
               {
-                title: "Competition Prep",
-                desc: "Mathathlon + AMC/MATHCOUNTS",
+                title: "60-Min Coaching",
+                desc: "Structured sessions with clear outcomes",
               },
               {
                 title: "Homeschool Records",
@@ -287,17 +287,27 @@ export default function PricingPage() {
 
       <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Questions?</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
+            Start with a free diagnostic
+          </h2>
           <p className="text-slate-600 mb-8">
-            Every enrollment starts with a free diagnostic assessment so we can
-            recommend the right track. No commitment required to learn more.
+            Every enrollment begins with a diagnostic assessment so we can build
+            a personalized learning roadmap. No commitment required.
           </p>
-          <Link
-            href="/get-started"
-            className="inline-flex items-center justify-center bg-blue-600 text-white font-medium px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors"
-          >
-            Request Free Consultation
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/diagnostic"
+              className="inline-flex items-center justify-center bg-blue-700 text-white font-medium px-8 py-3 rounded-xl hover:bg-blue-800 transition-colors"
+            >
+              Take the Free Diagnostic
+            </Link>
+            <Link
+              href="/get-started"
+              className="inline-flex items-center justify-center border border-slate-200 text-slate-700 font-medium px-8 py-3 rounded-xl hover:bg-slate-50 transition-colors"
+            >
+              Request Consultation
+            </Link>
+          </div>
         </div>
       </section>
 

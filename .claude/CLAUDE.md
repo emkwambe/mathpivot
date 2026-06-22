@@ -6,17 +6,18 @@
 
 ## Overview
 
-MathPivot builds the infrastructure that enables excellent math coaches to consistently produce strong student outcomes at scale. Named coaches, mastery tracking, Mathathlon competitions, career exposure, diagnostic-driven placement, and a licensable coaching method.
+MathPivot is a mathematics coaching academy that develops confidence, mastery, and future opportunities through personalized learning roadmaps, dedicated coaches, and micro-cohort learning environments. **Read `docs/coaching-academy-positioning.md` for full business philosophy.**
 
-**Hierarchy:** Human = "Math Coach" (premium). AI = "AI Math Tutor" (tool). Never call coaches "tutors" in user-facing text.
+**Hierarchy:** Human = "Math Coach" (premium). AI = "AI Math Tutor" (tool). Never call coaches "tutors" in user-facing text. Never use "tutoring hours" — use "coaching meetings" or "development pathway."
 
 ## Business Model
 
-- **Direct coaching:** Foundation ($349/mo), Acceleration ($549/mo), Elite ($799/mo)
-- **Summer clinics:** Propel Math 7 ($249), Advantage Math 8 ($399), Ignite Math 1 ($349), Ascent Pre-Calc ($449)
+- **Coaching programs:** Foundation ($349/mo, 2x/week), Acceleration ($549/mo, 3x/week), Elite ($799/mo, 2-3x/week + additional opportunities)
+- **Summer clinics:** Propel Math 7 ($249, $75 credit), Advantage Math 8 ($399, $100 credit), Ignite Math 1 ($349, $100 credit), Ascent Pre-Calc ($449, $150 credit)
 - **Future:** Coach certification ($1,500-2,500), platform licensing ($199/mo + 15% royalty)
-- **Cohorts:** 5-6 students per group, max 3 cohorts per coach, same-program default
+- **Cohorts:** 5 target / 6 max per cohort, max 3 cohorts per coach, same-program default
 - **Sessions:** 60 minutes + 10-min grace max. Mon-Thu 5:30-7:45 PM, Sat 10:00-12:15 PM
+- **Pricing philosophy:** Never sell hours. Sell development pathways. Focus on outcomes, mastery, confidence.
 
 ## Tech Stack
 
