@@ -256,6 +256,7 @@ export async function submitAssessment(
         to: parentEmail,
         subject: template.subject,
         html: template.html,
+        bcc: "admin@mathpivot.com",
       });
 
       console.log(

@@ -19,6 +19,7 @@ export interface SendEmailParams {
   html: string;
   text?: string;
   replyTo?: string;
+  bcc?: string | string[];
 }
 
 export interface SendEmailResult {
@@ -33,7 +34,7 @@ export interface SendEmailResult {
 export async function sendEmail(
   params: SendEmailParams,
 ): Promise<SendEmailResult> {
-  const { to, subject, html, text, replyTo } = params;
+  const { to, subject, html, text, replyTo, bcc } = params;
 
   // If Resend is not configured, log to console
   if (!resend) {
@@ -57,6 +58,7 @@ export async function sendEmail(
       html,
       text: text || htmlToText(html),
       replyTo: replyTo,
+      ...(bcc ? { bcc: Array.isArray(bcc) ? bcc : [bcc] } : {}),
     });
 
     if (error) {
