@@ -29,20 +29,6 @@ const programs = [
     dates: "July 6 – July 15",
   },
   {
-    name: "Advantage Math 8",
-    slug: "advantage-8",
-    price: "$399",
-    days: "9 days",
-    audience: "Rising 8th Graders",
-    focus: "Functions & Relations",
-    outcome:
-      "Strengthen the concepts that drive success in Grade 8 mathematics.",
-    creditExample:
-      "Receive a $100 enrollment credit if you continue into Acceleration Coaching.",
-    wave: 2,
-    dates: "July 20 – July 30",
-  },
-  {
     name: "Ignite Math 1",
     slug: "ignite-math1",
     price: "$349",
@@ -55,6 +41,20 @@ const programs = [
     featured: true,
     wave: 1,
     dates: "July 6 – July 17",
+  },
+  {
+    name: "Advantage Math 8",
+    slug: "advantage-8",
+    price: "$399",
+    days: "9 days",
+    audience: "Rising 8th Graders",
+    focus: "Functions & Relations",
+    outcome:
+      "Strengthen the concepts that drive success in Grade 8 mathematics.",
+    creditExample:
+      "Receive a $100 enrollment credit if you continue into Acceleration Coaching.",
+    wave: 2,
+    dates: "July 20 – July 30",
   },
   {
     name: "Ascent Pre-Calc",
