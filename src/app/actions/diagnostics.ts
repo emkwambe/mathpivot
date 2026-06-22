@@ -3,6 +3,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { sendEmail, emailTemplates } from "@/lib/email";
 
 export interface DiagnosticQuestion {
   id: string;
@@ -249,4 +250,28 @@ export async function getStudentDiagnostics(studentId: string) {
     .limit(5);
 
   return data || [];
+}
+
+export async function sendDiagnosticResultsEmail(
+  parentEmail: string,
+  parentName: string,
+  studentName: string,
+  result: PlacementResult,
+) {
+  const template = emailTemplates.diagnosticResults({
+    parentName,
+    studentName,
+    overallScore: result.overallScore,
+    domainScores: result.domainScores,
+    recommendedProgram: result.recommendedProgram,
+    programDescription: result.programDescription,
+    strongestDomain: result.strongestDomain,
+    weakestDomain: result.weakestDomain,
+  });
+
+  await sendEmail({
+    to: parentEmail,
+    subject: template.subject,
+    html: template.html,
+  }).catch((err) => console.error("[diagnostic email]", err));
 }

@@ -5,12 +5,14 @@ import Link from "next/link";
 import { captureLeadAction } from "@/app/actions/leads";
 import DiagnosticRunner from "@/components/DiagnosticRunner";
 import type { PlacementResult } from "@/app/actions/diagnostics";
+import { sendDiagnosticResultsEmail } from "@/app/actions/diagnostics";
 import { ArrowRight, GraduationCap } from "lucide-react";
 import { useActionState } from "react";
 
 export default function PublicDiagnosticPage() {
   const [phase, setPhase] = useState<"capture" | "assess" | "done">("capture");
   const [studentInfo, setStudentInfo] = useState({ name: "", grade: 7 });
+  const [parentInfo, setParentInfo] = useState({ name: "", email: "" });
   const [tempStudentId, setTempStudentId] = useState("");
   const [result, setResult] = useState<PlacementResult | null>(null);
   const [leadState, leadAction, leadPending] = useActionState(
@@ -21,7 +23,10 @@ export default function PublicDiagnosticPage() {
   function handleLeadSubmit(formData: FormData) {
     const grade = parseInt(formData.get("studentGrade") as string) || 7;
     const name = (formData.get("studentName") as string) || "Student";
+    const pName = (formData.get("parentName") as string) || "";
+    const pEmail = (formData.get("parentEmail") as string) || "";
     setStudentInfo({ name, grade });
+    setParentInfo({ name: pName, email: pEmail });
     setTempStudentId(`diagnostic-${Date.now()}`);
     leadAction(formData);
     setPhase("assess");
@@ -160,6 +165,14 @@ export default function PublicDiagnosticPage() {
             onComplete={(r) => {
               setResult(r);
               setPhase("done");
+              if (parentInfo.email) {
+                sendDiagnosticResultsEmail(
+                  parentInfo.email,
+                  parentInfo.name,
+                  studentInfo.name,
+                  r,
+                );
+              }
             }}
           />
         )}

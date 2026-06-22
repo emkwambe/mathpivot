@@ -322,6 +322,96 @@ export const emailTemplates = {
   }),
 
   /**
+   * Diagnostic results email (sent to parent after public diagnostic)
+   */
+  diagnosticResults: ({
+    parentName,
+    studentName,
+    overallScore,
+    domainScores,
+    recommendedProgram,
+    programDescription,
+    strongestDomain,
+    weakestDomain,
+  }: {
+    parentName: string;
+    studentName: string;
+    overallScore: number;
+    domainScores: {
+      domain: string;
+      correct: number;
+      total: number;
+      percentage: number;
+    }[];
+    recommendedProgram: string;
+    programDescription: string;
+    strongestDomain: string;
+    weakestDomain: string;
+  }) => ({
+    subject: `${studentName}'s MathPivot Diagnostic Results`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155;">
+        <div style="text-align: center; padding: 30px 0 20px;">
+          <div style="display: inline-block; background: #1D4ED8; color: white; font-weight: bold; width: 40px; height: 40px; line-height: 40px; border-radius: 10px; font-size: 18px;">M</div>
+          <p style="font-weight: bold; font-size: 18px; margin: 8px 0 0; color: #1e293b;">MathPivot</p>
+        </div>
+
+        <h2 style="color: #1e293b; text-align: center;">Diagnostic Results for ${studentName}</h2>
+        <p style="text-align: center; color: #64748b;">Hi ${parentName}, here are your child's assessment results.</p>
+
+        <div style="background: #1D4ED8; color: white; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center;">
+          <p style="font-size: 36px; font-weight: bold; margin: 0;">${overallScore}%</p>
+          <p style="margin: 4px 0 0; opacity: 0.9;">Overall Score</p>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin: 20px 0;">
+          <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; text-align: center;">
+            <p style="font-size: 12px; color: #16a34a; margin: 0;">Strongest</p>
+            <p style="font-weight: bold; color: #15803d; margin: 6px 0 0;">${strongestDomain.replace(/_/g, " ")}</p>
+          </div>
+          <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 16px; text-align: center;">
+            <p style="font-size: 12px; color: #d97706; margin: 0;">Focus Area</p>
+            <p style="font-weight: bold; color: #b45309; margin: 6px 0 0;">${weakestDomain.replace(/_/g, " ")}</p>
+          </div>
+        </div>
+
+        <h3 style="color: #1e293b; margin-top: 28px;">Domain Breakdown</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 12px 0;">
+          ${domainScores
+            .map(
+              (d) => `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 10px 0; font-size: 14px;">${d.domain.replace(/_/g, " ")}</td>
+              <td style="padding: 10px 0; text-align: right; font-weight: bold; color: ${d.percentage >= 60 ? "#16a34a" : "#d97706"};">${d.correct}/${d.total} (${d.percentage}%)</td>
+            </tr>
+          `,
+            )
+            .join("")}
+        </table>
+
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin: 24px 0;">
+          <p style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #1D4ED8; margin: 0;">Recommended Program</p>
+          <p style="font-size: 18px; font-weight: bold; color: #1e293b; margin: 8px 0 4px;">${recommendedProgram}</p>
+          <p style="font-size: 14px; color: #64748b; margin: 0;">${programDescription}</p>
+        </div>
+
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="https://mathpivot.com/summer" style="display: inline-block; background: #F97316; color: white; font-weight: bold; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-size: 16px;">Explore Summer Clinics</a>
+        </div>
+        <div style="text-align: center; margin: 0 0 32px;">
+          <a href="https://mathpivot.com/pricing" style="display: inline-block; border: 1px solid #e2e8f0; color: #334155; font-weight: 600; padding: 12px 32px; border-radius: 10px; text-decoration: none; font-size: 14px;">View Year-Round Programs</a>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+          MathPivot — The Travel Ball of Math<br>
+          <a href="https://mathpivot.com" style="color: #1D4ED8;">mathpivot.com</a>
+        </p>
+      </div>
+    `,
+  }),
+
+  /**
    * Purchase confirmation email
    */
   purchaseConfirmation: ({

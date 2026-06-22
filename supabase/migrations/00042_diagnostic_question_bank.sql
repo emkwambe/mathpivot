@@ -87,3 +87,36 @@ INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text,
 ('statistics', '8-9', 3, 'A scatter plot shows a negative correlation. Which is most likely the line of best fit?', 'multiple_choice', '["y = 2x + 5", "y = -3x + 10", "y = x²", "y = 5"]', 'y = -3x + 10', 'Negative correlation means negative slope', 'NC.M1.S-ID.6', 'correlation'),
 ('statistics', '8-9', 4, 'In a two-way frequency table, 40 out of 100 students who study pass the test, and 20 out of 100 who do not study pass. Is there an association between studying and passing?', 'multiple_choice', '["Yes, studying is associated with passing", "No, the pass rates are the same", "No, because both groups have students who pass", "Yes, but only because more students studied"]', 'Yes, studying is associated with passing', '40% pass rate for studiers vs 20% for non-studiers — different conditional rates show association', 'NC.M1.S-ID.5', 'two_way_tables')
 ON CONFLICT DO NOTHING;
+
+-- Additional questions to ensure 16+ per grade band
+-- Fills gaps where domains lack easy/medium/hard for certain bands
+
+-- Number sense for 7-8 (missing easy)
+INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
+('number_sense', '7-8', 2, 'What is the value of 5⁰?', 'multiple_choice', '["0", "1", "5", "Undefined"]', '1', 'Any non-zero number raised to the power of 0 equals 1', 'NC.8.EE.1', 'exponent_rules')
+ON CONFLICT DO NOTHING;
+
+-- Ratios for 7-8 (missing easy)
+INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
+('ratios_proportions', '7-8', 2, 'A store sells 3 notebooks for $5.25. What is the cost of one notebook?', 'multiple_choice', '["$1.25", "$1.50", "$1.75", "$2.25"]', '$1.75', '$5.25 ÷ 3 = $1.75 per notebook', 'NC.7.RP.1', 'unit_rates')
+ON CONFLICT DO NOTHING;
+
+-- Functions for 8-9 (missing hard)
+INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
+('functions', '8-9', 4, 'A population starts at 200 and doubles every 3 years. Which function models this growth?', 'multiple_choice', '["f(t) = 200 + 2t", "f(t) = 200(2)^(t/3)", "f(t) = 200(3)^t", "f(t) = 400t"]', 'f(t) = 200(2)^(t/3)', 'Exponential growth with initial value 200, doubling (×2) every 3 years', 'NC.M1.F-LE.2', 'exponential_modeling')
+ON CONFLICT DO NOTHING;
+
+-- Statistics for 7-8 (missing easy)
+INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
+('statistics', '7-8', 2, 'A student scores 85, 90, 78, 92, and 95 on five tests. What is their mean (average) score?', 'multiple_choice', '["85", "88", "90", "92"]', '88', '(85+90+78+92+95) ÷ 5 = 440 ÷ 5 = 88', 'NC.6.SP.5', 'mean')
+ON CONFLICT DO NOTHING;
+
+-- Statistics for 8-9 (missing easy)
+INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
+('statistics', '8-9', 2, 'Which type of graph is best for showing how data changes over time?', 'multiple_choice', '["Bar graph", "Line graph", "Pie chart", "Histogram"]', 'Line graph', 'Line graphs show trends and changes over time with connected data points', 'NC.M1.S-ID.1', 'data_representation')
+ON CONFLICT DO NOTHING;
+
+-- Geometry for 8-9 (extra medium for better coverage)
+INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
+('geometry', '8-9', 2, 'What is the area of a circle with radius 5? (Use π ≈ 3.14)', 'multiple_choice', '["15.7", "31.4", "78.5", "157"]', '78.5', 'A = πr² = 3.14 × 25 = 78.5', 'NC.7.G.4', 'circle_area')
+ON CONFLICT DO NOTHING;
