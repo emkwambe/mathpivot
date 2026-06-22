@@ -105,6 +105,12 @@ export default function SummerProgramsPage() {
               >
                 Sign In
               </Link>
+              <Link
+                href="/diagnostic"
+                className="text-sm font-semibold bg-blue-700 text-white px-5 py-2.5 rounded-lg hover:bg-blue-800 transition-colors shadow-sm"
+              >
+                Free Diagnostic
+              </Link>
               <a
                 href="#waitlist"
                 className="text-sm font-semibold bg-orange-500 text-white px-5 py-2.5 rounded-lg hover:bg-orange-600 transition-colors shadow-sm"
