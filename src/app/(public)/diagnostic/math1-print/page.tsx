@@ -78,25 +78,25 @@ export default function Math1DiagnosticPrint() {
 
             <Question
               n={3}
-              text="Solve: 2(x - 3) = 4x + 2"
+              text="Solve for x: 2(x - 3) = 4x + 2"
               choices={["x = -4", "x = -2", "x = 2", "x = 4"]}
               standard="NC.8.EE.7"
             />
             <Question
               n={4}
-              text="What is the slope of the line passing through (2, 5) and (4, 11)?"
+              text="What is the slope of the line passing through the points (2, 5) and (4, 11)?"
               choices={["2", "3", "6", "8"]}
               standard="NC.M1.F-IF.6"
             />
             <Question
               n={5}
-              text="Solve the system: x + y = 10 and 2x - y = 5"
+              text="Solve the system of equations: x + y = 10 and 2x - y = 5"
               choices={["x=5, y=5", "x=3, y=7", "x=7, y=3", "x=15, y=-5"]}
               standard="NC.M1.A-REI.6"
             />
             <Question
               n={6}
-              text="Factor: x² - 5x + 6"
+              text="Factor the expression: x² - 5x + 6"
               choices={["(x-2)(x-3)", "(x+2)(x+3)", "(x-1)(x-6)", "(x+1)(x-6)"]}
               standard="NC.M1.A-SSE.3"
             />
@@ -149,13 +149,13 @@ export default function Math1DiagnosticPrint() {
           <div className="space-y-5 flex-1">
             <Question
               n={10}
-              text="A ball is thrown with height h(t) = -16t² + 48t + 4. When does it reach maximum height?"
+              text="A ball is thrown upward. Its height in feet after t seconds is h(t) = -16t² + 48t + 4. At what time does it reach its maximum height?"
               choices={["t = 1", "t = 1.5", "t = 2", "t = 3"]}
               standard="NC.M1.F-IF.4"
             />
             <Question
               n={11}
-              text="Which function is exponential growth?"
+              text="Which of the following represents exponential growth?"
               choices={["y = 3x + 2", "y = x²", "y = 2(1.5)ˣ", "y = 2(0.5)ˣ"]}
               standard="NC.M1.F-LE.1"
             />
@@ -168,7 +168,7 @@ export default function Math1DiagnosticPrint() {
 
             <Question
               n={12}
-              text="A right triangle has legs of length 3 and 4. What is the hypotenuse?"
+              text="A right triangle has legs of length 3 and 4. What is the length of the hypotenuse?"
               choices={["5", "6", "7", "12"]}
               standard="NC.8.G.7"
             />
@@ -180,7 +180,7 @@ export default function Math1DiagnosticPrint() {
             />
             <Question
               n={14}
-              text="Point A is at (1,2) and point B is at (4,6). What is the distance between them?"
+              text="Point A is located at (1, 2) and Point B is located at (4, 6). What is the distance between them?"
               choices={["3", "4", "5", "7"]}
               standard="NC.8.G.8"
             />
@@ -199,7 +199,7 @@ export default function Math1DiagnosticPrint() {
             />
             <Question
               n={16}
-              text="A scatter plot shows a negative correlation. Which is most likely the line of best fit?"
+              text="A scatter plot shows a negative correlation. Which equation is most likely the line of best fit?"
               choices={["y = 2x + 5", "y = -3x + 10", "y = x²", "y = 5"]}
               standard="NC.M1.S-ID.6"
             />
@@ -239,14 +239,6 @@ export default function Math1DiagnosticPrint() {
                 <div className="border-b border-slate-300 h-6 mt-1" />
               </div>
             </div>
-          </div>
-
-          <div className="mt-6 text-center">
-            <p className="text-[10px] text-slate-400">
-              Answer Key: 1:2⁷ 2:7-8 3:x=-4 4:3 5:x=5,y=5 6:(x-2)(x-3) 7:No 8:9
-              9:y=3,5,7,9 10:t=1.5 11:y=2(1.5)ˣ 12:5 13:90π 14:5 15:1/2
-              16:y=-3x+10
-            </p>
           </div>
 
           <p className="text-xs text-slate-400 text-center mt-4">
