@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+function redirectGet(url: URL) {
+  return NextResponse.redirect(url, 303);
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -21,9 +25,7 @@ export async function POST(request: Request) {
       !application.email ||
       !application.experience
     ) {
-      return NextResponse.redirect(
-        new URL("/careers?error=missing_fields", request.url),
-      );
+      return redirectGet(new URL("/careers?error=missing_fields", request.url));
     }
 
     const supabase = await createClient();
@@ -43,12 +45,8 @@ export async function POST(request: Request) {
       status: "new",
     });
 
-    return NextResponse.redirect(
-      new URL("/careers?submitted=true", request.url),
-    );
+    return redirectGet(new URL("/careers?submitted=true", request.url));
   } catch {
-    return NextResponse.redirect(
-      new URL("/careers?error=server_error", request.url),
-    );
+    return redirectGet(new URL("/careers?error=server_error", request.url));
   }
 }
