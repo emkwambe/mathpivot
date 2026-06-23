@@ -116,12 +116,7 @@ export async function getLeads(filters?: { status?: string; source?: string }) {
 
   let query = supabase
     .from("leads")
-    .select(
-      `
-      *,
-      assigned_user:assigned_to (full_name)
-    `,
-    )
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(200);
 
@@ -146,12 +141,7 @@ export async function getLeadsByStatus() {
 
   const { data, error } = await supabase
     .from("leads")
-    .select(
-      `
-      *,
-      assigned_user:assigned_to (full_name)
-    `,
-    )
+    .select("*")
     .order("updated_at", { ascending: false });
 
   if (error) return { columns: {}, error: error.message };
@@ -296,11 +286,7 @@ export async function getLeadDetail(leadId: string) {
   const supabase = await createClient();
 
   const [leadResult, activitiesResult, trialsResult] = await Promise.all([
-    supabase
-      .from("leads")
-      .select("*, assigned_user:assigned_to (full_name, email)")
-      .eq("id", leadId)
-      .single(),
+    supabase.from("leads").select("*").eq("id", leadId).single(),
     supabase
       .from("lead_activities")
       .select("*")
