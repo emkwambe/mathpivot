@@ -33,6 +33,9 @@ const LEAD_SOURCES = [
   "email",
   "partner",
   "event",
+  "summer_clinic_waitlist",
+  "free_diagnostic",
+  "coach_application",
   "other",
 ] as const;
 
