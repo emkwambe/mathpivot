@@ -31,7 +31,7 @@ const programs = [
   {
     name: "Ignite Math 1",
     slug: "ignite-math1",
-    price: "$349",
+    price: "$449",
     days: "10 days",
     audience: "Rising 9th Graders",
     focus: "Number Sense, Algebra, and Functions",
@@ -45,7 +45,7 @@ const programs = [
   {
     name: "Advantage Math 8",
     slug: "advantage-8",
-    price: "$399",
+    price: "$349",
     days: "9 days",
     audience: "Rising 8th Graders",
     focus: "Functions & Relations",
@@ -59,7 +59,7 @@ const programs = [
   {
     name: "Ascent Pre-Calc",
     slug: "ascent-precalc",
-    price: "$449",
+    price: "$549",
     days: "11 days",
     audience: "Rising 11th Graders",
     focus: "Advanced Functions, Trigonometry, and Pre-Calculus",
