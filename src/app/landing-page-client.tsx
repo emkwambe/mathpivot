@@ -531,32 +531,32 @@ export default function LandingPage() {
                 price: "$249",
                 days: "8 days",
                 focus: "Ratios & Proportional Relationships",
-                weight: "24–28% of Grade 7 EOG",
+                outcome: "Grade 7 readiness",
                 color: "blue",
               },
               {
-                name: "Advantage Math 8",
-                price: "$399",
-                days: "9 days",
-                focus: "Functions & Relations",
-                weight: "28–32% of Grade 8 EOG",
-                color: "purple",
-              },
-              {
                 name: "Ignite Math 1",
-                price: "$349",
+                price: "$449",
                 days: "10 days",
-                focus: "Algebra + Functions",
-                weight: "68–76% of Math 1 EOC",
+                focus: "Number Sense, Algebra, and Functions",
+                outcome: "Algebra 1 & EOC success",
                 color: "amber",
                 featured: true,
               },
               {
+                name: "Advantage Math 8",
+                price: "$349",
+                days: "9 days",
+                focus: "Functions & Relations",
+                outcome: "Grade 8 readiness",
+                color: "purple",
+              },
+              {
                 name: "Ascent Pre-Calc",
-                price: "$449",
+                price: "$549",
                 days: "11 days",
-                focus: "Functions, Trig, Pre-Calc",
-                weight: "College & SAT readiness",
+                focus: "Advanced Functions, Trig, Pre-Calculus",
+                outcome: "Advanced math & STEM readiness",
                 color: "emerald",
               },
             ].map((clinic) => (
@@ -578,10 +578,12 @@ export default function LandingPage() {
                 <p className="text-xs text-blue-300 mt-3 font-medium">
                   {clinic.focus}
                 </p>
-                <p className="text-xs text-slate-500 mt-0.5">{clinic.weight}</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {clinic.outcome}
+                </p>
                 {clinic.featured && (
                   <span className="inline-block mt-3 text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">
-                    Most Popular
+                    Featured
                   </span>
                 )}
               </div>
@@ -589,9 +591,9 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-8 text-center space-y-3">
-            <p className="text-sm text-emerald-300">
-              100% of the clinic fee is credited if you enroll in coaching
-              within 14 days.
+            <p className="text-sm text-blue-300">
+              Clinic graduates receive an enrollment credit toward year-round
+              coaching.
             </p>
             <Link
               href="/summer"
