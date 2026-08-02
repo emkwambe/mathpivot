@@ -20,6 +20,7 @@ const PUBLIC_ROUTES = [
   "/share",
   "/for",
   "/partnerships",
+  "/compare",
 ];
 
 const ROLE_PREFIXES: Record<string, string> = {
