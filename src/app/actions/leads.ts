@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import type { LeadRecord } from "@/types/views";
+import { classifyPersona } from "@/lib/persona";
 
 export type LeadResult = {
   success: boolean;
@@ -82,6 +83,14 @@ export async function captureLeadAction(
         .filter(Boolean)
     : [];
 
+  const personaResult = classifyPersona({
+    studentGrade: parsed.data.studentGrade,
+    goals: parsed.data.goals,
+    source: parsed.data.source,
+    subjectsInterested: subjects,
+    sourceDetail: parsed.data.sourceDetail,
+  });
+
   const { error } = await admin.from("leads").insert({
     parent_name: parsed.data.parentName,
     parent_email: parsed.data.parentEmail,
@@ -93,6 +102,12 @@ export async function captureLeadAction(
     preferred_modality: parsed.data.preferredModality || null,
     source: parsed.data.source,
     source_detail: parsed.data.sourceDetail || null,
+    persona: personaResult.persona,
+    persona_confidence: personaResult.confidence,
+    persona_signals: {
+      reasoning: personaResult.reasoning,
+      ...personaResult.signals,
+    },
   });
 
   if (error) {

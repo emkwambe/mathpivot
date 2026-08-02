@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateLeadStatus, addLeadNote } from "@/app/actions/leads";
 import type { LeadRecord } from "@/types/views";
+import { PERSONA_LABELS, PERSONA_COLORS, type Persona } from "@/lib/persona";
 
 const COLUMNS = [
   { key: "new", label: "New", color: "bg-slate-500" },
@@ -121,9 +122,23 @@ export function LeadKanban({ columns }: LeadKanbanProps) {
                   </div>
                 )}
 
+                {(() => {
+                  const persona = ((lead as unknown as { persona?: Persona })
+                    .persona || "unclassified") as Persona;
+                  return persona !== "unclassified" ? (
+                    <div className="mt-1.5">
+                      <span
+                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${PERSONA_COLORS[persona]}`}
+                      >
+                        {PERSONA_LABELS[persona]}
+                      </span>
+                    </div>
+                  ) : null;
+                })()}
+
                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
                   <span className="text-[10px] text-slate-400">
-                    {lead.source.replace("_", " ")}
+                    {lead.source.replace(/_/g, " ")}
                   </span>
                   <button
                     onClick={() =>

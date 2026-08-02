@@ -52,6 +52,8 @@ export interface LeadRecord {
   notes: string | null;
   assigned_user: { full_name: string } | null;
   next_follow_up_at: string | null;
+  persona?: string;
+  persona_confidence?: string | null;
 }
 
 /** Lead analytics source stats */
