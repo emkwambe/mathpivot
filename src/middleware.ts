@@ -19,6 +19,7 @@ const PUBLIC_ROUTES = [
   "/flyer",
   "/share",
   "/for",
+  "/partnerships",
 ];
 
 const ROLE_PREFIXES: Record<string, string> = {
