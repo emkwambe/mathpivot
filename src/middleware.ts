@@ -18,6 +18,7 @@ const PUBLIC_ROUTES = [
   "/diagnostic/math1-print",
   "/flyer",
   "/share",
+  "/for",
 ];
 
 const ROLE_PREFIXES: Record<string, string> = {
