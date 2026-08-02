@@ -15,9 +15,10 @@ export default async function ParentFeedbackPage() {
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Session Feedback</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Check-ins</h1>
         <p className="text-slate-600 text-sm mt-1">
-          Confirm attendance and share how your child is doing.
+          Confirm attendance and share how your child is doing after each
+          coaching session.
         </p>
       </div>
 

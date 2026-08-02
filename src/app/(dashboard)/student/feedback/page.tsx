@@ -15,9 +15,10 @@ export default async function StudentFeedbackPage() {
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Session Feedback</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Check-ins</h1>
         <p className="text-slate-600 text-sm mt-1">
-          Let your math coach know how the session went.
+          Share how your last session went so your math coach can adjust the
+          plan.
         </p>
       </div>
 

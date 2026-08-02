@@ -76,7 +76,7 @@ const parentNavItems: NavItem[] = [
     ),
   },
   {
-    label: "Session Feedback",
+    label: "Check-ins",
     href: "/parent/feedback",
     icon: (
       <svg
@@ -1094,7 +1094,7 @@ const studentNavItems: NavItem[] = [
     ),
   },
   {
-    label: "Feedback",
+    label: "Check-ins",
     href: "/student/feedback",
     icon: (
       <svg

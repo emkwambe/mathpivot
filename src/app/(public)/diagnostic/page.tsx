@@ -70,10 +70,32 @@ export default function PublicDiagnosticPage() {
                 Where does your child stand in math?
               </h1>
               <p className="mt-4 text-slate-600 max-w-xl mx-auto">
-                Our 15-minute diagnostic covers 6 core math domains and tells
-                you exactly where your child is strong and where they need
-                support. No cost, no commitment.
+                Our 15-minute diagnostic tells you exactly where your child is
+                strong and where they need support. No cost, no commitment.
               </p>
+
+              <div className="mt-6 max-w-xl mx-auto">
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
+                  What the diagnostic covers
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                  {[
+                    "Number Sense",
+                    "Ratios & Proportions",
+                    "Expressions & Equations",
+                    "Functions",
+                    "Geometry",
+                    "Statistics & Probability",
+                  ].map((d) => (
+                    <div
+                      key={d}
+                      className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-center"
+                    >
+                      {d}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="max-w-md mx-auto bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-100 p-7">
@@ -131,7 +153,7 @@ export default function PublicDiagnosticPage() {
                       required
                       className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700"
                     >
-                      {[5, 6, 7, 8, 9, 10, 11].map((g) => (
+                      {[5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
                         <option key={g} value={g}>
                           Grade {g}
                         </option>
@@ -149,10 +171,41 @@ export default function PublicDiagnosticPage() {
                   {!leadPending && <ArrowRight className="w-5 h-5" />}
                 </button>
 
-                <p className="text-[11px] text-slate-400 text-center">
-                  No payment required. Results emailed within minutes.
-                </p>
+                <div className="pt-2 space-y-2">
+                  <p className="text-[11px] text-slate-400 text-center">
+                    No payment required. Results emailed within minutes.
+                  </p>
+                  <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
+                    <svg
+                      className="w-3 h-3 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                      />
+                    </svg>
+                    Your child&apos;s data is protected. COPPA-compliant. Never
+                    shared with third parties.
+                  </p>
+                </div>
               </form>
+
+              <div className="mt-5 pt-5 border-t border-slate-100 text-center">
+                <p className="text-xs text-slate-500">
+                  Prefer to talk first?{" "}
+                  <Link
+                    href="/get-started"
+                    className="text-blue-700 font-medium hover:text-blue-800"
+                  >
+                    Schedule a consultation →
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
         )}
