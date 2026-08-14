@@ -16,11 +16,11 @@ interface GradeCopy {
 
 const GRADE_COPY: Record<ValidGrade, GradeCopy> = {
   6: {
-    scope: "Grade 6 · Ratios, integers, and expressions",
-    headline: "Grade 6 Math Diagnostic",
+    scope: "Grade 6 content · For students entering grade 7",
+    headline: "Entering Grade 7 Diagnostic",
     subheadline:
-      "A ~15-minute grade-6 assessment covering ratios, proportions, integers, one-variable equations, and basic geometry. Free — we email the full report and match your student with the right coaching pathway.",
-    scopeTitle: "What grade 6 covers",
+      "A ~15-minute assessment of the grade 6 content your student should have mastered — ratios, integers, one-variable equations, and basic geometry. Free — we email the full report and a coaching program recommendation. Also a valid mid-year check for current grade 6 students.",
+    scopeTitle: "Grade 6 content covered",
     scopeItems: [
       "Ratios & unit rates",
       "Integer operations",
@@ -31,11 +31,11 @@ const GRADE_COPY: Record<ValidGrade, GradeCopy> = {
     ],
   },
   7: {
-    scope: "Grade 7 · Proportions, expressions, and geometry",
-    headline: "Grade 7 Math Diagnostic",
+    scope: "Grade 7 content · For students entering grade 8",
+    headline: "Entering Grade 8 Diagnostic",
     subheadline:
-      "A ~15-minute grade-7 assessment covering proportional relationships, rational numbers, expressions and equations, and probability. Free — we email the full report and match your student with the right coaching pathway.",
-    scopeTitle: "What grade 7 covers",
+      "A ~15-minute assessment of the grade 7 content your student should have mastered — proportional relationships, rational numbers, multi-step equations, and probability. Free — we email the full report and a coaching program recommendation. Also a valid mid-year check for current grade 7 students.",
+    scopeTitle: "Grade 7 content covered",
     scopeItems: [
       "Proportional relationships",
       "Rational number operations",
@@ -46,11 +46,11 @@ const GRADE_COPY: Record<ValidGrade, GradeCopy> = {
     ],
   },
   8: {
-    scope: "Grade 8 · Functions, exponents, and pre-algebra",
-    headline: "Grade 8 Math Diagnostic",
+    scope: "Grade 8 content · For students entering grade 9",
+    headline: "Entering Grade 9 Diagnostic",
     subheadline:
-      "A ~15-minute grade-8 assessment covering linear functions, systems, exponents, transformations, and the Pythagorean theorem — the bridge to Algebra 1. Free — we email the full report and match your student with the right coaching pathway.",
-    scopeTitle: "What grade 8 covers",
+      "A ~15-minute assessment of the grade 8 content your student should have mastered — the bridge to Algebra 1. Covers linear functions, systems, exponents, transformations, and the Pythagorean theorem. Free — we email the full report and a coaching program recommendation. Also a valid mid-year check for current grade 8 students.",
+    scopeTitle: "Grade 8 content covered",
     scopeItems: [
       "Linear equations & functions",
       "Systems of equations",
@@ -61,11 +61,11 @@ const GRADE_COPY: Record<ValidGrade, GradeCopy> = {
     ],
   },
   9: {
-    scope: "Grade 9 · Algebra 1 foundations",
-    headline: "Grade 9 Math Diagnostic",
+    scope: "Grade 9 · Algebra 1 · For students entering grade 10",
+    headline: "Entering Grade 10 Diagnostic",
     subheadline:
-      "A ~15-minute Algebra 1 diagnostic covering linear and quadratic functions, systems, and inequalities. Free — we email the full report and match your student with the right coaching pathway.",
-    scopeTitle: "What grade 9 covers",
+      "A ~15-minute Algebra 1 diagnostic covering linear and quadratic functions, systems, and factoring. Free — we email the full report and a coaching program recommendation. Also a valid mid-year check for current Algebra 1 students.",
+    scopeTitle: "Grade 9 (Algebra 1) content covered",
     scopeItems: [
       "Linear & quadratic functions",
       "Systems & inequalities",
@@ -76,11 +76,11 @@ const GRADE_COPY: Record<ValidGrade, GradeCopy> = {
     ],
   },
   10: {
-    scope: "Grade 10 · Geometry and algebra applications",
-    headline: "Grade 10 Math Diagnostic",
+    scope: "Grade 10 · Geometry · For students entering grade 11",
+    headline: "Entering Grade 11 Diagnostic",
     subheadline:
-      "A ~15-minute assessment covering geometry, coordinate proofs, right triangles, and continued algebra fluency. Free — we email the full report and match your student with the right coaching pathway.",
-    scopeTitle: "What grade 10 covers",
+      "A ~15-minute Geometry diagnostic covering proofs, right triangle trig, circles, and coordinate geometry. Free — we email the full report and a coaching program recommendation. Also a valid mid-year check for current Geometry students.",
+    scopeTitle: "Grade 10 (Geometry) content covered",
     scopeItems: [
       "Congruence & similarity",
       "Right triangle trigonometry",
@@ -91,11 +91,11 @@ const GRADE_COPY: Record<ValidGrade, GradeCopy> = {
     ],
   },
   11: {
-    scope: "Grade 11 · Algebra 2 and pre-calculus",
-    headline: "Grade 11 Math Diagnostic",
+    scope: "Grade 11 · Algebra 2 / Pre-Calc · For students entering grade 12",
+    headline: "Entering Grade 12 Diagnostic",
     subheadline:
-      "A ~15-minute Algebra 2 / Pre-Calc diagnostic covering polynomials, rational and exponential functions, trigonometry, and function composition. Free — we email the full report and match your student with the right coaching pathway.",
-    scopeTitle: "What grade 11 covers",
+      "A ~15-minute Algebra 2 / Pre-Calc diagnostic covering polynomials, exponential and logarithmic functions, trigonometry, and function composition. Free — we email the full report and a coaching program recommendation. Also a valid mid-year check for current Algebra 2 / Pre-Calc students.",
+    scopeTitle: "Grade 11 (Algebra 2 / Pre-Calc) content covered",
     scopeItems: [
       "Polynomial & rational functions",
       "Exponential & logarithmic functions",

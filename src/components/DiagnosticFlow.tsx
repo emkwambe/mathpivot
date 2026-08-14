@@ -46,12 +46,12 @@ export default function DiagnosticFlow({
   const resolvedHeadline =
     headline ??
     (fixedGrade
-      ? `Grade ${fixedGrade} Math Diagnostic`
+      ? `Entering Grade ${fixedGrade + 1} Diagnostic`
       : "Where does your child stand in math?");
   const resolvedSub =
     subheadline ??
     (fixedGrade
-      ? `A ~15-minute assessment aligned to grade ${fixedGrade} math. Free — we email you the full report and a coaching program recommendation.`
+      ? `A ~15-minute assessment of grade ${fixedGrade} content — the mastery expected before entering grade ${fixedGrade + 1}. Free — we email the full report and a coaching program recommendation.`
       : "Our 15-minute diagnostic tells you exactly where your child is strong and where they need support. No cost, no commitment.");
 
   return (

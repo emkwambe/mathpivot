@@ -17,38 +17,50 @@ export const metadata: Metadata = {
 const GRADES = [
   {
     grade: 6,
-    label: "Grade 6",
+    enteringGrade: 7,
+    label: "Entering Grade 7",
+    contentLabel: "Grade 6 content",
     scope: "Ratios, integers, expressions",
     color: "border-blue-200 hover:border-blue-400 hover:bg-blue-50",
   },
   {
     grade: 7,
-    label: "Grade 7",
+    enteringGrade: 8,
+    label: "Entering Grade 8",
+    contentLabel: "Grade 7 content",
     scope: "Proportions, rationals, geometry",
     color: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
   },
   {
     grade: 8,
-    label: "Grade 8",
+    enteringGrade: 9,
+    label: "Entering Grade 9",
+    contentLabel: "Grade 8 content",
     scope: "Linear functions, systems, exponents",
     color: "border-amber-200 hover:border-amber-400 hover:bg-amber-50",
   },
   {
     grade: 9,
-    label: "Grade 9",
-    scope: "Algebra 1 · quadratics, polynomials",
+    enteringGrade: 10,
+    label: "Entering Grade 10",
+    contentLabel: "Grade 9 content · Algebra 1",
+    scope: "Quadratics, systems, polynomials",
     color: "border-purple-200 hover:border-purple-400 hover:bg-purple-50",
   },
   {
     grade: 10,
-    label: "Grade 10",
-    scope: "Geometry · proofs, trig, circles",
+    enteringGrade: 11,
+    label: "Entering Grade 11",
+    contentLabel: "Grade 10 content · Geometry",
+    scope: "Proofs, trig, circles, coordinate geometry",
     color: "border-rose-200 hover:border-rose-400 hover:bg-rose-50",
   },
   {
     grade: 11,
-    label: "Grade 11",
-    scope: "Algebra 2 / Pre-Calc · logs, trig",
+    enteringGrade: 12,
+    label: "Entering Grade 12",
+    contentLabel: "Grade 11 content · Algebra 2 / Pre-Calc",
+    scope: "Logs, trig, polynomial & rational functions",
     color: "border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50",
   },
 ];
@@ -88,12 +100,13 @@ export default function DiagnosticPickerPage() {
             Free · 15 minutes · No commitment
           </div>
           <h1 className="text-3xl sm:text-5xl font-bold text-slate-800 leading-tight">
-            Which grade is your student in?
+            Which grade is your student entering?
           </h1>
           <p className="mt-4 text-slate-600 max-w-xl mx-auto text-base sm:text-lg">
-            Pick a grade to start a diagnostic tailored to that curriculum.
-            We&apos;ll email a full domain-by-domain report and a coaching
-            program recommendation.
+            Pick the grade your student is entering. We&apos;ll assess mastery
+            of the prior-grade content and email a coaching program
+            recommendation. Also a good mid-year check for students currently in
+            the tested grade.
           </p>
         </div>
 
@@ -107,7 +120,7 @@ export default function DiagnosticPickerPage() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Diagnostic
+                    {g.contentLabel}
                   </p>
                   <p className="text-2xl font-bold text-slate-800 mt-1">
                     {g.label}

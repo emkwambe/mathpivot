@@ -737,20 +737,36 @@ export default function LandingPage() {
               Start with a free diagnostic
             </h2>
             <p className="mt-4 text-slate-400 max-w-2xl mx-auto">
-              Pick your student&apos;s grade. Get a domain-by-domain report and
-              a coaching program recommendation — Foundation, Acceleration, or
-              Elite — matched to their actual results.
+              Pick the grade your student is entering. We assess mastery of the
+              prior-grade content and recommend a coaching program — Foundation,
+              Acceleration, or Elite — matched to the results.
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { grade: 6, scope: "Ratios & integers" },
-              { grade: 7, scope: "Proportions & rationals" },
-              { grade: 8, scope: "Linear functions" },
-              { grade: 9, scope: "Algebra 1" },
-              { grade: 10, scope: "Geometry" },
-              { grade: 11, scope: "Algebra 2 / Pre-Calc" },
+              {
+                grade: 6,
+                entering: 7,
+                scope: "Grade 6 · Ratios & integers",
+              },
+              {
+                grade: 7,
+                entering: 8,
+                scope: "Grade 7 · Proportions & rationals",
+              },
+              {
+                grade: 8,
+                entering: 9,
+                scope: "Grade 8 · Linear functions",
+              },
+              { grade: 9, entering: 10, scope: "Grade 9 · Algebra 1" },
+              { grade: 10, entering: 11, scope: "Grade 10 · Geometry" },
+              {
+                grade: 11,
+                entering: 12,
+                scope: "Grade 11 · Algebra 2 / Pre-Calc",
+              },
             ].map((g) => (
               <Link
                 key={g.grade}
@@ -758,9 +774,9 @@ export default function LandingPage() {
                 className="rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/40 transition-all p-4 text-center group"
               >
                 <p className="text-xs font-bold uppercase tracking-wide text-blue-300">
-                  Diagnostic
+                  Entering
                 </p>
-                <p className="text-2xl font-bold mt-1">Grade {g.grade}</p>
+                <p className="text-2xl font-bold mt-1">Grade {g.entering}</p>
                 <p className="text-xs text-slate-400 mt-2 leading-snug">
                   {g.scope}
                 </p>
