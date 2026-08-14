@@ -215,7 +215,7 @@ export default function LandingPage() {
                 Sign In
               </Link>
               <Link
-                href="/signup"
+                href="/pricing"
                 className="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-lg transition-colors"
               >
                 Get Started
@@ -349,7 +349,7 @@ export default function LandingPage() {
                 Sign In
               </Link>
               <Link
-                href="/signup"
+                href="/pricing"
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-sm text-white bg-blue-600 px-4 py-2 rounded-lg"
               >
@@ -388,7 +388,7 @@ export default function LandingPage() {
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/signup"
+              href="/pricing"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-medium px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors text-base shadow-lg shadow-blue-600/25"
             >
               Enroll Your Child
@@ -628,7 +628,7 @@ export default function LandingPage() {
                 </ul>
 
                 <Link
-                  href="/signup"
+                  href={`/enroll/${program.name.toLowerCase()}`}
                   className={`mt-8 block text-center py-3 rounded-xl text-white font-medium transition-colors ${
                     program.name === "Foundation"
                       ? "bg-blue-600 hover:bg-blue-700"
@@ -892,7 +892,7 @@ export default function LandingPage() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/signup"
+              href="/pricing"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-blue-700 font-semibold px-8 py-3.5 rounded-xl hover:bg-blue-50 transition-colors text-base"
             >
               Enroll Your Child
