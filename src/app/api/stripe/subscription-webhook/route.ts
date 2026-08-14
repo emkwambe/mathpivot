@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import type Stripe from "stripe";
 import {
   stripe,
-  constructWebhookEvent,
+  constructSubscriptionWebhookEvent,
   isStripeConfigured,
 } from "@/lib/stripe";
 import { isValidTier, type ProgramTier } from "@/lib/stripe/programs";
@@ -34,20 +34,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
-  const event = constructWebhookEvent(body, signature);
+  const event = constructSubscriptionWebhookEvent(body, signature);
   if (!event) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // Best-effort audit log; ignore failure if table doesn't exist.
-  try {
-    await supabaseAdmin.from("stripe_webhook_events").insert({
+  // Best-effort audit log; ignore failure if table doesn't exist. Deliberately
+  // never fatal — supabase-js returns errors rather than throwing, so this is
+  // logged and stepped over.
+  const { error: auditErr } = await supabaseAdmin
+    .from("stripe_webhook_events")
+    .insert({
       stripe_event_id: event.id,
       event_type: event.type,
       payload_json: event.data.object as unknown as Record<string, unknown>,
     });
-  } catch (e) {
-    console.warn("[subscription-webhook] audit log skipped:", e);
+  if (auditErr) {
+    console.warn("[subscription-webhook] audit log skipped:", auditErr.message);
   }
 
   try {
@@ -138,13 +141,32 @@ async function handleSubscriptionCheckoutCompleted(
   const item = sub.items.data[0];
   const stripePriceId = item?.price?.id ?? "";
 
-  const { data: existing } = await supabaseAdmin
+  // Provision the parent's auth user before writing the row so the new user id
+  // can be stored as parent_user_id — without it the RLS policy in migration
+  // 00049 has nothing to match on and the parent cannot see their own
+  // subscription. Best-effort: a provisioning failure must not lose the paid
+  // subscription, so we fall back to a null id and a plain login link.
+  const provisioned = await provisionParentAccount(parentEmail, parentName);
+
+  const { data: existing, error: existingErr } = await supabaseAdmin
     .from("program_subscriptions")
     .select("id")
     .eq("stripe_subscription_id", stripeSubId)
     .maybeSingle();
 
+  if (existingErr) {
+    console.error(
+      "[subscription-webhook] lookup failed for",
+      stripeSubId,
+      existingErr.message,
+    );
+    throw new Error(`program_subscriptions lookup: ${existingErr.message}`);
+  }
+
   const record = {
+    // Only written when provisioning succeeded, so a failed retry never blanks
+    // an id that a previous delivery already stored.
+    ...(provisioned.userId ? { parent_user_id: provisioned.userId } : {}),
     parent_email: parentEmail,
     parent_name: parentName,
     student_name: studentName,
@@ -168,34 +190,38 @@ async function handleSubscriptionCheckoutCompleted(
     metadata: session.metadata ?? {},
   };
 
-  if (existing) {
-    await supabaseAdmin
-      .from("program_subscriptions")
-      .update(record)
-      .eq("id", existing.id);
-  } else {
-    await supabaseAdmin.from("program_subscriptions").insert(record);
+  // These writes are the whole point of the webhook. supabase-js resolves with
+  // an { error } instead of throwing, so an unchecked call would let a failed
+  // write return 200 and Stripe would never retry. Throw to the outer catch.
+  const { error: writeErr } = existing
+    ? await supabaseAdmin
+        .from("program_subscriptions")
+        .update(record)
+        .eq("id", existing.id)
+    : await supabaseAdmin.from("program_subscriptions").insert(record);
+
+  if (writeErr) {
+    console.error(
+      `[subscription-webhook] ${existing ? "update" : "insert"} failed for`,
+      stripeSubId,
+      writeErr.message,
+    );
+    throw new Error(
+      `program_subscriptions ${existing ? "update" : "insert"}: ${writeErr.message}`,
+    );
   }
 
-  // Send a welcome email with a password-setup magic link (best-effort).
+  // Send a welcome email with an account-setup magic link (best-effort — the
+  // subscription is already recorded, so a mail failure must not 500 and
+  // trigger a Stripe retry of the whole handler).
   if (parentEmail) {
     try {
-      const { data: link, error: linkErr } =
-        await supabaseAdmin.auth.admin.generateLink({
-          type: "magiclink",
-          email: parentEmail,
-          options: {
-            redirectTo: `${originFromWebhookHint()}/parent`,
-          },
-        });
-
-      const magic = link?.properties?.action_link;
       const subject = `Welcome to MathPivot — set up your ${tier[0].toUpperCase() + tier.slice(1)} Coaching account`;
       const html = welcomeEmailHtml({
         parentName: parentName ?? "there",
         studentName: studentName ?? "your student",
         tier,
-        magicLink: magic ?? `${originFromWebhookHint()}/login`,
+        magicLink: provisioned.magicLink ?? `${originFromWebhookHint()}/login`,
       });
       await sendEmail({
         to: parentEmail,
@@ -203,23 +229,99 @@ async function handleSubscriptionCheckoutCompleted(
         html,
         bcc: "mathpivot@mpingo.ai",
       });
-      if (linkErr) console.warn("[subscription-webhook] magic link:", linkErr);
     } catch (e) {
       console.error("[subscription-webhook] welcome email failed:", e);
     }
   }
 }
 
+/**
+ * Make sure a parent paying for the first time ends up with a usable account.
+ *
+ * generateLink({ type: "magiclink" }) only works for an email that already has
+ * an auth.users row — for a brand-new self-serve parent there is none, so the
+ * link came back empty and the welcome email pointed at a login page for an
+ * account that did not exist. Create the user first (auto-confirmed, since
+ * they just completed payment), then generate the link.
+ *
+ * Never throws: a subscription that is paid for must be recorded even if
+ * account provisioning is having a bad day.
+ */
+async function provisionParentAccount(
+  parentEmail: string,
+  parentName: string | null,
+): Promise<{ userId: string | null; magicLink: string | null }> {
+  if (!parentEmail) return { userId: null, magicLink: null };
+
+  try {
+    const { data: created, error: createErr } =
+      await supabaseAdmin.auth.admin.createUser({
+        email: parentEmail,
+        email_confirm: true,
+        user_metadata: {
+          ...(parentName ? { full_name: parentName } : {}),
+          source: "stripe_subscription_checkout",
+        },
+      });
+
+    // A repeat customer (or a webhook retry) already has an account — that is
+    // an expected outcome here, not a failure.
+    const alreadyExists =
+      !!createErr &&
+      /already (been )?registered|already exists/i.test(createErr.message);
+    if (createErr && !alreadyExists) {
+      console.error(
+        "[subscription-webhook] createUser failed:",
+        createErr.message,
+      );
+    }
+
+    const { data: link, error: linkErr } =
+      await supabaseAdmin.auth.admin.generateLink({
+        type: "magiclink",
+        email: parentEmail,
+        options: { redirectTo: `${originFromWebhookHint()}/parent` },
+      });
+
+    if (linkErr) {
+      console.error(
+        "[subscription-webhook] generateLink failed:",
+        linkErr.message,
+      );
+    }
+
+    // generateLink echoes back the resolved user, which covers the
+    // already-registered case without a second lookup.
+    return {
+      userId: link?.user?.id ?? created?.user?.id ?? null,
+      magicLink: link?.properties?.action_link ?? null,
+    };
+  } catch (e) {
+    console.error("[subscription-webhook] parent provisioning failed:", e);
+    return { userId: null, magicLink: null };
+  }
+}
+
 async function syncSubscriptionState(sub: Stripe.Subscription) {
-  const { data: existing } = await supabaseAdmin
+  const { data: existing, error: existingErr } = await supabaseAdmin
     .from("program_subscriptions")
     .select("id")
     .eq("stripe_subscription_id", sub.id)
     .maybeSingle();
 
+  if (existingErr) {
+    console.error(
+      "[subscription-webhook] lookup failed for",
+      sub.id,
+      existingErr.message,
+    );
+    throw new Error(`program_subscriptions lookup: ${existingErr.message}`);
+  }
+
+  // No row yet — checkout.session.completed has not landed. Nothing to sync.
   if (!existing) return;
 
-  await supabaseAdmin
+  const { error: syncErr } = await supabaseAdmin
     .from("program_subscriptions")
     .update({
       status: sub.status,
@@ -234,15 +336,34 @@ async function syncSubscriptionState(sub: Stripe.Subscription) {
       canceled_at: toIsoNullable(sub.canceled_at),
     })
     .eq("id", existing.id);
+
+  if (syncErr) {
+    console.error(
+      "[subscription-webhook] state sync failed for",
+      sub.id,
+      syncErr.message,
+    );
+    throw new Error(`program_subscriptions sync: ${syncErr.message}`);
+  }
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   const subId = (invoice as unknown as { subscription?: string }).subscription;
   if (!subId) return;
-  await supabaseAdmin
+
+  const { error: pastDueErr } = await supabaseAdmin
     .from("program_subscriptions")
     .update({ status: "past_due" })
     .eq("stripe_subscription_id", subId);
+
+  if (pastDueErr) {
+    console.error(
+      "[subscription-webhook] past_due update failed for",
+      subId,
+      pastDueErr.message,
+    );
+    throw new Error(`program_subscriptions past_due: ${pastDueErr.message}`);
+  }
 }
 
 function toIsoNullable(epochSeconds: number | null | undefined): string | null {

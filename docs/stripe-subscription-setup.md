@@ -41,7 +41,13 @@ In **Vercel → Project → Settings → Environment Variables**, add:
 Also required (should already be set from other Stripe flows):
 
 - `STRIPE_SECRET_KEY` — test key (`sk_test_...`) for Preview/Dev, live key (`sk_live_...`) for Production
-- `STRIPE_WEBHOOK_SECRET` — set in step 3 below, one per environment
+- `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` — set in step 3 below, one per environment
+
+> **Do not reuse `STRIPE_WEBHOOK_SECRET` here.** That variable belongs to the
+> older credit-purchase endpoint (`/api/stripe/webhook`). Stripe issues a
+> *separate* signing secret for every endpoint you register, so the two cannot
+> share a value — if they do, one of the two endpoints rejects every event it
+> receives with a 400.
 
 ---
 
@@ -61,7 +67,9 @@ In Stripe Dashboard → **Developers → Webhooks → Add endpoint**:
 
 After saving, click the endpoint and reveal the **Signing secret** (starts with `whsec_...`). Set it as:
 
-- `STRIPE_WEBHOOK_SECRET` in the matching Vercel environment.
+- `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` in the matching Vercel environment.
+
+This must be the signing secret shown on the **subscription** endpoint specifically — not the one from the credit-purchase endpoint, and not a copy of `STRIPE_WEBHOOK_SECRET`.
 
 **One webhook per environment** — test-mode webhook uses your test-mode secret, live-mode webhook uses your live-mode secret. They are separate secrets.
 
@@ -119,8 +127,8 @@ Then run one more end-to-end test with a real card at a small amount (or use Str
 
 - **"Stripe not configured"** on the enroll page → `STRIPE_SECRET_KEY` missing from that Vercel environment.
 - **"Missing STRIPE_PRICE_ID for foundation"** → forgot one of the three price ID env vars.
-- **Webhook returns 400 "Invalid signature"** → `STRIPE_WEBHOOK_SECRET` doesn't match the endpoint's secret in Stripe (or you're using the test secret against live events, or vice versa).
-- **Row never appears in `program_subscriptions`** → check webhook deliveries in Stripe; if they're failing, view the error. If they show `200 OK` but no row, check Supabase logs for an admin-client permission issue.
+- **Webhook returns 400 "Invalid signature"** → `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` doesn't match the subscription endpoint's secret in Stripe (or you're using the test secret against live events, or vice versa). A log line reading `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET: signing secret env var is not set` means the variable is missing from that environment entirely.
+- **Row never appears in `program_subscriptions`** → check webhook deliveries in Stripe. A failed database write now returns a 500 with the Postgres error in the logs (prefixed `[subscription-webhook]`) and Stripe retries it, so a delivery showing `200 OK` genuinely means the row was written.
 - **Welcome email never arrives** → the fallback in the webhook is best-effort; check server logs for `[subscription-webhook] welcome email failed`. `RESEND_API_KEY` must be set in the same environment.
 
 ---
@@ -132,7 +140,7 @@ Then run one more end-to-end test with a real card at a small amount (or use Str
 3. Server action `startEnrollmentAction` creates a Stripe Checkout session in `mode: 'subscription'` with two custom fields (student name, grade), price = `STRIPE_PRICE_ID_[TIER]`.
 4. Parent completes payment in Stripe's hosted Checkout.
 5. Stripe sends `checkout.session.completed` to `/api/stripe/subscription-webhook`.
-6. Webhook inserts a row in `program_subscriptions`, generates a Supabase auth magic link, and emails the parent a welcome message with the account-setup link.
+6. Webhook creates the parent's Supabase auth user (auto-confirmed — they just paid), generates a magic link for it, inserts a row in `program_subscriptions` carrying that user id as `parent_user_id`, and emails the parent a welcome message with the account-setup link.
 7. Parent redirected to `/enroll/success` — clean thank-you page with next steps.
 8. Ongoing subscription state changes (renewals, cancellations, past-due) are synced by the `customer.subscription.*` and `invoice.*` webhook events.
 
