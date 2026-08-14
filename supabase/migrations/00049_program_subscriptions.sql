@@ -7,7 +7,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE subscription_status AS ENUM (
+  CREATE TYPE program_subscription_status AS ENUM (
     'incomplete', 'incomplete_expired', 'trialing', 'active',
     'past_due', 'canceled', 'unpaid', 'paused'
   );
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS public.program_subscriptions (
   stripe_subscription_id TEXT UNIQUE NOT NULL,
   stripe_price_id TEXT NOT NULL,
   stripe_checkout_session_id TEXT,
-  status subscription_status NOT NULL DEFAULT 'incomplete',
+  status program_subscription_status NOT NULL DEFAULT 'incomplete',
 
   current_period_start TIMESTAMPTZ,
   current_period_end TIMESTAMPTZ,
