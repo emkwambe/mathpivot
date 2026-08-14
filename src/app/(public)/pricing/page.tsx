@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 const PROGRAMS = [
   {
+    tier: "foundation",
     name: "Foundation",
     price: "349",
     sessions: "2x per week",
@@ -28,6 +29,7 @@ const PROGRAMS = [
     featured: false,
   },
   {
+    tier: "acceleration",
     name: "Acceleration",
     price: "549",
     sessions: "3x per week",
@@ -47,6 +49,7 @@ const PROGRAMS = [
     featured: true,
   },
   {
+    tier: "elite",
     name: "Elite",
     price: "799",
     sessions: "2–3x per week",
@@ -219,7 +222,7 @@ export default function PricingPage() {
                 </ul>
 
                 <Link
-                  href="/get-started"
+                  href={`/enroll/${plan.tier}`}
                   className={`block text-center font-semibold py-3 rounded-xl transition-colors ${colors.button}`}
                 >
                   Enroll Now

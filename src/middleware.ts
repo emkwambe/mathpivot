@@ -21,6 +21,7 @@ const PUBLIC_ROUTES = [
   "/for",
   "/partnerships",
   "/compare",
+  "/enroll",
 ];
 
 const ROLE_PREFIXES: Record<string, string> = {

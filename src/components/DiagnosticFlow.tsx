@@ -280,7 +280,7 @@ export default function DiagnosticFlow({
 
             <div className="flex flex-col gap-3">
               <Link
-                href="/pricing"
+                href={`/enroll/${result.programTier}`}
                 className="w-full bg-blue-700 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition-colors text-center"
               >
                 Enroll in {result.recommendedProgram}
