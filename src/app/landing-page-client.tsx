@@ -199,10 +199,11 @@ export default function LandingPage() {
                 Compare
               </Link>
               <Link
-                href="/summer"
+                href="/diagnostic"
                 className="text-sm font-semibold text-orange-500 hover:text-orange-600"
+                title="Free 15-minute diagnostic by grade"
               >
-                Summer
+                Free Diagnostic
               </Link>
             </div>
 
@@ -332,11 +333,11 @@ export default function LandingPage() {
               </div>
             </Link>
             <Link
-              href="/summer"
+              href="/diagnostic"
               onClick={() => setMobileMenuOpen(false)}
               className="block text-sm font-semibold text-orange-500 py-2"
             >
-              Summer Programs
+              Free Diagnostic
             </Link>
 
             <div className="flex gap-2 pt-3 border-t border-slate-100 mt-2">
@@ -724,114 +725,63 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Summer Clinics */}
+      {/* Free Diagnostic — replaces the summer clinic promo */}
       <section className="py-20 px-4 bg-slate-900 text-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <span className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
-                />
-              </svg>
-              Summer 2026 — Spots Closing Soon
+            <span className="inline-flex items-center gap-2 bg-blue-500/15 border border-blue-500/30 text-blue-200 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+              <GraduationCap className="w-3.5 h-3.5" />
+              Free · 15 minutes · By grade
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold">
-              Summer Math Clinics
+              Start with a free diagnostic
             </h2>
             <p className="mt-4 text-slate-400 max-w-2xl mx-auto">
-              Intensive 8–11 day clinics targeting the most heavily tested EOG
-              and EOC topics. Your child walks into the next school year
-              prepared — not catching up.
+              Pick your student&apos;s grade. Get a domain-by-domain report and
+              a coaching program recommendation — Foundation, Acceleration, or
+              Elite — matched to their actual results.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              {
-                name: "Propel Math 7",
-                price: "$249",
-                days: "8 days",
-                focus: "Ratios & Proportional Relationships",
-                outcome: "Grade 7 readiness",
-                color: "blue",
-              },
-              {
-                name: "Ignite Math 1",
-                price: "$449",
-                days: "10 days",
-                focus: "Number Sense, Algebra, and Functions",
-                outcome: "Algebra 1 & EOC success",
-                color: "amber",
-                featured: true,
-              },
-              {
-                name: "Advantage Math 8",
-                price: "$349",
-                days: "9 days",
-                focus: "Functions & Relations",
-                outcome: "Grade 8 readiness",
-                color: "purple",
-              },
-              {
-                name: "Ascent Pre-Calc",
-                price: "$549",
-                days: "11 days",
-                focus: "Advanced Functions, Trig, Pre-Calculus",
-                outcome: "Advanced math & STEM readiness",
-                color: "emerald",
-              },
-            ].map((clinic) => (
-              <div
-                key={clinic.name}
-                className={`rounded-2xl border p-5 ${
-                  clinic.featured
-                    ? "border-amber-400/50 bg-amber-400/10"
-                    : "border-white/10 bg-white/5"
-                }`}
+              { grade: 6, scope: "Ratios & integers" },
+              { grade: 7, scope: "Proportions & rationals" },
+              { grade: 8, scope: "Linear functions" },
+              { grade: 9, scope: "Algebra 1" },
+              { grade: 10, scope: "Geometry" },
+              { grade: 11, scope: "Algebra 2 / Pre-Calc" },
+            ].map((g) => (
+              <Link
+                key={g.grade}
+                href={`/diagnostic/grade/${g.grade}`}
+                className="rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/40 transition-all p-4 text-center group"
               >
-                <p className="text-sm font-bold text-white">{clinic.name}</p>
-                <div className="flex items-end gap-1.5 mt-2">
-                  <span className="text-2xl font-bold">{clinic.price}</span>
-                  <span className="text-xs text-slate-400 pb-0.5">
-                    / {clinic.days}
-                  </span>
-                </div>
-                <p className="text-xs text-blue-300 mt-3 font-medium">
-                  {clinic.focus}
+                <p className="text-xs font-bold uppercase tracking-wide text-blue-300">
+                  Diagnostic
                 </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {clinic.outcome}
+                <p className="text-2xl font-bold mt-1">Grade {g.grade}</p>
+                <p className="text-xs text-slate-400 mt-2 leading-snug">
+                  {g.scope}
                 </p>
-                {clinic.featured && (
-                  <span className="inline-block mt-3 text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">
-                    Featured
-                  </span>
-                )}
-              </div>
+                <p className="mt-3 text-[11px] font-semibold text-blue-300 group-hover:text-blue-200">
+                  Start →
+                </p>
+              </Link>
             ))}
           </div>
 
-          <div className="mt-8 text-center space-y-3">
-            <p className="text-sm text-blue-300">
-              Clinic graduates receive an enrollment credit toward year-round
-              coaching.
-            </p>
+          <div className="mt-10 text-center">
             <Link
-              href="/summer"
+              href="/diagnostic"
               className="inline-flex items-center gap-2 bg-blue-600 text-white font-medium px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors text-base"
             >
-              Join the Summer Waitlist
+              Not sure? Open the grade picker
               <ArrowRight size={18} />
             </Link>
+            <p className="mt-4 text-xs text-slate-500">
+              No cost, no commitment. Results emailed within minutes.
+            </p>
           </div>
         </div>
       </section>

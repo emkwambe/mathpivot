@@ -27,7 +27,10 @@ export interface DomainScore {
 
 export interface PlacementResult {
   recommendedProgram: string;
+  programTier: "foundation" | "acceleration" | "elite";
   programDescription: string;
+  programPriceMonthly: number;
+  programCadence: string;
   domainScores: DomainScore[];
   overallScore: number;
   weakestDomain: string;
@@ -35,48 +38,49 @@ export interface PlacementResult {
   assessmentId: string;
 }
 
-const PLACEMENT_RULES: {
-  program: string;
-  description: string;
-  condition: (scores: Record<string, DomainScore>) => boolean;
-}[] = [
-  {
-    program: "Propel Math 7",
-    description:
-      "Build strong foundations in ratios, number sense, and proportional reasoning before tackling higher concepts.",
-    condition: (s) => {
-      const ratios = s.ratios_proportions?.percentage ?? 0;
-      const numbers = s.number_sense?.percentage ?? 0;
-      return ratios < 60 || numbers < 60;
-    },
+interface CoachingProgram {
+  tier: "foundation" | "acceleration" | "elite";
+  name: string;
+  priceMonthly: number;
+  cadence: string;
+  description: (grade?: number) => string;
+}
+
+const COACHING_PROGRAMS: Record<
+  "foundation" | "acceleration" | "elite",
+  CoachingProgram
+> = {
+  foundation: {
+    tier: "foundation",
+    name: "Foundation Coaching",
+    priceMonthly: 349,
+    cadence: "2 sessions / week",
+    description: () =>
+      "Rebuild confidence and close specific mastery gaps with a named math coach. Weekly coaching, structured progression, and measurable mastery — not hourly tutoring.",
   },
-  {
-    program: "Advantage Math 8",
-    description:
-      "Strengthen functions, expressions, and geometry — the core of 8th grade math and the bridge to algebra.",
-    condition: (s) => {
-      const functions = s.functions?.percentage ?? 0;
-      const expressions = s.expressions_equations?.percentage ?? 0;
-      return functions < 60 || expressions < 60;
-    },
+  acceleration: {
+    tier: "acceleration",
+    name: "Acceleration Coaching",
+    priceMonthly: 549,
+    cadence: "3 sessions / week",
+    description: () =>
+      "Fill remaining gaps while advancing beyond grade level. Three coaching meetings per week with a dedicated coach, mastery tracking, and a personalized roadmap.",
   },
-  {
-    program: "Ignite Math 1",
-    description:
-      "Master algebra, systems, and function analysis — the foundation for all high school math.",
-    condition: (s) => {
-      const functions = s.functions?.percentage ?? 100;
-      const expressions = s.expressions_equations?.percentage ?? 100;
-      return functions >= 60 && expressions >= 60;
-    },
+  elite: {
+    tier: "elite",
+    name: "Elite Coaching",
+    priceMonthly: 799,
+    cadence: "2-3 sessions / week + enrichment",
+    description: () =>
+      "Ready to accelerate. Elite coaching adds competition prep (AMC, MATHCOUNTS), advanced problem-solving, and additional development opportunities alongside grade-level mastery.",
   },
-  {
-    program: "Ascent Pre-Calc",
-    description:
-      "Ready for advanced functions, trigonometry, and pre-calculus concepts.",
-    condition: () => true,
-  },
-];
+};
+
+function selectProgram(overallScore: number): CoachingProgram {
+  if (overallScore < 40) return COACHING_PROGRAMS.foundation;
+  if (overallScore < 70) return COACHING_PROGRAMS.acceleration;
+  return COACHING_PROGRAMS.elite;
+}
 
 export async function getAssessmentQuestions(
   gradeHint?: number,
@@ -84,12 +88,27 @@ export async function getAssessmentQuestions(
   const supabase = await createClient();
 
   let gradeBands: string[];
-  if (gradeHint && gradeHint <= 7) {
-    gradeBands = ["6-7", "7-8"];
-  } else if (gradeHint && gradeHint <= 9) {
-    gradeBands = ["7-8", "8-9"];
-  } else {
-    gradeBands = ["8-9", "9-10", "10-11"];
+  switch (gradeHint) {
+    case 6:
+      gradeBands = ["6-7"];
+      break;
+    case 7:
+      gradeBands = ["6-7", "7-8"];
+      break;
+    case 8:
+      gradeBands = ["7-8", "8-9"];
+      break;
+    case 9:
+      gradeBands = ["8-9", "9-10"];
+      break;
+    case 10:
+      gradeBands = ["9-10", "10-11"];
+      break;
+    case 11:
+      gradeBands = ["10-11", "9-10"];
+      break;
+    default:
+      gradeBands = ["7-8", "8-9", "9-10"];
   }
 
   const { data } = await supabase
@@ -140,6 +159,7 @@ export async function submitAssessment(
   parentEmail?: string,
   parentName?: string,
   studentName?: string,
+  gradeHint?: number,
 ): Promise<PlacementResult | null> {
   const user = await getCurrentUser();
   const supabase = await createClient();
@@ -188,15 +208,12 @@ export async function submitAssessment(
   const weakestDomain = sorted[0]?.domain || "";
   const strongestDomain = sorted[sorted.length - 1]?.domain || "";
 
-  let recommendedProgram = "Ignite Math 1";
-  let programDescription = "";
-  for (const rule of PLACEMENT_RULES) {
-    if (rule.condition(domainScores)) {
-      recommendedProgram = rule.program;
-      programDescription = rule.description;
-      break;
-    }
-  }
+  const program = selectProgram(overallScore);
+  const recommendedProgram = program.name;
+  const programTier = program.tier;
+  const programDescription = program.description(gradeHint);
+  const programPriceMonthly = program.priceMonthly;
+  const programCadence = program.cadence;
 
   let assessmentId = `local-${Date.now()}`;
 
@@ -231,7 +248,10 @@ export async function submitAssessment(
 
   const placementResult: PlacementResult = {
     recommendedProgram,
+    programTier,
     programDescription,
+    programPriceMonthly,
+    programCadence,
     domainScores: domainScoreArray,
     overallScore,
     weakestDomain,
@@ -248,6 +268,8 @@ export async function submitAssessment(
         domainScores: domainScoreArray,
         recommendedProgram,
         programDescription,
+        programPriceMonthly,
+        programCadence,
         strongestDomain,
         weakestDomain,
       });

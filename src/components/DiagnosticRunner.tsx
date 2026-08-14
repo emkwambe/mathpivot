@@ -72,6 +72,7 @@ export default function DiagnosticRunner({
         parentEmail,
         parentName,
         studentName,
+        gradeHint,
       );
       if (placementResult) {
         setResult(placementResult);
@@ -169,7 +170,15 @@ export default function DiagnosticRunner({
           <h3 className="text-xl font-bold text-slate-800">
             {result.recommendedProgram}
           </h3>
-          <p className="text-sm text-slate-600 mt-2">
+          {result.programPriceMonthly && result.programCadence && (
+            <p className="text-sm text-slate-500 mt-1">
+              <span className="font-semibold text-slate-700">
+                ${result.programPriceMonthly}/mo
+              </span>{" "}
+              · {result.programCadence}
+            </p>
+          )}
+          <p className="text-sm text-slate-600 mt-3">
             {result.programDescription}
           </p>
         </div>

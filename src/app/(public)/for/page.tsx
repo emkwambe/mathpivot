@@ -19,7 +19,7 @@ const DESCRIPTIONS: Record<string, string> = {
   schools:
     "Certified coaches and mastery data for school and district partnerships.",
   "falling-behind":
-    "Free diagnostic + summer clinic to rebuild confidence fast.",
+    "Free diagnostic + Foundation coaching to rebuild confidence fast.",
   proactive: "Beyond grade level — structured coaching for motivated families.",
 };
 

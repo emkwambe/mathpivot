@@ -333,6 +333,8 @@ export const emailTemplates = {
     domainScores,
     recommendedProgram,
     programDescription,
+    programPriceMonthly,
+    programCadence,
     strongestDomain,
     weakestDomain,
   }: {
@@ -347,6 +349,8 @@ export const emailTemplates = {
     }[];
     recommendedProgram: string;
     programDescription: string;
+    programPriceMonthly?: number;
+    programCadence?: string;
     strongestDomain: string;
     weakestDomain: string;
   }) => ({
@@ -412,6 +416,11 @@ export const emailTemplates = {
         <div style="margin: 28px 24px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 24px;">
           <p style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; color: #1D4ED8; margin: 0;">Our Recommendation</p>
           <p style="font-size: 20px; font-weight: bold; color: #1e293b; margin: 10px 0 6px;">${recommendedProgram}</p>
+          ${
+            programPriceMonthly && programCadence
+              ? `<p style="font-size: 13px; color: #64748b; margin: 0 0 10px;"><strong>$${programPriceMonthly}/mo</strong> · ${programCadence}</p>`
+              : ""
+          }
           <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.5;">${programDescription}</p>
         </div>
 
@@ -420,25 +429,25 @@ export const emailTemplates = {
           <p style="font-size: 16px; font-weight: bold; color: #1e293b; margin: 0 0 12px;">What happens next?</p>
           <table style="width: 100%;">
             <tr>
-              <td style="padding: 6px 0; font-size: 14px; color: #475569; vertical-align: top; width: 24px; font-weight: bold; color: #1D4ED8;">1.</td>
-              <td style="padding: 6px 0; font-size: 14px; color: #475569;">We review ${studentName}'s results and identify the best coaching pathway.</td>
+              <td style="padding: 6px 0; font-size: 14px; color: #1D4ED8; vertical-align: top; width: 24px; font-weight: bold;">1.</td>
+              <td style="padding: 6px 0; font-size: 14px; color: #475569;">We review ${studentName}'s results and match them with a dedicated math coach.</td>
             </tr>
             <tr>
-              <td style="padding: 6px 0; font-size: 14px; color: #475569; vertical-align: top; width: 24px; font-weight: bold; color: #1D4ED8;">2.</td>
-              <td style="padding: 6px 0; font-size: 14px; color: #475569;">A MathPivot team member will follow up within 48 hours to discuss options.</td>
+              <td style="padding: 6px 0; font-size: 14px; color: #1D4ED8; vertical-align: top; width: 24px; font-weight: bold;">2.</td>
+              <td style="padding: 6px 0; font-size: 14px; color: #475569;">A MathPivot team member will follow up within 48 hours to discuss the coaching pathway.</td>
             </tr>
             <tr>
-              <td style="padding: 6px 0; font-size: 14px; color: #475569; vertical-align: top; width: 24px; font-weight: bold; color: #1D4ED8;">3.</td>
-              <td style="padding: 6px 0; font-size: 14px; color: #475569;">If you're ready now, explore our summer clinics or year-round programs below.</td>
+              <td style="padding: 6px 0; font-size: 14px; color: #1D4ED8; vertical-align: top; width: 24px; font-weight: bold;">3.</td>
+              <td style="padding: 6px 0; font-size: 14px; color: #475569;">Once enrolled, ${studentName} joins a small cohort (5 students target, 6 max) and starts on a personalized roadmap.</td>
             </tr>
           </table>
         </div>
 
         <!-- CTAs -->
         <div style="padding: 28px 24px; text-align: center;">
-          <a href="https://mathpivot.com/summer" style="display: inline-block; background: #F97316; color: white; font-weight: bold; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px;">Explore Summer Clinics</a>
+          <a href="https://mathpivot.com/pricing" style="display: inline-block; background: #1D4ED8; color: white; font-weight: bold; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px;">Enroll in Coaching</a>
           <br />
-          <a href="https://mathpivot.com/pricing" style="display: inline-block; margin-top: 12px; border: 2px solid #e2e8f0; color: #334155; font-weight: 600; padding: 12px 36px; border-radius: 10px; text-decoration: none; font-size: 14px;">View Year-Round Programs</a>
+          <a href="https://mathpivot.com/get-started" style="display: inline-block; margin-top: 12px; border: 2px solid #e2e8f0; color: #334155; font-weight: 600; padding: 12px 36px; border-radius: 10px; text-decoration: none; font-size: 14px;">Schedule a Consultation</a>
         </div>
 
         <!-- Footer -->
