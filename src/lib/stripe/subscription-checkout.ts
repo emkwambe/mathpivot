@@ -32,7 +32,6 @@ export async function createSubscriptionCheckout({
     allow_promotion_codes: true,
     billing_address_collection: "required",
     customer_email: parentEmail,
-    customer_creation: parentEmail ? undefined : "always",
     success_url: successUrl,
     cancel_url: cancelUrl,
     custom_fields: [
