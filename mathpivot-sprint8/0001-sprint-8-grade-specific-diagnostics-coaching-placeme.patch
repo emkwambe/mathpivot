@@ -1,0 +1,1518 @@
+From c5ab1f9d5d8f10a5c2e5a6686994da64159876fa Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 14 Aug 2026 04:12:23 +0000
+Subject: [PATCH] sprint 8: grade-specific diagnostics + coaching placement +
+ summer sunset
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- New /diagnostic route: grade picker with 6 grade cards (6-11)
+- New /diagnostic/grade/[grade] dynamic route with grade-specific
+  copy, scope-of-topics box, and pre-filled grade in the form
+- New DiagnosticFlow component shared between the picker fallback
+  and the per-grade pages
+- Placement rules now recommend coaching programs:
+  <40% Foundation ($349), 40-70% Acceleration ($549), 70%+ Elite ($799)
+- Results UI shows monthly price + cadence next to the program name
+- Diagnostic email rewritten to reference coaching programs and
+  the cohort model (was: summer clinics)
+- Summer clinic promo removed from homepage — replaced with a
+  free-diagnostic grade grid + grade picker CTA
+- Summer nav link replaced with 'Free Diagnostic' (desktop + mobile)
+- Migration 00048 adds ~28 questions across grade bands 9-10 and
+  10-11 so grades 9, 10, and 11 have real content to draw from
+- /summer page and admin summer-waitlist remain live but unpromoted
+---
+ .../diagnostic/grade/[grade]/page.tsx         | 199 +++++++++
+ src/app/(public)/diagnostic/page.tsx          | 391 ++++++------------
+ src/app/(public)/for/page.tsx                 |   2 +-
+ src/app/actions/diagnostics.ts                | 130 +++---
+ src/app/landing-page-client.tsx               | 130 ++----
+ src/components/DiagnosticFlow.tsx             | 300 ++++++++++++++
+ src/components/DiagnosticRunner.tsx           |  11 +-
+ src/lib/email/index.ts                        |  25 +-
+ ...00048_diagnostic_questions_grades_9_11.sql |  53 +++
+ 9 files changed, 833 insertions(+), 408 deletions(-)
+ create mode 100644 src/app/(public)/diagnostic/grade/[grade]/page.tsx
+ create mode 100644 src/components/DiagnosticFlow.tsx
+ create mode 100644 supabase/migrations/00048_diagnostic_questions_grades_9_11.sql
+
+diff --git a/src/app/(public)/diagnostic/grade/[grade]/page.tsx b/src/app/(public)/diagnostic/grade/[grade]/page.tsx
+new file mode 100644
+index 0000000..0c0561f
+--- /dev/null
++++ b/src/app/(public)/diagnostic/grade/[grade]/page.tsx
+@@ -0,0 +1,199 @@
++import Link from "next/link";
++import { notFound } from "next/navigation";
++import type { Metadata } from "next";
++import DiagnosticFlow from "@/components/DiagnosticFlow";
++
++const VALID_GRADES = [6, 7, 8, 9, 10, 11] as const;
++type ValidGrade = (typeof VALID_GRADES)[number];
++
++interface GradeCopy {
++  scope: string;
++  headline: string;
++  subheadline: string;
++  scopeTitle: string;
++  scopeItems: string[];
++}
++
++const GRADE_COPY: Record<ValidGrade, GradeCopy> = {
++  6: {
++    scope: "Grade 6 · Ratios, integers, and expressions",
++    headline: "Grade 6 Math Diagnostic",
++    subheadline:
++      "A ~15-minute grade-6 assessment covering ratios, proportions, integers, one-variable equations, and basic geometry. Free — we email the full report and match your student with the right coaching pathway.",
++    scopeTitle: "What grade 6 covers",
++    scopeItems: [
++      "Ratios & unit rates",
++      "Integer operations",
++      "One-variable equations",
++      "Coordinate plane",
++      "Area, surface area, volume",
++      "Statistical variability",
++    ],
++  },
++  7: {
++    scope: "Grade 7 · Proportions, expressions, and geometry",
++    headline: "Grade 7 Math Diagnostic",
++    subheadline:
++      "A ~15-minute grade-7 assessment covering proportional relationships, rational numbers, expressions and equations, and probability. Free — we email the full report and match your student with the right coaching pathway.",
++    scopeTitle: "What grade 7 covers",
++    scopeItems: [
++      "Proportional relationships",
++      "Rational number operations",
++      "Multi-step equations",
++      "Scale drawings & angles",
++      "Circle area & circumference",
++      "Probability of events",
++    ],
++  },
++  8: {
++    scope: "Grade 8 · Functions, exponents, and pre-algebra",
++    headline: "Grade 8 Math Diagnostic",
++    subheadline:
++      "A ~15-minute grade-8 assessment covering linear functions, systems, exponents, transformations, and the Pythagorean theorem — the bridge to Algebra 1. Free — we email the full report and match your student with the right coaching pathway.",
++    scopeTitle: "What grade 8 covers",
++    scopeItems: [
++      "Linear equations & functions",
++      "Systems of equations",
++      "Integer exponents & roots",
++      "Transformations",
++      "Pythagorean theorem",
++      "Bivariate data & scatter plots",
++    ],
++  },
++  9: {
++    scope: "Grade 9 · Algebra 1 foundations",
++    headline: "Grade 9 Math Diagnostic",
++    subheadline:
++      "A ~15-minute Algebra 1 diagnostic covering linear and quadratic functions, systems, and inequalities. Free — we email the full report and match your student with the right coaching pathway.",
++    scopeTitle: "What grade 9 covers",
++    scopeItems: [
++      "Linear & quadratic functions",
++      "Systems & inequalities",
++      "Exponents & polynomials",
++      "Factoring",
++      "Function transformations",
++      "Descriptive statistics",
++    ],
++  },
++  10: {
++    scope: "Grade 10 · Geometry and algebra applications",
++    headline: "Grade 10 Math Diagnostic",
++    subheadline:
++      "A ~15-minute assessment covering geometry, coordinate proofs, right triangles, and continued algebra fluency. Free — we email the full report and match your student with the right coaching pathway.",
++    scopeTitle: "What grade 10 covers",
++    scopeItems: [
++      "Congruence & similarity",
++      "Right triangle trigonometry",
++      "Coordinate geometry proofs",
++      "Circle theorems",
++      "Volume & surface area",
++      "Probability rules",
++    ],
++  },
++  11: {
++    scope: "Grade 11 · Algebra 2 and pre-calculus",
++    headline: "Grade 11 Math Diagnostic",
++    subheadline:
++      "A ~15-minute Algebra 2 / Pre-Calc diagnostic covering polynomials, rational and exponential functions, trigonometry, and function composition. Free — we email the full report and match your student with the right coaching pathway.",
++    scopeTitle: "What grade 11 covers",
++    scopeItems: [
++      "Polynomial & rational functions",
++      "Exponential & logarithmic functions",
++      "Trigonometric functions",
++      "Sequences & series",
++      "Complex numbers",
++      "Statistical inference",
++    ],
++  },
++};
++
++export function generateStaticParams() {
++  return VALID_GRADES.map((g) => ({ grade: String(g) }));
++}
++
++export async function generateMetadata({
++  params,
++}: {
++  params: Promise<{ grade: string }>;
++}): Promise<Metadata> {
++  const { grade } = await params;
++  const n = Number(grade);
++  if (!VALID_GRADES.includes(n as ValidGrade)) {
++    return { title: "Math Diagnostic — MathPivot" };
++  }
++  const copy = GRADE_COPY[n as ValidGrade];
++  return {
++    title: `${copy.headline} — Free 15-min assessment | MathPivot`,
++    description: copy.subheadline,
++  };
++}
++
++export default async function GradeDiagnosticPage({
++  params,
++}: {
++  params: Promise<{ grade: string }>;
++}) {
++  const { grade } = await params;
++  const n = Number(grade);
++  if (!VALID_GRADES.includes(n as ValidGrade)) return notFound();
++  const copy = GRADE_COPY[n as ValidGrade];
++
++  return (
++    <div className="min-h-screen bg-[#F8FAFC]">
++      <header className="bg-white border-b border-slate-100">
++        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
++          <Link href="/" className="flex items-center gap-2">
++            <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
++              <span className="text-white font-bold text-sm">M</span>
++            </div>
++            <span className="font-bold text-slate-800 text-lg">MathPivot</span>
++          </Link>
++          <div className="flex items-center gap-4 text-sm">
++            <Link
++              href="/diagnostic"
++              className="text-slate-600 hover:text-slate-900"
++            >
++              All grades
++            </Link>
++            <Link
++              href="/pricing"
++              className="text-slate-600 hover:text-slate-900"
++            >
++              Programs
++            </Link>
++          </div>
++        </div>
++      </header>
++
++      <DiagnosticFlow
++        fixedGrade={n}
++        gradeLabel={copy.scope}
++        headline={copy.headline}
++        subheadline={copy.subheadline}
++      />
++
++      <div className="max-w-3xl mx-auto px-4 pb-16">
++        <div className="bg-white rounded-2xl border border-slate-100 p-6">
++          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
++            {copy.scopeTitle}
++          </p>
++          <div className="grid grid-cols-2 gap-2 text-sm text-slate-700">
++            {copy.scopeItems.map((item) => (
++              <div key={item} className="flex items-start gap-2">
++                <span className="text-blue-600 mt-0.5">•</span>
++                <span>{item}</span>
++              </div>
++            ))}
++          </div>
++        </div>
++
++        <div className="mt-8 text-center text-sm text-slate-500">
++          Wrong grade?{" "}
++          <Link href="/diagnostic" className="text-blue-700 hover:underline">
++            Pick a different grade
++          </Link>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/app/(public)/diagnostic/page.tsx b/src/app/(public)/diagnostic/page.tsx
+index 588a468..e9ba93c 100644
+--- a/src/app/(public)/diagnostic/page.tsx
++++ b/src/app/(public)/diagnostic/page.tsx
+@@ -1,36 +1,59 @@
+-"use client";
+-
+-import { useState } from "react";
+ import Link from "next/link";
+-import { captureLeadAction } from "@/app/actions/leads";
+-import DiagnosticRunner from "@/components/DiagnosticRunner";
+-import type { PlacementResult } from "@/app/actions/diagnostics";
+-import { ArrowRight, GraduationCap } from "lucide-react";
+-import { useActionState } from "react";
+-
+-export default function PublicDiagnosticPage() {
+-  const [phase, setPhase] = useState<"capture" | "assess" | "done">("capture");
+-  const [studentInfo, setStudentInfo] = useState({ name: "", grade: 7 });
+-  const [parentInfo, setParentInfo] = useState({ name: "", email: "" });
+-  const [tempStudentId, setTempStudentId] = useState("");
+-  const [result, setResult] = useState<PlacementResult | null>(null);
+-  const [leadState, leadAction, leadPending] = useActionState(
+-    captureLeadAction,
+-    {},
+-  );
+-
+-  function handleLeadSubmit(formData: FormData) {
+-    const grade = parseInt(formData.get("studentGrade") as string) || 7;
+-    const name = (formData.get("studentName") as string) || "Student";
+-    const pName = (formData.get("parentName") as string) || "";
+-    const pEmail = (formData.get("parentEmail") as string) || "";
+-    setStudentInfo({ name, grade });
+-    setParentInfo({ name: pName, email: pEmail });
+-    setTempStudentId(`diagnostic-${Date.now()}`);
+-    leadAction(formData);
+-    setPhase("assess");
+-  }
+-
++import type { Metadata } from "next";
++import {
++  GraduationCap,
++  ArrowRight,
++  Clock,
++  Shield,
++  Sparkles,
++} from "lucide-react";
++
++export const metadata: Metadata = {
++  title: "Free Math Diagnostic by Grade — MathPivot",
++  description:
++    "Free 15-minute math diagnostic for grades 6-11. Get a domain-by-domain report and a coaching program recommendation. No commitment.",
++};
++
++const GRADES = [
++  {
++    grade: 6,
++    label: "Grade 6",
++    scope: "Ratios, integers, expressions",
++    color: "border-blue-200 hover:border-blue-400 hover:bg-blue-50",
++  },
++  {
++    grade: 7,
++    label: "Grade 7",
++    scope: "Proportions, rationals, geometry",
++    color: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50",
++  },
++  {
++    grade: 8,
++    label: "Grade 8",
++    scope: "Linear functions, systems, exponents",
++    color: "border-amber-200 hover:border-amber-400 hover:bg-amber-50",
++  },
++  {
++    grade: 9,
++    label: "Grade 9",
++    scope: "Algebra 1 · quadratics, polynomials",
++    color: "border-purple-200 hover:border-purple-400 hover:bg-purple-50",
++  },
++  {
++    grade: 10,
++    label: "Grade 10",
++    scope: "Geometry · proofs, trig, circles",
++    color: "border-rose-200 hover:border-rose-400 hover:bg-rose-50",
++  },
++  {
++    grade: 11,
++    label: "Grade 11",
++    scope: "Algebra 2 / Pre-Calc · logs, trig",
++    color: "border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50",
++  },
++];
++
++export default function DiagnosticPickerPage() {
+   return (
+     <div className="min-h-screen bg-[#F8FAFC]">
+       <header className="bg-white border-b border-slate-100">
+@@ -41,246 +64,106 @@ export default function PublicDiagnosticPage() {
+             </div>
+             <span className="font-bold text-slate-800 text-lg">MathPivot</span>
+           </Link>
+-          <div className="flex items-center gap-3">
++          <div className="flex items-center gap-4 text-sm">
+             <Link
+-              href="/summer"
+-              className="text-sm text-orange-500 font-semibold hover:text-orange-600"
++              href="/pricing"
++              className="text-slate-600 hover:text-slate-900"
+             >
+-              Summer Programs
++              Programs
+             </Link>
+             <Link
+-              href="/pricing"
+-              className="text-sm text-slate-600 hover:text-slate-900"
++              href="/get-started"
++              className="text-slate-600 hover:text-slate-900"
+             >
+-              Programs
++              Talk to a coach
+             </Link>
+           </div>
+         </div>
+       </header>
+ 
+-      <div className="max-w-3xl mx-auto px-4 py-12">
+-        {phase === "capture" && (
+-          <div>
+-            <div className="text-center mb-10">
+-              <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+-                <GraduationCap className="w-3.5 h-3.5" />
+-                Free Assessment
+-              </div>
+-              <h1 className="text-3xl sm:text-4xl font-bold text-slate-800">
+-                Where does your child stand in math?
+-              </h1>
+-              <p className="mt-4 text-slate-600 max-w-xl mx-auto">
+-                Our 15-minute diagnostic tells you exactly where your child is
+-                strong and where they need support. No cost, no commitment.
+-              </p>
+-
+-              <div className="mt-6 max-w-xl mx-auto">
+-                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
+-                  What the diagnostic covers
+-                </p>
+-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+-                  {[
+-                    "Number Sense",
+-                    "Ratios & Proportions",
+-                    "Expressions & Equations",
+-                    "Functions",
+-                    "Geometry",
+-                    "Statistics & Probability",
+-                  ].map((d) => (
+-                    <div
+-                      key={d}
+-                      className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-center"
+-                    >
+-                      {d}
+-                    </div>
+-                  ))}
+-                </div>
+-              </div>
+-            </div>
+-
+-            <div className="max-w-md mx-auto bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-100 p-7">
+-              <h2 className="text-lg font-bold text-slate-800 mb-1">
+-                Start the diagnostic
+-              </h2>
+-              <p className="text-sm text-slate-500 mb-5">
+-                We&apos;ll email you the full results report.
+-              </p>
+-
+-              <form action={handleLeadSubmit} className="space-y-4">
+-                <input type="hidden" name="source" value="free_diagnostic" />
+-
+-                <div className="grid grid-cols-2 gap-3">
+-                  <div>
+-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+-                      Parent Name *
+-                    </label>
+-                    <input
+-                      name="parentName"
+-                      required
+-                      className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10"
+-                    />
+-                  </div>
+-                  <div>
+-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+-                      Email *
+-                    </label>
+-                    <input
+-                      name="parentEmail"
+-                      type="email"
+-                      required
+-                      className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10"
+-                    />
+-                  </div>
+-                </div>
+-
+-                <div className="grid grid-cols-2 gap-3">
+-                  <div>
+-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+-                      Student Name *
+-                    </label>
+-                    <input
+-                      name="studentName"
+-                      required
+-                      className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10"
+-                    />
+-                  </div>
+-                  <div>
+-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+-                      Grade *
+-                    </label>
+-                    <select
+-                      name="studentGrade"
+-                      required
+-                      className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700"
+-                    >
+-                      {[5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
+-                        <option key={g} value={g}>
+-                          Grade {g}
+-                        </option>
+-                      ))}
+-                    </select>
+-                  </div>
+-                </div>
+-
+-                <button
+-                  type="submit"
+-                  disabled={leadPending}
+-                  className="w-full bg-blue-700 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+-                >
+-                  {leadPending ? "Loading..." : "Begin Assessment"}
+-                  {!leadPending && <ArrowRight className="w-5 h-5" />}
+-                </button>
++      <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16">
++        <div className="text-center mb-12">
++          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
++            <GraduationCap className="w-3.5 h-3.5" />
++            Free · 15 minutes · No commitment
++          </div>
++          <h1 className="text-3xl sm:text-5xl font-bold text-slate-800 leading-tight">
++            Which grade is your student in?
++          </h1>
++          <p className="mt-4 text-slate-600 max-w-xl mx-auto text-base sm:text-lg">
++            Pick a grade to start a diagnostic tailored to that curriculum.
++            We&apos;ll email a full domain-by-domain report and a coaching
++            program recommendation.
++          </p>
++        </div>
+ 
+-                <div className="pt-2 space-y-2">
+-                  <p className="text-[11px] text-slate-400 text-center">
+-                    No payment required. Results emailed within minutes.
++        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
++          {GRADES.map((g) => (
++            <Link
++              key={g.grade}
++              href={`/diagnostic/grade/${g.grade}`}
++              className={`group bg-white rounded-2xl border-2 ${g.color} p-6 transition-all hover:shadow-md`}
++            >
++              <div className="flex items-start justify-between mb-3">
++                <div>
++                  <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
++                    Diagnostic
+                   </p>
+-                  <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
+-                    <svg
+-                      className="w-3 h-3 text-emerald-600"
+-                      fill="none"
+-                      stroke="currentColor"
+-                      viewBox="0 0 24 24"
+-                    >
+-                      <path
+-                        strokeLinecap="round"
+-                        strokeLinejoin="round"
+-                        strokeWidth={2.5}
+-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+-                      />
+-                    </svg>
+-                    Your child&apos;s data is protected. COPPA-compliant. Never
+-                    shared with third parties.
++                  <p className="text-2xl font-bold text-slate-800 mt-1">
++                    {g.label}
+                   </p>
+                 </div>
+-              </form>
+-
+-              <div className="mt-5 pt-5 border-t border-slate-100 text-center">
+-                <p className="text-xs text-slate-500">
+-                  Prefer to talk first?{" "}
+-                  <Link
+-                    href="/get-started"
+-                    className="text-blue-700 font-medium hover:text-blue-800"
+-                  >
+-                    Schedule a consultation →
+-                  </Link>
+-                </p>
++                <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-1 transition-all" />
+               </div>
+-            </div>
+-          </div>
+-        )}
+-
+-        {phase === "assess" && (
+-          <DiagnosticRunner
+-            studentId={tempStudentId}
+-            gradeHint={studentInfo.grade}
+-            parentEmail={parentInfo.email}
+-            parentName={parentInfo.name}
+-            studentName={studentInfo.name}
+-            onComplete={(r) => {
+-              setResult(r);
+-              setPhase("done");
+-            }}
+-          />
+-        )}
+-
+-        {phase === "done" && result && (
+-          <div className="text-center py-8">
+-            <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-100 p-8">
+-              <h2 className="text-2xl font-bold text-slate-800 mb-2">
+-                {studentInfo.name}&apos;s Results
+-              </h2>
+-              <p className="text-slate-500 mb-6">
+-                Overall score: <strong>{result.overallScore}%</strong>
++              <p className="text-sm text-slate-600 leading-snug">{g.scope}</p>
++              <p className="mt-4 text-xs font-semibold text-blue-700">
++                Start assessment →
+               </p>
++            </Link>
++          ))}
++        </div>
+ 
+-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 text-left">
+-                <p className="text-xs font-bold uppercase tracking-widest text-blue-700 mb-1">
+-                  Recommended Program
+-                </p>
+-                <h3 className="text-lg font-bold text-slate-800">
+-                  {result.recommendedProgram}
+-                </h3>
+-                <p className="text-sm text-slate-600 mt-1">
+-                  {result.programDescription}
+-                </p>
+-              </div>
+-
+-              <div className="space-y-2 mb-6">
+-                {result.domainScores.map((d) => (
+-                  <div
+-                    key={d.domain}
+-                    className="flex items-center justify-between text-sm"
+-                  >
+-                    <span className="text-slate-600">
+-                      {d.domain.replace(/_/g, " ")}
+-                    </span>
+-                    <span
+-                      className={`font-semibold ${d.percentage >= 60 ? "text-emerald-600" : "text-amber-600"}`}
+-                    >
+-                      {d.percentage}%
+-                    </span>
+-                  </div>
+-                ))}
+-              </div>
+-
+-              <div className="flex flex-col gap-3">
+-                <Link
+-                  href="/summer"
+-                  className="w-full bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition-colors text-center"
+-                >
+-                  Explore Summer Clinics
+-                </Link>
+-                <Link
+-                  href="/pricing"
+-                  className="w-full bg-white text-slate-700 font-semibold py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-center"
+-                >
+-                  View Year-Round Programs
+-                </Link>
+-              </div>
+-            </div>
++        <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
++          <div className="bg-white rounded-xl border border-slate-100 p-5">
++            <Clock className="w-5 h-5 text-blue-600 mb-2" />
++            <p className="text-sm font-semibold text-slate-800">
++              About 15 minutes
++            </p>
++            <p className="text-xs text-slate-500 mt-1">
++              Domain-scored, adaptive per grade.
++            </p>
++          </div>
++          <div className="bg-white rounded-xl border border-slate-100 p-5">
++            <Sparkles className="w-5 h-5 text-emerald-600 mb-2" />
++            <p className="text-sm font-semibold text-slate-800">
++              Coaching recommendation
++            </p>
++            <p className="text-xs text-slate-500 mt-1">
++              Foundation, Acceleration, or Elite — matched to the results.
++            </p>
++          </div>
++          <div className="bg-white rounded-xl border border-slate-100 p-5">
++            <Shield className="w-5 h-5 text-slate-600 mb-2" />
++            <p className="text-sm font-semibold text-slate-800">
++              COPPA-compliant
++            </p>
++            <p className="text-xs text-slate-500 mt-1">
++              Student data protected. Never shared.
++            </p>
+           </div>
+-        )}
++        </div>
++
++        <div className="mt-12 text-center">
++          <p className="text-sm text-slate-500">
++            Not sure which grade to pick?{" "}
++            <Link
++              href="/get-started"
++              className="text-blue-700 font-medium hover:underline"
++            >
++              Schedule a free consultation →
++            </Link>
++          </p>
++        </div>
+       </div>
+     </div>
+   );
+diff --git a/src/app/(public)/for/page.tsx b/src/app/(public)/for/page.tsx
+index 1a05ae5..61a1b86 100644
+--- a/src/app/(public)/for/page.tsx
++++ b/src/app/(public)/for/page.tsx
+@@ -19,7 +19,7 @@ const DESCRIPTIONS: Record<string, string> = {
+   schools:
+     "Certified coaches and mastery data for school and district partnerships.",
+   "falling-behind":
+-    "Free diagnostic + summer clinic to rebuild confidence fast.",
++    "Free diagnostic + Foundation coaching to rebuild confidence fast.",
+   proactive: "Beyond grade level — structured coaching for motivated families.",
+ };
+ 
+diff --git a/src/app/actions/diagnostics.ts b/src/app/actions/diagnostics.ts
+index e986d64..1e96bfb 100644
+--- a/src/app/actions/diagnostics.ts
++++ b/src/app/actions/diagnostics.ts
+@@ -27,7 +27,10 @@ export interface DomainScore {
+ 
+ export interface PlacementResult {
+   recommendedProgram: string;
++  programTier: "foundation" | "acceleration" | "elite";
+   programDescription: string;
++  programPriceMonthly: number;
++  programCadence: string;
+   domainScores: DomainScore[];
+   overallScore: number;
+   weakestDomain: string;
+@@ -35,48 +38,49 @@ export interface PlacementResult {
+   assessmentId: string;
+ }
+ 
+-const PLACEMENT_RULES: {
+-  program: string;
+-  description: string;
+-  condition: (scores: Record<string, DomainScore>) => boolean;
+-}[] = [
+-  {
+-    program: "Propel Math 7",
+-    description:
+-      "Build strong foundations in ratios, number sense, and proportional reasoning before tackling higher concepts.",
+-    condition: (s) => {
+-      const ratios = s.ratios_proportions?.percentage ?? 0;
+-      const numbers = s.number_sense?.percentage ?? 0;
+-      return ratios < 60 || numbers < 60;
+-    },
+-  },
+-  {
+-    program: "Advantage Math 8",
+-    description:
+-      "Strengthen functions, expressions, and geometry — the core of 8th grade math and the bridge to algebra.",
+-    condition: (s) => {
+-      const functions = s.functions?.percentage ?? 0;
+-      const expressions = s.expressions_equations?.percentage ?? 0;
+-      return functions < 60 || expressions < 60;
+-    },
++interface CoachingProgram {
++  tier: "foundation" | "acceleration" | "elite";
++  name: string;
++  priceMonthly: number;
++  cadence: string;
++  description: (grade?: number) => string;
++}
++
++const COACHING_PROGRAMS: Record<
++  "foundation" | "acceleration" | "elite",
++  CoachingProgram
++> = {
++  foundation: {
++    tier: "foundation",
++    name: "Foundation Coaching",
++    priceMonthly: 349,
++    cadence: "2 sessions / week",
++    description: () =>
++      "Rebuild confidence and close specific mastery gaps with a named math coach. Weekly coaching, structured progression, and measurable mastery — not hourly tutoring.",
+   },
+-  {
+-    program: "Ignite Math 1",
+-    description:
+-      "Master algebra, systems, and function analysis — the foundation for all high school math.",
+-    condition: (s) => {
+-      const functions = s.functions?.percentage ?? 100;
+-      const expressions = s.expressions_equations?.percentage ?? 100;
+-      return functions >= 60 && expressions >= 60;
+-    },
++  acceleration: {
++    tier: "acceleration",
++    name: "Acceleration Coaching",
++    priceMonthly: 549,
++    cadence: "3 sessions / week",
++    description: () =>
++      "Fill remaining gaps while advancing beyond grade level. Three coaching meetings per week with a dedicated coach, mastery tracking, and a personalized roadmap.",
+   },
+-  {
+-    program: "Ascent Pre-Calc",
+-    description:
+-      "Ready for advanced functions, trigonometry, and pre-calculus concepts.",
+-    condition: () => true,
++  elite: {
++    tier: "elite",
++    name: "Elite Coaching",
++    priceMonthly: 799,
++    cadence: "2-3 sessions / week + enrichment",
++    description: () =>
++      "Ready to accelerate. Elite coaching adds competition prep (AMC, MATHCOUNTS), advanced problem-solving, and additional development opportunities alongside grade-level mastery.",
+   },
+-];
++};
++
++function selectProgram(overallScore: number): CoachingProgram {
++  if (overallScore < 40) return COACHING_PROGRAMS.foundation;
++  if (overallScore < 70) return COACHING_PROGRAMS.acceleration;
++  return COACHING_PROGRAMS.elite;
++}
+ 
+ export async function getAssessmentQuestions(
+   gradeHint?: number,
+@@ -84,12 +88,27 @@ export async function getAssessmentQuestions(
+   const supabase = await createClient();
+ 
+   let gradeBands: string[];
+-  if (gradeHint && gradeHint <= 7) {
+-    gradeBands = ["6-7", "7-8"];
+-  } else if (gradeHint && gradeHint <= 9) {
+-    gradeBands = ["7-8", "8-9"];
+-  } else {
+-    gradeBands = ["8-9", "9-10", "10-11"];
++  switch (gradeHint) {
++    case 6:
++      gradeBands = ["6-7"];
++      break;
++    case 7:
++      gradeBands = ["6-7", "7-8"];
++      break;
++    case 8:
++      gradeBands = ["7-8", "8-9"];
++      break;
++    case 9:
++      gradeBands = ["8-9", "9-10"];
++      break;
++    case 10:
++      gradeBands = ["9-10", "10-11"];
++      break;
++    case 11:
++      gradeBands = ["10-11", "9-10"];
++      break;
++    default:
++      gradeBands = ["7-8", "8-9", "9-10"];
+   }
+ 
+   const { data } = await supabase
+@@ -140,6 +159,7 @@ export async function submitAssessment(
+   parentEmail?: string,
+   parentName?: string,
+   studentName?: string,
++  gradeHint?: number,
+ ): Promise<PlacementResult | null> {
+   const user = await getCurrentUser();
+   const supabase = await createClient();
+@@ -188,15 +208,12 @@ export async function submitAssessment(
+   const weakestDomain = sorted[0]?.domain || "";
+   const strongestDomain = sorted[sorted.length - 1]?.domain || "";
+ 
+-  let recommendedProgram = "Ignite Math 1";
+-  let programDescription = "";
+-  for (const rule of PLACEMENT_RULES) {
+-    if (rule.condition(domainScores)) {
+-      recommendedProgram = rule.program;
+-      programDescription = rule.description;
+-      break;
+-    }
+-  }
++  const program = selectProgram(overallScore);
++  const recommendedProgram = program.name;
++  const programTier = program.tier;
++  const programDescription = program.description(gradeHint);
++  const programPriceMonthly = program.priceMonthly;
++  const programCadence = program.cadence;
+ 
+   let assessmentId = `local-${Date.now()}`;
+ 
+@@ -231,7 +248,10 @@ export async function submitAssessment(
+ 
+   const placementResult: PlacementResult = {
+     recommendedProgram,
++    programTier,
+     programDescription,
++    programPriceMonthly,
++    programCadence,
+     domainScores: domainScoreArray,
+     overallScore,
+     weakestDomain,
+@@ -248,6 +268,8 @@ export async function submitAssessment(
+         domainScores: domainScoreArray,
+         recommendedProgram,
+         programDescription,
++        programPriceMonthly,
++        programCadence,
+         strongestDomain,
+         weakestDomain,
+       });
+diff --git a/src/app/landing-page-client.tsx b/src/app/landing-page-client.tsx
+index 6215e3b..114cfa4 100644
+--- a/src/app/landing-page-client.tsx
++++ b/src/app/landing-page-client.tsx
+@@ -199,10 +199,11 @@ export default function LandingPage() {
+                 Compare
+               </Link>
+               <Link
+-                href="/summer"
++                href="/diagnostic"
+                 className="text-sm font-semibold text-orange-500 hover:text-orange-600"
++                title="Free 15-minute diagnostic by grade"
+               >
+-                Summer
++                Free Diagnostic
+               </Link>
+             </div>
+ 
+@@ -332,11 +333,11 @@ export default function LandingPage() {
+               </div>
+             </Link>
+             <Link
+-              href="/summer"
++              href="/diagnostic"
+               onClick={() => setMobileMenuOpen(false)}
+               className="block text-sm font-semibold text-orange-500 py-2"
+             >
+-              Summer Programs
++              Free Diagnostic
+             </Link>
+ 
+             <div className="flex gap-2 pt-3 border-t border-slate-100 mt-2">
+@@ -724,114 +725,63 @@ export default function LandingPage() {
+         </div>
+       </section>
+ 
+-      {/* Summer Clinics */}
++      {/* Free Diagnostic — replaces the summer clinic promo */}
+       <section className="py-20 px-4 bg-slate-900 text-white">
+         <div className="max-w-5xl mx-auto">
+           <div className="text-center mb-12">
+-            <span className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+-              <svg
+-                className="w-3.5 h-3.5"
+-                fill="none"
+-                stroke="currentColor"
+-                viewBox="0 0 24 24"
+-              >
+-                <path
+-                  strokeLinecap="round"
+-                  strokeLinejoin="round"
+-                  strokeWidth={2}
+-                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
+-                />
+-              </svg>
+-              Summer 2026 — Spots Closing Soon
++            <span className="inline-flex items-center gap-2 bg-blue-500/15 border border-blue-500/30 text-blue-200 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
++              <GraduationCap className="w-3.5 h-3.5" />
++              Free · 15 minutes · By grade
+             </span>
+             <h2 className="text-3xl sm:text-4xl font-bold">
+-              Summer Math Clinics
++              Start with a free diagnostic
+             </h2>
+             <p className="mt-4 text-slate-400 max-w-2xl mx-auto">
+-              Intensive 8–11 day clinics targeting the most heavily tested EOG
+-              and EOC topics. Your child walks into the next school year
+-              prepared — not catching up.
++              Pick your student&apos;s grade. Get a domain-by-domain report and
++              a coaching program recommendation — Foundation, Acceleration, or
++              Elite — matched to their actual results.
+             </p>
+           </div>
+ 
+-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
++          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+             {[
+-              {
+-                name: "Propel Math 7",
+-                price: "$249",
+-                days: "8 days",
+-                focus: "Ratios & Proportional Relationships",
+-                outcome: "Grade 7 readiness",
+-                color: "blue",
+-              },
+-              {
+-                name: "Ignite Math 1",
+-                price: "$449",
+-                days: "10 days",
+-                focus: "Number Sense, Algebra, and Functions",
+-                outcome: "Algebra 1 & EOC success",
+-                color: "amber",
+-                featured: true,
+-              },
+-              {
+-                name: "Advantage Math 8",
+-                price: "$349",
+-                days: "9 days",
+-                focus: "Functions & Relations",
+-                outcome: "Grade 8 readiness",
+-                color: "purple",
+-              },
+-              {
+-                name: "Ascent Pre-Calc",
+-                price: "$549",
+-                days: "11 days",
+-                focus: "Advanced Functions, Trig, Pre-Calculus",
+-                outcome: "Advanced math & STEM readiness",
+-                color: "emerald",
+-              },
+-            ].map((clinic) => (
+-              <div
+-                key={clinic.name}
+-                className={`rounded-2xl border p-5 ${
+-                  clinic.featured
+-                    ? "border-amber-400/50 bg-amber-400/10"
+-                    : "border-white/10 bg-white/5"
+-                }`}
++              { grade: 6, scope: "Ratios & integers" },
++              { grade: 7, scope: "Proportions & rationals" },
++              { grade: 8, scope: "Linear functions" },
++              { grade: 9, scope: "Algebra 1" },
++              { grade: 10, scope: "Geometry" },
++              { grade: 11, scope: "Algebra 2 / Pre-Calc" },
++            ].map((g) => (
++              <Link
++                key={g.grade}
++                href={`/diagnostic/grade/${g.grade}`}
++                className="rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/40 transition-all p-4 text-center group"
+               >
+-                <p className="text-sm font-bold text-white">{clinic.name}</p>
+-                <div className="flex items-end gap-1.5 mt-2">
+-                  <span className="text-2xl font-bold">{clinic.price}</span>
+-                  <span className="text-xs text-slate-400 pb-0.5">
+-                    / {clinic.days}
+-                  </span>
+-                </div>
+-                <p className="text-xs text-blue-300 mt-3 font-medium">
+-                  {clinic.focus}
++                <p className="text-xs font-bold uppercase tracking-wide text-blue-300">
++                  Diagnostic
+                 </p>
+-                <p className="text-xs text-slate-500 mt-0.5">
+-                  {clinic.outcome}
++                <p className="text-2xl font-bold mt-1">Grade {g.grade}</p>
++                <p className="text-xs text-slate-400 mt-2 leading-snug">
++                  {g.scope}
+                 </p>
+-                {clinic.featured && (
+-                  <span className="inline-block mt-3 text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">
+-                    Featured
+-                  </span>
+-                )}
+-              </div>
++                <p className="mt-3 text-[11px] font-semibold text-blue-300 group-hover:text-blue-200">
++                  Start →
++                </p>
++              </Link>
+             ))}
+           </div>
+ 
+-          <div className="mt-8 text-center space-y-3">
+-            <p className="text-sm text-blue-300">
+-              Clinic graduates receive an enrollment credit toward year-round
+-              coaching.
+-            </p>
++          <div className="mt-10 text-center">
+             <Link
+-              href="/summer"
++              href="/diagnostic"
+               className="inline-flex items-center gap-2 bg-blue-600 text-white font-medium px-8 py-3.5 rounded-xl hover:bg-blue-700 transition-colors text-base"
+             >
+-              Join the Summer Waitlist
++              Not sure? Open the grade picker
+               <ArrowRight size={18} />
+             </Link>
++            <p className="mt-4 text-xs text-slate-500">
++              No cost, no commitment. Results emailed within minutes.
++            </p>
+           </div>
+         </div>
+       </section>
+diff --git a/src/components/DiagnosticFlow.tsx b/src/components/DiagnosticFlow.tsx
+new file mode 100644
+index 0000000..b80a9e0
+--- /dev/null
++++ b/src/components/DiagnosticFlow.tsx
+@@ -0,0 +1,300 @@
++"use client";
++
++import { useState, useActionState } from "react";
++import Link from "next/link";
++import { captureLeadAction } from "@/app/actions/leads";
++import DiagnosticRunner from "@/components/DiagnosticRunner";
++import type { PlacementResult } from "@/app/actions/diagnostics";
++import { ArrowRight, GraduationCap } from "lucide-react";
++
++interface DiagnosticFlowProps {
++  fixedGrade?: number;
++  gradeLabel?: string;
++  headline?: string;
++  subheadline?: string;
++}
++
++export default function DiagnosticFlow({
++  fixedGrade,
++  gradeLabel,
++  headline,
++  subheadline,
++}: DiagnosticFlowProps) {
++  const [phase, setPhase] = useState<"capture" | "assess" | "done">("capture");
++  const [studentInfo, setStudentInfo] = useState({
++    name: "",
++    grade: fixedGrade ?? 7,
++  });
++  const [parentInfo, setParentInfo] = useState({ name: "", email: "" });
++  const [tempStudentId, setTempStudentId] = useState("");
++  const [result, setResult] = useState<PlacementResult | null>(null);
++  const [, leadAction, leadPending] = useActionState(captureLeadAction, {});
++
++  function handleLeadSubmit(formData: FormData) {
++    const grade =
++      fixedGrade ?? (parseInt(formData.get("studentGrade") as string) || 7);
++    const name = (formData.get("studentName") as string) || "Student";
++    const pName = (formData.get("parentName") as string) || "";
++    const pEmail = (formData.get("parentEmail") as string) || "";
++    setStudentInfo({ name, grade });
++    setParentInfo({ name: pName, email: pEmail });
++    setTempStudentId(`diagnostic-${Date.now()}`);
++    leadAction(formData);
++    setPhase("assess");
++  }
++
++  const resolvedHeadline =
++    headline ??
++    (fixedGrade
++      ? `Grade ${fixedGrade} Math Diagnostic`
++      : "Where does your child stand in math?");
++  const resolvedSub =
++    subheadline ??
++    (fixedGrade
++      ? `A ~15-minute assessment aligned to grade ${fixedGrade} math. Free — we email you the full report and a coaching program recommendation.`
++      : "Our 15-minute diagnostic tells you exactly where your child is strong and where they need support. No cost, no commitment.");
++
++  return (
++    <div className="max-w-3xl mx-auto px-4 py-12">
++      {phase === "capture" && (
++        <div>
++          <div className="text-center mb-10">
++            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
++              <GraduationCap className="w-3.5 h-3.5" />
++              {gradeLabel ?? "Free Assessment"}
++            </div>
++            <h1 className="text-3xl sm:text-4xl font-bold text-slate-800">
++              {resolvedHeadline}
++            </h1>
++            <p className="mt-4 text-slate-600 max-w-xl mx-auto">
++              {resolvedSub}
++            </p>
++
++            <div className="mt-6 max-w-xl mx-auto">
++              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
++                What the diagnostic covers
++              </p>
++              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
++                {[
++                  "Number Sense",
++                  "Ratios & Proportions",
++                  "Expressions & Equations",
++                  "Functions",
++                  "Geometry",
++                  "Statistics & Probability",
++                ].map((d) => (
++                  <div
++                    key={d}
++                    className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 text-center"
++                  >
++                    {d}
++                  </div>
++                ))}
++              </div>
++            </div>
++          </div>
++
++          <div className="max-w-md mx-auto bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-100 p-7">
++            <h2 className="text-lg font-bold text-slate-800 mb-1">
++              Start the diagnostic
++            </h2>
++            <p className="text-sm text-slate-500 mb-5">
++              We&apos;ll email you the full results report.
++            </p>
++
++            <form action={handleLeadSubmit} className="space-y-4">
++              <input type="hidden" name="source" value="free_diagnostic" />
++              {fixedGrade && (
++                <input
++                  type="hidden"
++                  name="studentGrade"
++                  value={String(fixedGrade)}
++                />
++              )}
++
++              <div className="grid grid-cols-2 gap-3">
++                <div>
++                  <label className="block text-sm font-medium text-slate-700 mb-1">
++                    Parent Name *
++                  </label>
++                  <input
++                    name="parentName"
++                    required
++                    className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10"
++                  />
++                </div>
++                <div>
++                  <label className="block text-sm font-medium text-slate-700 mb-1">
++                    Email *
++                  </label>
++                  <input
++                    name="parentEmail"
++                    type="email"
++                    required
++                    className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10"
++                  />
++                </div>
++              </div>
++
++              <div className={fixedGrade ? "" : "grid grid-cols-2 gap-3"}>
++                <div>
++                  <label className="block text-sm font-medium text-slate-700 mb-1">
++                    Student Name *
++                  </label>
++                  <input
++                    name="studentName"
++                    required
++                    className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/10"
++                  />
++                </div>
++                {!fixedGrade && (
++                  <div>
++                    <label className="block text-sm font-medium text-slate-700 mb-1">
++                      Grade *
++                    </label>
++                    <select
++                      name="studentGrade"
++                      required
++                      defaultValue="7"
++                      className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-700"
++                    >
++                      {[6, 7, 8, 9, 10, 11].map((g) => (
++                        <option key={g} value={g}>
++                          Grade {g}
++                        </option>
++                      ))}
++                    </select>
++                  </div>
++                )}
++              </div>
++
++              <button
++                type="submit"
++                disabled={leadPending}
++                className="w-full bg-blue-700 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
++              >
++                {leadPending ? "Loading..." : "Begin Assessment"}
++                {!leadPending && <ArrowRight className="w-5 h-5" />}
++              </button>
++
++              <div className="pt-2 space-y-2">
++                <p className="text-[11px] text-slate-400 text-center">
++                  No payment required. Results emailed within minutes.
++                </p>
++                <p className="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1.5">
++                  <svg
++                    className="w-3 h-3 text-emerald-600"
++                    fill="none"
++                    stroke="currentColor"
++                    viewBox="0 0 24 24"
++                  >
++                    <path
++                      strokeLinecap="round"
++                      strokeLinejoin="round"
++                      strokeWidth={2.5}
++                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
++                    />
++                  </svg>
++                  Your child&apos;s data is protected. COPPA-compliant. Never
++                  shared with third parties.
++                </p>
++              </div>
++            </form>
++
++            <div className="mt-5 pt-5 border-t border-slate-100 text-center">
++              <p className="text-xs text-slate-500">
++                Prefer to talk first?{" "}
++                <Link
++                  href="/get-started"
++                  className="text-blue-700 font-medium hover:text-blue-800"
++                >
++                  Schedule a consultation →
++                </Link>
++              </p>
++            </div>
++          </div>
++        </div>
++      )}
++
++      {phase === "assess" && (
++        <DiagnosticRunner
++          studentId={tempStudentId}
++          gradeHint={studentInfo.grade}
++          parentEmail={parentInfo.email}
++          parentName={parentInfo.name}
++          studentName={studentInfo.name}
++          onComplete={(r) => {
++            setResult(r);
++            setPhase("done");
++          }}
++        />
++      )}
++
++      {phase === "done" && result && (
++        <div className="text-center py-8">
++          <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-100 p-8">
++            <h2 className="text-2xl font-bold text-slate-800 mb-2">
++              {studentInfo.name}&apos;s Results
++            </h2>
++            <p className="text-slate-500 mb-6">
++              Overall score: <strong>{result.overallScore}%</strong>
++            </p>
++
++            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 text-left">
++              <p className="text-xs font-bold uppercase tracking-widest text-blue-700 mb-1">
++                Recommended Program
++              </p>
++              <h3 className="text-lg font-bold text-slate-800">
++                {result.recommendedProgram}
++              </h3>
++              {result.programPriceMonthly && result.programCadence && (
++                <p className="text-sm text-slate-500 mt-1">
++                  <span className="font-semibold text-slate-700">
++                    ${result.programPriceMonthly}/mo
++                  </span>{" "}
++                  · {result.programCadence}
++                </p>
++              )}
++              <p className="text-sm text-slate-600 mt-2">
++                {result.programDescription}
++              </p>
++            </div>
++
++            <div className="space-y-2 mb-6">
++              {result.domainScores.map((d) => (
++                <div
++                  key={d.domain}
++                  className="flex items-center justify-between text-sm"
++                >
++                  <span className="text-slate-600 capitalize">
++                    {d.domain.replace(/_/g, " ")}
++                  </span>
++                  <span
++                    className={`font-semibold ${d.percentage >= 60 ? "text-emerald-600" : "text-amber-600"}`}
++                  >
++                    {d.percentage}%
++                  </span>
++                </div>
++              ))}
++            </div>
++
++            <div className="flex flex-col gap-3">
++              <Link
++                href="/pricing"
++                className="w-full bg-blue-700 text-white font-semibold py-3 rounded-xl hover:bg-blue-800 transition-colors text-center"
++              >
++                Enroll in {result.recommendedProgram}
++              </Link>
++              <Link
++                href="/get-started"
++                className="w-full bg-white text-slate-700 font-semibold py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-center"
++              >
++                Talk to a MathPivot coach
++              </Link>
++            </div>
++          </div>
++        </div>
++      )}
++    </div>
++  );
++}
+diff --git a/src/components/DiagnosticRunner.tsx b/src/components/DiagnosticRunner.tsx
+index aedaad1..d7abe5a 100644
+--- a/src/components/DiagnosticRunner.tsx
++++ b/src/components/DiagnosticRunner.tsx
+@@ -72,6 +72,7 @@ export default function DiagnosticRunner({
+         parentEmail,
+         parentName,
+         studentName,
++        gradeHint,
+       );
+       if (placementResult) {
+         setResult(placementResult);
+@@ -169,7 +170,15 @@ export default function DiagnosticRunner({
+           <h3 className="text-xl font-bold text-slate-800">
+             {result.recommendedProgram}
+           </h3>
+-          <p className="text-sm text-slate-600 mt-2">
++          {result.programPriceMonthly && result.programCadence && (
++            <p className="text-sm text-slate-500 mt-1">
++              <span className="font-semibold text-slate-700">
++                ${result.programPriceMonthly}/mo
++              </span>{" "}
++              · {result.programCadence}
++            </p>
++          )}
++          <p className="text-sm text-slate-600 mt-3">
+             {result.programDescription}
+           </p>
+         </div>
+diff --git a/src/lib/email/index.ts b/src/lib/email/index.ts
+index 4183b8f..759c831 100644
+--- a/src/lib/email/index.ts
++++ b/src/lib/email/index.ts
+@@ -333,6 +333,8 @@ export const emailTemplates = {
+     domainScores,
+     recommendedProgram,
+     programDescription,
++    programPriceMonthly,
++    programCadence,
+     strongestDomain,
+     weakestDomain,
+   }: {
+@@ -347,6 +349,8 @@ export const emailTemplates = {
+     }[];
+     recommendedProgram: string;
+     programDescription: string;
++    programPriceMonthly?: number;
++    programCadence?: string;
+     strongestDomain: string;
+     weakestDomain: string;
+   }) => ({
+@@ -412,6 +416,11 @@ export const emailTemplates = {
+         <div style="margin: 28px 24px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 24px;">
+           <p style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; color: #1D4ED8; margin: 0;">Our Recommendation</p>
+           <p style="font-size: 20px; font-weight: bold; color: #1e293b; margin: 10px 0 6px;">${recommendedProgram}</p>
++          ${
++            programPriceMonthly && programCadence
++              ? `<p style="font-size: 13px; color: #64748b; margin: 0 0 10px;"><strong>$${programPriceMonthly}/mo</strong> · ${programCadence}</p>`
++              : ""
++          }
+           <p style="font-size: 14px; color: #475569; margin: 0; line-height: 1.5;">${programDescription}</p>
+         </div>
+ 
+@@ -420,25 +429,25 @@ export const emailTemplates = {
+           <p style="font-size: 16px; font-weight: bold; color: #1e293b; margin: 0 0 12px;">What happens next?</p>
+           <table style="width: 100%;">
+             <tr>
+-              <td style="padding: 6px 0; font-size: 14px; color: #475569; vertical-align: top; width: 24px; font-weight: bold; color: #1D4ED8;">1.</td>
+-              <td style="padding: 6px 0; font-size: 14px; color: #475569;">We review ${studentName}'s results and identify the best coaching pathway.</td>
++              <td style="padding: 6px 0; font-size: 14px; color: #1D4ED8; vertical-align: top; width: 24px; font-weight: bold;">1.</td>
++              <td style="padding: 6px 0; font-size: 14px; color: #475569;">We review ${studentName}'s results and match them with a dedicated math coach.</td>
+             </tr>
+             <tr>
+-              <td style="padding: 6px 0; font-size: 14px; color: #475569; vertical-align: top; width: 24px; font-weight: bold; color: #1D4ED8;">2.</td>
+-              <td style="padding: 6px 0; font-size: 14px; color: #475569;">A MathPivot team member will follow up within 48 hours to discuss options.</td>
++              <td style="padding: 6px 0; font-size: 14px; color: #1D4ED8; vertical-align: top; width: 24px; font-weight: bold;">2.</td>
++              <td style="padding: 6px 0; font-size: 14px; color: #475569;">A MathPivot team member will follow up within 48 hours to discuss the coaching pathway.</td>
+             </tr>
+             <tr>
+-              <td style="padding: 6px 0; font-size: 14px; color: #475569; vertical-align: top; width: 24px; font-weight: bold; color: #1D4ED8;">3.</td>
+-              <td style="padding: 6px 0; font-size: 14px; color: #475569;">If you're ready now, explore our summer clinics or year-round programs below.</td>
++              <td style="padding: 6px 0; font-size: 14px; color: #1D4ED8; vertical-align: top; width: 24px; font-weight: bold;">3.</td>
++              <td style="padding: 6px 0; font-size: 14px; color: #475569;">Once enrolled, ${studentName} joins a small cohort (5 students target, 6 max) and starts on a personalized roadmap.</td>
+             </tr>
+           </table>
+         </div>
+ 
+         <!-- CTAs -->
+         <div style="padding: 28px 24px; text-align: center;">
+-          <a href="https://mathpivot.com/summer" style="display: inline-block; background: #F97316; color: white; font-weight: bold; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px;">Explore Summer Clinics</a>
++          <a href="https://mathpivot.com/pricing" style="display: inline-block; background: #1D4ED8; color: white; font-weight: bold; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-size: 15px;">Enroll in Coaching</a>
+           <br />
+-          <a href="https://mathpivot.com/pricing" style="display: inline-block; margin-top: 12px; border: 2px solid #e2e8f0; color: #334155; font-weight: 600; padding: 12px 36px; border-radius: 10px; text-decoration: none; font-size: 14px;">View Year-Round Programs</a>
++          <a href="https://mathpivot.com/get-started" style="display: inline-block; margin-top: 12px; border: 2px solid #e2e8f0; color: #334155; font-weight: 600; padding: 12px 36px; border-radius: 10px; text-decoration: none; font-size: 14px;">Schedule a Consultation</a>
+         </div>
+ 
+         <!-- Footer -->
+diff --git a/supabase/migrations/00048_diagnostic_questions_grades_9_11.sql b/supabase/migrations/00048_diagnostic_questions_grades_9_11.sql
+new file mode 100644
+index 0000000..b8ef66c
+--- /dev/null
++++ b/supabase/migrations/00048_diagnostic_questions_grades_9_11.sql
+@@ -0,0 +1,53 @@
++-- Migration 00048: Diagnostic question bank expansion (grades 9-11)
++-- Adds coverage for Algebra 1, Geometry, Algebra 2, and Pre-Calculus so that
++-- /diagnostic/grade/9, /grade/10, and /grade/11 pull real, level-appropriate items.
++
++-- ============================================================================
++-- Grade 9 · Algebra 1 (grade_band '8-9' and '9-10')
++-- ============================================================================
++
++INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
++('functions', '9-10', 2, 'What is the y-intercept of the line y = -3x + 7?', 'multiple_choice', '["-3", "3", "7", "-7"]', '7', 'In slope-intercept form y = mx + b, the y-intercept is b.', 'NC.M1.F-IF.4', 'y_intercept'),
++('functions', '9-10', 3, 'A function is defined by f(x) = 2x² - 3. What is f(-4)?', 'multiple_choice', '["29", "-19", "-11", "13"]', '29', 'f(-4) = 2(-4)² - 3 = 2(16) - 3 = 32 - 3 = 29', 'NC.M1.F-IF.2', 'function_evaluation'),
++('functions', '9-10', 4, 'Which is a solution to x² - 5x + 6 = 0?', 'multiple_choice', '["x = 1", "x = 2", "x = 4", "x = 6"]', 'x = 2', 'Factor: (x-2)(x-3) = 0, so x = 2 or x = 3.', 'NC.M1.A-REI.4', 'quadratic_factoring'),
++('expressions_equations', '9-10', 2, 'Solve the system: y = 2x + 1 and y = x + 4', 'multiple_choice', '["(3, 7)", "(1, 3)", "(-3, -5)", "(0, 1)"]', '(3, 7)', 'Set equal: 2x + 1 = x + 4 → x = 3, then y = 2(3) + 1 = 7.', 'NC.M1.A-REI.6', 'systems_substitution'),
++('expressions_equations', '9-10', 3, 'Which expression is equivalent to (2x - 3)²?', 'multiple_choice', '["4x² - 9", "4x² + 9", "4x² - 12x + 9", "4x² - 6x + 9"]', '4x² - 12x + 9', '(2x - 3)² = (2x)² - 2(2x)(3) + 3² = 4x² - 12x + 9', 'NC.M1.A-SSE.2', 'binomial_square'),
++('expressions_equations', '9-10', 4, 'Factor completely: x² - 9', 'multiple_choice', '["(x - 3)(x + 3)", "(x - 3)²", "(x + 3)²", "Cannot be factored"]', '(x - 3)(x + 3)', 'Difference of squares: a² - b² = (a-b)(a+b).', 'NC.M1.A-SSE.3', 'difference_of_squares'),
++('functions', '8-9', 3, 'A function has domain {-2, 0, 1, 4} and rule f(x) = x + 5. What is the range?', 'multiple_choice', '["{3, 5, 6, 9}", "{7, 5, 6, 9}", "{-7, -5, -4, -1}", "{3, 4, 5, 6}"]', '{3, 5, 6, 9}', 'Apply f to each: f(-2)=3, f(0)=5, f(1)=6, f(4)=9.', 'NC.M1.F-IF.1', 'domain_range'),
++('statistics', '9-10', 2, 'The mean of five numbers is 12. Four of the numbers are 8, 10, 14, and 16. What is the fifth?', 'multiple_choice', '["12", "14", "10", "8"]', '12', 'Sum = 5 × 12 = 60. 8+10+14+16 = 48. Fifth = 60 - 48 = 12.', 'NC.M1.S-ID.2', 'mean'),
++('statistics', '9-10', 3, 'Which measure of spread is most affected by outliers?', 'multiple_choice', '["Median", "Interquartile range", "Range", "Mode"]', 'Range', 'Range = max − min, so a single outlier at either extreme changes it directly.', 'NC.M1.S-ID.3', 'measures_of_spread'),
++('geometry', '9-10', 3, 'A right triangle has legs of 6 and 8. What is the hypotenuse?', 'multiple_choice', '["10", "12", "14", "48"]', '10', 'By Pythagorean theorem: √(6² + 8²) = √100 = 10.', 'NC.8.G.7', 'pythagorean')
++ON CONFLICT DO NOTHING;
++
++-- ============================================================================
++-- Grade 10 · Geometry + Algebra continuation (grade_band '9-10' focus)
++-- ============================================================================
++
++INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
++('geometry', '9-10', 2, 'What is the sum of the interior angles of a hexagon?', 'multiple_choice', '["540°", "720°", "900°", "1080°"]', '720°', '(n − 2) × 180 = (6 − 2) × 180 = 720°.', 'NC.M2.G-CO.11', 'polygon_angles'),
++('geometry', '9-10', 3, 'Two triangles are similar with a scale factor of 3. If the smaller triangle has area 12, what is the larger triangle''s area?', 'multiple_choice', '["36", "72", "108", "144"]', '108', 'Areas scale by the square of the ratio: 12 × 3² = 108.', 'NC.M2.G-SRT.5', 'similar_areas'),
++('geometry', '9-10', 4, 'In a right triangle, one acute angle is 30° and the hypotenuse is 12. What is the length of the side opposite the 30° angle?', 'multiple_choice', '["6", "6√3", "12", "24"]', '6', 'sin(30°) = opp/hyp = 1/2, so opp = 12 × 1/2 = 6.', 'NC.M2.G-SRT.7', 'right_triangle_trig'),
++('geometry', '9-10', 3, 'A circle has radius 5. What is its area? (use π)', 'multiple_choice', '["10π", "25π", "50π", "100π"]', '25π', 'Area = πr² = π(5)² = 25π.', 'NC.7.G.4', 'circle_area'),
++('geometry', '10-11', 3, 'What is the distance between the points (1, 2) and (4, 6)?', 'multiple_choice', '["3", "4", "5", "7"]', '5', '√((4-1)² + (6-2)²) = √(9 + 16) = √25 = 5.', 'NC.M2.G-GPE.7', 'distance_formula'),
++('geometry', '10-11', 4, 'A chord of a circle is 8 units and lies 3 units from the center. What is the radius?', 'multiple_choice', '["4", "5", "√73", "7"]', '5', 'Half-chord (4) and distance from center (3) form legs of a right triangle with the radius as hypotenuse: r = √(3² + 4²) = 5.', 'NC.M2.G-C.2', 'chord_radius'),
++('statistics', '10-11', 3, 'Two fair coins are flipped. What is the probability of exactly one head?', 'multiple_choice', '["1/4", "1/3", "1/2", "3/4"]', '1/2', 'Outcomes: HH, HT, TH, TT. Exactly one head: HT or TH → 2/4 = 1/2.', 'NC.M2.S-CP.7', 'probability_basic'),
++('advanced_algebra', '10-11', 3, 'Simplify: (x² · x³) / x⁴', 'multiple_choice', '["x", "x²", "x⁴", "x⁹"]', 'x', 'Numerator: x^(2+3) = x⁵. Divide: x^(5-4) = x.', 'NC.M2.A-SSE.2', 'exponent_rules_advanced')
++ON CONFLICT DO NOTHING;
++
++-- ============================================================================
++-- Grade 11 · Algebra 2 / Pre-Calculus (grade_band '10-11')
++-- ============================================================================
++
++INSERT INTO diagnostic_questions (domain, grade_band, difficulty, question_text, question_type, choices, correct_answer, explanation, standard_code, concept_tag) VALUES
++('advanced_algebra', '10-11', 2, 'Simplify: log₁₀(1000)', 'multiple_choice', '["2", "3", "10", "100"]', '3', '10³ = 1000, so log₁₀(1000) = 3.', 'NC.M3.F-BF.5', 'logarithms_basic'),
++('advanced_algebra', '10-11', 3, 'If f(x) = 2ˣ, what is f(5) / f(3)?', 'multiple_choice', '["2", "4", "8", "32"]', '4', 'f(5)/f(3) = 2⁵/2³ = 2^(5-3) = 2² = 4.', 'NC.M3.F-LE.4', 'exponential_ratio'),
++('advanced_algebra', '10-11', 4, 'Solve: log₂(x) = 5', 'multiple_choice', '["2", "10", "25", "32"]', '32', 'log₂(x) = 5 means x = 2⁵ = 32.', 'NC.M3.F-BF.5', 'logarithm_equation'),
++('advanced_algebra', '10-11', 3, 'What is the degree of the polynomial 4x³ − 2x⁵ + x − 7?', 'multiple_choice', '["1", "3", "5", "7"]', '5', 'Degree is the highest exponent on x. Here, x⁵ gives degree 5.', 'NC.M3.A-APR.1', 'polynomial_degree'),
++('advanced_algebra', '10-11', 4, 'Which is a factor of x³ − 8?', 'multiple_choice', '["x − 4", "x + 4", "x − 2", "x² + 4"]', 'x − 2', 'Difference of cubes: a³ − b³ = (a − b)(a² + ab + b²). Here b = 2, so (x − 2) is a factor.', 'NC.M3.A-APR.4', 'difference_of_cubes'),
++('trigonometry', '10-11', 2, 'What is sin(90°)?', 'multiple_choice', '["0", "1", "-1", "1/2"]', '1', 'On the unit circle at 90°, y-coordinate = 1, so sin(90°) = 1.', 'NC.M3.F-TF.2', 'sine_special'),
++('trigonometry', '10-11', 3, 'If cos(θ) = 3/5 and θ is in the first quadrant, what is sin(θ)?', 'multiple_choice', '["3/5", "4/5", "5/4", "5/3"]', '4/5', 'sin²(θ) + cos²(θ) = 1 → sin²(θ) = 1 − 9/25 = 16/25 → sin(θ) = 4/5 (Q1 positive).', 'NC.M3.F-TF.8', 'pythagorean_identity'),
++('trigonometry', '10-11', 4, 'What is the exact value of tan(45°)?', 'multiple_choice', '["1/2", "√2/2", "1", "√3"]', '1', 'tan(45°) = sin(45°)/cos(45°) = (√2/2)/(√2/2) = 1.', 'NC.M3.F-TF.2', 'tan_45'),
++('functions', '10-11', 3, 'If f(x) = x + 3 and g(x) = 2x, what is (f ∘ g)(4)?', 'multiple_choice', '["8", "11", "14", "16"]', '11', '(f ∘ g)(4) = f(g(4)) = f(8) = 8 + 3 = 11.', 'NC.M3.F-BF.1', 'function_composition'),
++('functions', '10-11', 4, 'What is the inverse of f(x) = 3x − 6?', 'multiple_choice', '["(x + 6)/3", "(x − 6)/3", "3/(x − 6)", "3(x + 6)"]', '(x + 6)/3', 'Swap x and y: x = 3y − 6 → y = (x + 6)/3.', 'NC.M3.F-BF.4', 'inverse_function'),
++('statistics', '10-11', 3, 'A normal distribution has mean 50 and standard deviation 5. Approximately what percent of data lies between 45 and 55?', 'multiple_choice', '["50%", "68%", "95%", "99.7%"]', '68%', 'By the empirical rule, ~68% of data lies within 1 standard deviation of the mean.', 'NC.M3.S-ID.4', 'empirical_rule')
++ON CONFLICT DO NOTHING;
+-- 
+2.43.0
+

@@ -1,20 +1,38 @@
+import "server-only";
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn(
-    "STRIPE_SECRET_KEY not set - Stripe functionality will be disabled",
+// Fail at module load, not in front of a paying parent. A missing or malformed
+// key used to warn and export null, which turned a configuration mistake into a
+// runtime 500 at checkout — exactly how a publishable key reached production
+// and broke POST /enroll/acceleration. Throwing here breaks the build instead.
+const secretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!secretKey) {
+  throw new Error(
+    "STRIPE_SECRET_KEY is not set. Stripe cannot be initialised.",
   );
 }
 
-export const stripe = process.env.STRIPE_SECRET_KEY
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2025-12-15.clover",
-      typescript: true,
-    })
-  : null;
+if (!/^(sk|rk)_(test|live)_/.test(secretKey)) {
+  throw new Error(
+    `STRIPE_SECRET_KEY has an invalid prefix (got "${secretKey.slice(0, 3)}..."). ` +
+      "Expected a secret (sk_) or restricted (rk_) key — a publishable (pk_) key will " +
+      "be rejected by the Stripe API at request time.",
+  );
+}
 
+export const stripe = new Stripe(secretKey, {
+  apiVersion: "2025-12-15.clover",
+  typescript: true,
+});
+
+/**
+ * Retained as a no-op so existing call sites need not change. `stripe` is now
+ * non-nullable — if the key were missing or malformed this module would have
+ * thrown at import time and nothing downstream would run at all.
+ */
 export function isStripeConfigured(): boolean {
-  return !!stripe;
+  return true;
 }
 
 // Each Stripe webhook endpoint gets its own signing secret from the dashboard.
@@ -43,11 +61,6 @@ export async function createCheckoutSession({
   successUrl: string;
   cancelUrl: string;
 }): Promise<{ sessionId: string; url: string } | null> {
-  if (!stripe) {
-    console.warn("Stripe not configured");
-    return null;
-  }
-
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
@@ -77,7 +90,6 @@ export async function createCheckoutSession({
  * Retrieve a Stripe Checkout session
  */
 export async function getCheckoutSession(sessionId: string) {
-  if (!stripe) return null;
   return stripe.checkout.sessions.retrieve(sessionId);
 }
 
@@ -94,9 +106,7 @@ export async function createStripeProduct({
   description?: string;
   priceCents: number;
   credits: number;
-}): Promise<{ productId: string; priceId: string } | null> {
-  if (!stripe) return null;
-
+}): Promise<{ productId: string; priceId: string }> {
   const product = await stripe.products.create({
     name,
     description: description || `${credits} tutoring credits`,
@@ -123,7 +133,6 @@ function verifyWithSecret(
   secret: string | undefined,
   label: string,
 ): Stripe.Event | null {
-  if (!stripe) return null;
   if (!secret) {
     console.error(`${label}: signing secret env var is not set`);
     return null;

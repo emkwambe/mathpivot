@@ -1,0 +1,353 @@
+From c735902698053b91f1f9caa344550717e4d4cfa8 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 9 Aug 2026 00:52:07 +0000
+Subject: [PATCH] sprint 7a: nav dropdown surfacing personas, compare,
+ partnerships
+
+Adds a "For Families" dropdown with all 6 personas (each with an icon
++ one-line description for quick clarity), plus dedicated "For Schools"
+and "Compare" links. Mobile menu gets the same content in a collapsible
+section. Also auto-closes menus on link click, adds tooltips (title
+attr) on desktop links, and click-outside-to-close for the dropdown.
+
+Previously the persona landing pages, /compare, and /partnerships were
+built but had no discoverable entry points from the homepage.
+---
+ src/app/landing-page-client.tsx | 264 ++++++++++++++++++++++++++++++--
+ 1 file changed, 247 insertions(+), 17 deletions(-)
+
+diff --git a/src/app/landing-page-client.tsx b/src/app/landing-page-client.tsx
+index f64cb9f..6215e3b 100644
+--- a/src/app/landing-page-client.tsx
++++ b/src/app/landing-page-client.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { useEffect, useState } from "react";
++import { useEffect, useRef, useState } from "react";
+ import Link from "next/link";
+ import {
+   ArrowRight,
+@@ -15,11 +15,56 @@ import {
+   Target,
+   TrendingUp,
+   Shield,
++  ChevronDown,
++  Home,
++  GraduationCap,
++  Scale,
+ } from "lucide-react";
+ 
++const PERSONA_LINKS = [
++  {
++    href: "/for/proactive",
++    label: "Proactive Suburban Family",
++    desc: "Grade-level mastery + stretch to accelerated tracks",
++    icon: TrendingUp,
++    color: "text-blue-600",
++  },
++  {
++    href: "/for/travel-ball",
++    label: "Travel Ball Family",
++    desc: "Flexible scheduling around tournaments & practices",
++    icon: Users,
++    color: "text-orange-600",
++  },
++  {
++    href: "/for/homeschool",
++    label: "Homeschool Family",
++    desc: "Certified math coach + attendance & transcript logs",
++    icon: Home,
++    color: "text-emerald-600",
++  },
++  {
++    href: "/for/falling-behind",
++    label: "Falling Behind",
++    desc: "Rebuild confidence + close specific mastery gaps",
++    icon: Shield,
++    color: "text-rose-600",
++  },
++  {
++    href: "/for/competition",
++    label: "Competition Math",
++    desc: "AMC 8/10, MATHCOUNTS, olympiad prep with elite coaches",
++    icon: Trophy,
++    color: "text-purple-600",
++  },
++];
++
+ export default function LandingPage() {
+   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
++  const [mobileFamiliesOpen, setMobileFamiliesOpen] = useState(false);
++  const [familiesOpen, setFamiliesOpen] = useState(false);
+   const [scrolled, setScrolled] = useState(false);
++  const familiesRef = useRef<HTMLDivElement>(null);
+ 
+   useEffect(() => {
+     const handleScroll = () => setScrolled(window.scrollY > 20);
+@@ -27,6 +72,19 @@ export default function LandingPage() {
+     return () => window.removeEventListener("scroll", handleScroll);
+   }, []);
+ 
++  useEffect(() => {
++    const handleClick = (e: MouseEvent) => {
++      if (
++        familiesRef.current &&
++        !familiesRef.current.contains(e.target as Node)
++      ) {
++        setFamiliesOpen(false);
++      }
++    };
++    if (familiesOpen) document.addEventListener("mousedown", handleClick);
++    return () => document.removeEventListener("mousedown", handleClick);
++  }, [familiesOpen]);
++
+   return (
+     <div className="min-h-screen bg-white">
+       {/* Nav */}
+@@ -46,7 +104,7 @@ export default function LandingPage() {
+               </span>
+             </Link>
+ 
+-            <div className="hidden md:flex items-center gap-8">
++            <div className="hidden md:flex items-center gap-6 lg:gap-7">
+               <a
+                 href="#how-it-works"
+                 className="text-sm text-slate-600 hover:text-slate-900"
+@@ -59,23 +117,92 @@ export default function LandingPage() {
+               >
+                 Programs
+               </a>
+-              <a
+-                href="#results"
++
++              <div
++                ref={familiesRef}
++                className="relative"
++                onMouseEnter={() => setFamiliesOpen(true)}
++                onMouseLeave={() => setFamiliesOpen(false)}
++              >
++                <button
++                  type="button"
++                  onClick={() => setFamiliesOpen((v) => !v)}
++                  className="flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
++                  aria-expanded={familiesOpen}
++                  aria-haspopup="true"
++                >
++                  For Families
++                  <ChevronDown
++                    size={14}
++                    className={`transition-transform ${familiesOpen ? "rotate-180" : ""}`}
++                  />
++                </button>
++                {familiesOpen && (
++                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 w-[420px]">
++                    <div className="bg-white rounded-xl shadow-xl ring-1 ring-slate-200 p-2">
++                      <div className="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
++                        Choose the fit for your family
++                      </div>
++                      {PERSONA_LINKS.map((p) => {
++                        const Icon = p.icon;
++                        return (
++                          <Link
++                            key={p.href}
++                            href={p.href}
++                            onClick={() => setFamiliesOpen(false)}
++                            className="flex items-start gap-3 rounded-lg p-3 hover:bg-slate-50 transition-colors"
++                          >
++                            <div
++                              className={`shrink-0 mt-0.5 ${p.color}`}
++                              aria-hidden="true"
++                            >
++                              <Icon size={18} />
++                            </div>
++                            <div className="min-w-0">
++                              <div className="text-sm font-semibold text-slate-900">
++                                {p.label}
++                              </div>
++                              <div className="text-xs text-slate-500 leading-snug">
++                                {p.desc}
++                              </div>
++                            </div>
++                          </Link>
++                        );
++                      })}
++                      <div className="border-t border-slate-100 mt-1 pt-1">
++                        <Link
++                          href="/for"
++                          onClick={() => setFamiliesOpen(false)}
++                          className="flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium text-blue-700 hover:bg-blue-50"
++                        >
++                          See all fits
++                          <ArrowRight size={14} />
++                        </Link>
++                      </div>
++                    </div>
++                  </div>
++                )}
++              </div>
++
++              <Link
++                href="/for/schools"
+                 className="text-sm text-slate-600 hover:text-slate-900"
++                title="School & district partnerships — enrichment, intervention, teacher PD"
+               >
+-                Results
+-              </a>
+-              <a
+-                href="#coaches"
++                For Schools
++              </Link>
++              <Link
++                href="/compare"
+                 className="text-sm text-slate-600 hover:text-slate-900"
++                title="MathPivot vs Kumon, Mathnasium, AoPS, RSM, and private tutoring"
+               >
+-                For Coaches
+-              </a>
++                Compare
++              </Link>
+               <Link
+                 href="/summer"
+                 className="text-sm font-semibold text-orange-500 hover:text-orange-600"
+               >
+-                Summer Programs
++                Summer
+               </Link>
+             </div>
+ 
+@@ -104,22 +231,125 @@ export default function LandingPage() {
+         </div>
+ 
+         {mobileMenuOpen && (
+-          <div className="md:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-3">
+-            <a href="#how-it-works" className="block text-sm text-slate-600">
++          <div className="md:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
++            <a
++              href="#how-it-works"
++              onClick={() => setMobileMenuOpen(false)}
++              className="block text-sm text-slate-600 py-2"
++            >
+               How It Works
+             </a>
+-            <a href="#programs" className="block text-sm text-slate-600">
++            <a
++              href="#programs"
++              onClick={() => setMobileMenuOpen(false)}
++              className="block text-sm text-slate-600 py-2"
++            >
+               Programs
+             </a>
+-            <a href="#results" className="block text-sm text-slate-600">
++            <a
++              href="#results"
++              onClick={() => setMobileMenuOpen(false)}
++              className="block text-sm text-slate-600 py-2"
++            >
+               Results
+             </a>
+-            <div className="flex gap-2 pt-2">
+-              <Link href="/login" className="text-sm text-slate-700">
++
++            <button
++              type="button"
++              onClick={() => setMobileFamiliesOpen((v) => !v)}
++              className="w-full flex items-center justify-between text-sm text-slate-600 py-2"
++              aria-expanded={mobileFamiliesOpen}
++            >
++              For Families
++              <ChevronDown
++                size={16}
++                className={`transition-transform ${mobileFamiliesOpen ? "rotate-180" : ""}`}
++              />
++            </button>
++            {mobileFamiliesOpen && (
++              <div className="pl-3 border-l-2 border-slate-100 ml-1 space-y-1 pb-2">
++                {PERSONA_LINKS.map((p) => {
++                  const Icon = p.icon;
++                  return (
++                    <Link
++                      key={p.href}
++                      href={p.href}
++                      onClick={() => setMobileMenuOpen(false)}
++                      className="flex items-start gap-2 py-2"
++                    >
++                      <Icon
++                        size={16}
++                        className={`shrink-0 mt-0.5 ${p.color}`}
++                      />
++                      <div>
++                        <div className="text-sm font-medium text-slate-900">
++                          {p.label}
++                        </div>
++                        <div className="text-xs text-slate-500 leading-snug">
++                          {p.desc}
++                        </div>
++                      </div>
++                    </Link>
++                  );
++                })}
++                <Link
++                  href="/for"
++                  onClick={() => setMobileMenuOpen(false)}
++                  className="block text-xs font-medium text-blue-700 py-2"
++                >
++                  See all fits →
++                </Link>
++              </div>
++            )}
++
++            <Link
++              href="/for/schools"
++              onClick={() => setMobileMenuOpen(false)}
++              className="flex items-start gap-2 text-sm text-slate-600 py-2"
++            >
++              <GraduationCap
++                size={16}
++                className="shrink-0 mt-0.5 text-indigo-600"
++              />
++              <div>
++                <div className="font-medium text-slate-900">For Schools</div>
++                <div className="text-xs text-slate-500">
++                  District & school partnerships
++                </div>
++              </div>
++            </Link>
++            <Link
++              href="/compare"
++              onClick={() => setMobileMenuOpen(false)}
++              className="flex items-start gap-2 text-sm text-slate-600 py-2"
++            >
++              <Scale size={16} className="shrink-0 mt-0.5 text-slate-500" />
++              <div>
++                <div className="font-medium text-slate-900">Compare</div>
++                <div className="text-xs text-slate-500">
++                  vs Kumon, Mathnasium, AoPS, RSM
++                </div>
++              </div>
++            </Link>
++            <Link
++              href="/summer"
++              onClick={() => setMobileMenuOpen(false)}
++              className="block text-sm font-semibold text-orange-500 py-2"
++            >
++              Summer Programs
++            </Link>
++
++            <div className="flex gap-2 pt-3 border-t border-slate-100 mt-2">
++              <Link
++                href="/login"
++                onClick={() => setMobileMenuOpen(false)}
++                className="text-sm text-slate-700 px-4 py-2"
++              >
+                 Sign In
+               </Link>
+               <Link
+                 href="/signup"
++                onClick={() => setMobileMenuOpen(false)}
+                 className="text-sm text-white bg-blue-600 px-4 py-2 rounded-lg"
+               >
+                 Get Started
+-- 
+2.43.0
+

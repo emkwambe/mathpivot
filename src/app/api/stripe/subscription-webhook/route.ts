@@ -14,7 +14,7 @@ import { sendEmail } from "@/lib/email";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
-  if (!isStripeConfigured() || !stripe) {
+  if (!isStripeConfigured()) {
     return NextResponse.json(
       { error: "Stripe not configured" },
       { status: 503 },
@@ -39,18 +39,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // Best-effort audit log; ignore failure if table doesn't exist. Deliberately
-  // never fatal — supabase-js returns errors rather than throwing, so this is
-  // logged and stepped over.
-  const { error: auditErr } = await supabaseAdmin
+  // Claim the event before doing any work. The insert itself is the lock: a
+  // SELECT-then-INSERT would race between concurrent deliveries, whereas the
+  // unique constraint on stripe_event_id lets exactly one delivery win.
+  const { error: claimErr } = await supabaseAdmin
     .from("stripe_webhook_events")
     .insert({
       stripe_event_id: event.id,
       event_type: event.type,
       payload_json: event.data.object as unknown as Record<string, unknown>,
     });
-  if (auditErr) {
-    console.warn("[subscription-webhook] audit log skipped:", auditErr.message);
+
+  if (claimErr) {
+    // 23505 = unique_violation: this event.id was already claimed by a prior
+    // delivery. Ack with 200 so Stripe stops retrying; do not re-run handlers.
+    if (claimErr.code === "23505") {
+      return NextResponse.json({ received: true, deduped: true });
+    }
+    console.error(
+      "[subscription-webhook] could not claim event:",
+      claimErr.message,
+    );
+    return NextResponse.json({ error: "Claim failed" }, { status: 500 });
   }
 
   try {
@@ -137,9 +147,10 @@ async function handleSubscriptionCheckoutCompleted(
 
   const priceCents = session.amount_total ?? 0;
 
-  const sub = await stripe!.subscriptions.retrieve(stripeSubId);
+  const sub = await stripe.subscriptions.retrieve(stripeSubId);
   const item = sub.items.data[0];
   const stripePriceId = item?.price?.id ?? "";
+  const period = periodFrom(sub);
 
   // Provision the parent's auth user before writing the row so the new user id
   // can be stored as parent_user_id — without it the RLS policy in migration
@@ -178,13 +189,8 @@ async function handleSubscriptionCheckoutCompleted(
     stripe_price_id: stripePriceId,
     stripe_checkout_session_id: session.id,
     status: sub.status,
-    current_period_start: toIsoNullable(
-      (sub as unknown as { current_period_start?: number })
-        .current_period_start,
-    ),
-    current_period_end: toIsoNullable(
-      (sub as unknown as { current_period_end?: number }).current_period_end,
-    ),
+    current_period_start: period.start,
+    current_period_end: period.end,
     cancel_at_period_end: sub.cancel_at_period_end,
     canceled_at: toIsoNullable(sub.canceled_at),
     metadata: session.metadata ?? {},
@@ -321,17 +327,14 @@ async function syncSubscriptionState(sub: Stripe.Subscription) {
   // No row yet — checkout.session.completed has not landed. Nothing to sync.
   if (!existing) return;
 
+  const period = periodFrom(sub);
+
   const { error: syncErr } = await supabaseAdmin
     .from("program_subscriptions")
     .update({
       status: sub.status,
-      current_period_start: toIsoNullable(
-        (sub as unknown as { current_period_start?: number })
-          .current_period_start,
-      ),
-      current_period_end: toIsoNullable(
-        (sub as unknown as { current_period_end?: number }).current_period_end,
-      ),
+      current_period_start: period.start,
+      current_period_end: period.end,
       cancel_at_period_end: sub.cancel_at_period_end,
       canceled_at: toIsoNullable(sub.canceled_at),
     })
@@ -348,7 +351,7 @@ async function syncSubscriptionState(sub: Stripe.Subscription) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const subId = (invoice as unknown as { subscription?: string }).subscription;
+  const subId = subscriptionIdFromInvoice(invoice);
   if (!subId) return;
 
   const { error: pastDueErr } = await supabaseAdmin
@@ -364,6 +367,68 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     );
     throw new Error(`program_subscriptions past_due: ${pastDueErr.message}`);
   }
+}
+
+/**
+ * Read the current billing period off a subscription.
+ *
+ * Verified against this account with `stripe subscriptions list --limit 1`:
+ * under both the SDK's pinned 2025-12-15.clover and the account default
+ * 2026-05-27.dahlia, `current_period_start` / `current_period_end` exist only
+ * on `items.data[0]` — there is no field of either name at the subscription
+ * root. Reading the root is what was writing null to both columns on every row.
+ *
+ * The root fallback is kept because webhook payloads render at the API version
+ * configured on the endpoint, not at the SDK's pinned apiVersion, and those two
+ * drift independently — an endpoint still pinned pre-Basil sends the old shape.
+ */
+function periodFrom(sub: Stripe.Subscription): {
+  start: string | null;
+  end: string | null;
+} {
+  const item = sub.items?.data?.[0] as
+    | {
+        current_period_start?: number;
+        current_period_end?: number;
+      }
+    | undefined;
+  const legacy = sub as unknown as {
+    current_period_start?: number;
+    current_period_end?: number;
+  };
+
+  return {
+    start: toIsoNullable(
+      item?.current_period_start ?? legacy.current_period_start,
+    ),
+    end: toIsoNullable(item?.current_period_end ?? legacy.current_period_end),
+  };
+}
+
+/**
+ * Read the subscription id off an invoice.
+ *
+ * Verified against this account with `stripe invoices list --limit 1`: the
+ * invoice has no `subscription` property at the root at all — it lives at
+ * `parent.subscription_details.subscription`. Reading the root returned
+ * undefined, so handleInvoicePaymentFailed returned early every time and
+ * `past_due` was never set: a failed payment left the row reading `active`
+ * indefinitely. Root is kept as a fallback for older endpoint API versions.
+ */
+function subscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
+  const withParent = invoice as unknown as {
+    parent?: {
+      subscription_details?: { subscription?: string | { id: string } };
+    };
+    subscription?: string | { id: string };
+  };
+
+  const raw =
+    withParent.parent?.subscription_details?.subscription ??
+    withParent.subscription;
+
+  if (!raw) return null;
+  return typeof raw === "string" ? raw : raw.id;
 }
 
 function toIsoNullable(epochSeconds: number | null | undefined): string | null {

@@ -1,0 +1,373 @@
+From 9d4ab509078b1ba43bb66a89d0079f1bd08418c4 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 2 Aug 2026 02:01:07 +0000
+Subject: [PATCH 3/7] sprint 2: persona-based lead routing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Auto-classifies every incoming lead into one of 6 personas from
+docs/customer-personas.md based on form signals (goals, grade,
+source, keywords).
+
+- src/lib/persona.ts: Classifier with 6 personas + metadata
+  (labels, colors, priority, recommendations)
+- captureLeadAction: Classifies at capture time and stores
+  persona, persona_confidence, persona_signals in leads table
+- LeadRecord type: Added optional persona fields
+- LeadKanban: Per-lead persona badge with color coding
+
+Requires migration 00046_lead_personas.sql (already applied
+in Supabase — persona/confidence/signals columns exist).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Qjoh5TNLXgQyXHU7KQUouF
+---
+ .../(dashboard)/admin/leads/LeadKanban.tsx    |  17 +-
+ src/app/actions/leads.ts                      |  15 ++
+ src/lib/persona.ts                            | 242 ++++++++++++++++++
+ src/types/views.ts                            |   2 +
+ 4 files changed, 275 insertions(+), 1 deletion(-)
+ create mode 100644 src/lib/persona.ts
+
+diff --git a/src/app/(dashboard)/admin/leads/LeadKanban.tsx b/src/app/(dashboard)/admin/leads/LeadKanban.tsx
+index a89dfbb..c83350d 100644
+--- a/src/app/(dashboard)/admin/leads/LeadKanban.tsx
++++ b/src/app/(dashboard)/admin/leads/LeadKanban.tsx
+@@ -4,6 +4,7 @@ import { useState } from "react";
+ import { useRouter } from "next/navigation";
+ import { updateLeadStatus, addLeadNote } from "@/app/actions/leads";
+ import type { LeadRecord } from "@/types/views";
++import { PERSONA_LABELS, PERSONA_COLORS, type Persona } from "@/lib/persona";
+ 
+ const COLUMNS = [
+   { key: "new", label: "New", color: "bg-slate-500" },
+@@ -121,9 +122,23 @@ export function LeadKanban({ columns }: LeadKanbanProps) {
+                   </div>
+                 )}
+ 
++                {(() => {
++                  const persona = ((lead as unknown as { persona?: Persona })
++                    .persona || "unclassified") as Persona;
++                  return persona !== "unclassified" ? (
++                    <div className="mt-1.5">
++                      <span
++                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${PERSONA_COLORS[persona]}`}
++                      >
++                        {PERSONA_LABELS[persona]}
++                      </span>
++                    </div>
++                  ) : null;
++                })()}
++
+                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                   <span className="text-[10px] text-slate-400">
+-                    {lead.source.replace("_", " ")}
++                    {lead.source.replace(/_/g, " ")}
+                   </span>
+                   <button
+                     onClick={() =>
+diff --git a/src/app/actions/leads.ts b/src/app/actions/leads.ts
+index fec6052..c24e65a 100644
+--- a/src/app/actions/leads.ts
++++ b/src/app/actions/leads.ts
+@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
+ import { z } from "zod";
+ import { getCurrentUser } from "@/lib/auth";
+ import type { LeadRecord } from "@/types/views";
++import { classifyPersona } from "@/lib/persona";
+ 
+ export type LeadResult = {
+   success: boolean;
+@@ -82,6 +83,14 @@ export async function captureLeadAction(
+         .filter(Boolean)
+     : [];
+ 
++  const personaResult = classifyPersona({
++    studentGrade: parsed.data.studentGrade,
++    goals: parsed.data.goals,
++    source: parsed.data.source,
++    subjectsInterested: subjects,
++    sourceDetail: parsed.data.sourceDetail,
++  });
++
+   const { error } = await admin.from("leads").insert({
+     parent_name: parsed.data.parentName,
+     parent_email: parsed.data.parentEmail,
+@@ -93,6 +102,12 @@ export async function captureLeadAction(
+     preferred_modality: parsed.data.preferredModality || null,
+     source: parsed.data.source,
+     source_detail: parsed.data.sourceDetail || null,
++    persona: personaResult.persona,
++    persona_confidence: personaResult.confidence,
++    persona_signals: {
++      reasoning: personaResult.reasoning,
++      ...personaResult.signals,
++    },
+   });
+ 
+   if (error) {
+diff --git a/src/lib/persona.ts b/src/lib/persona.ts
+new file mode 100644
+index 0000000..675a698
+--- /dev/null
++++ b/src/lib/persona.ts
+@@ -0,0 +1,242 @@
++/**
++ * Persona classification for MathPivot leads.
++ * Maps intake form signals → one of 6 personas from docs/customer-personas.md
++ */
++
++export type Persona =
++  | "proactive_suburban"
++  | "travel_ball_family"
++  | "homeschool_family"
++  | "falling_behind"
++  | "competition_math"
++  | "school_partner"
++  | "unclassified";
++
++export interface PersonaSignals {
++  studentGrade?: number;
++  goals?: string;
++  source?: string;
++  subjectsInterested?: string[];
++  sourceDetail?: string;
++}
++
++export interface PersonaResult {
++  persona: Persona;
++  confidence: "high" | "medium" | "low";
++  reasoning: string;
++  signals: Record<string, boolean>;
++}
++
++const KEYWORDS = {
++  homeschool: [
++    "homeschool",
++    "home-school",
++    "home school",
++    "hsldda",
++    "hslda",
++    "co-op",
++    "coop",
++    "curriculum",
++    "compliance",
++  ],
++  competition: [
++    "amc",
++    "mathcounts",
++    "competition",
++    "olympiad",
++    "aime",
++    "aops",
++    "art of problem solving",
++    "gifted",
++    "advanced",
++    "challenge",
++    "ahead",
++  ],
++  fallingBehind: [
++    "failing",
++    "falling behind",
++    "struggling",
++    "grade drop",
++    "bad grade",
++    "d in math",
++    "f in math",
++    "hate math",
++    "confused",
++    "lost",
++    "help",
++    "catch up",
++    "urgent",
++    "worried",
++  ],
++  travelBall: [
++    "travel ball",
++    "travel team",
++    "aau",
++    "select team",
++    "club sports",
++    "competitive sport",
++    "athlete",
++    "scholarship",
++  ],
++  suburbanProactive: [
++    "get ahead",
++    "advantage",
++    "prep for",
++    "prepare for",
++    "readiness",
++    "confidence",
++    "next level",
++  ],
++  schoolPartner: [
++    "school",
++    "district",
++    "principal",
++    "administrator",
++    "title i",
++    "esser",
++    "charter",
++    "learning center",
++    "partnership",
++    "bulk",
++    "cohort",
++  ],
++};
++
++function textContains(text: string, keywords: string[]): boolean {
++  const lower = text.toLowerCase();
++  return keywords.some((kw) => lower.includes(kw));
++}
++
++export function classifyPersona(input: PersonaSignals): PersonaResult {
++  const goals = (input.goals || "").trim();
++  const sourceDetail = (input.sourceDetail || "").trim();
++  const combined = `${goals} ${sourceDetail}`.trim();
++  const grade = input.studentGrade;
++
++  const signals: Record<string, boolean> = {
++    mentionsHomeschool: textContains(combined, KEYWORDS.homeschool),
++    mentionsCompetition: textContains(combined, KEYWORDS.competition),
++    mentionsFallingBehind: textContains(combined, KEYWORDS.fallingBehind),
++    mentionsTravelBall: textContains(combined, KEYWORDS.travelBall),
++    mentionsSuburbanProactive: textContains(
++      combined,
++      KEYWORDS.suburbanProactive,
++    ),
++    mentionsSchoolPartner: textContains(combined, KEYWORDS.schoolPartner),
++    fromCoachApplication: input.source === "coach_application",
++    fromSummerWaitlist: input.source === "summer_clinic_waitlist",
++    fromDiagnostic: input.source === "free_diagnostic",
++    gradeInMiddleSchool: !!grade && grade >= 6 && grade <= 8,
++    gradeInHighSchool: !!grade && grade >= 9 && grade <= 12,
++  };
++
++  if (signals.mentionsSchoolPartner) {
++    return {
++      persona: "school_partner",
++      confidence: "high",
++      reasoning: "Mentions school, district, or partnership language",
++      signals,
++    };
++  }
++  if (signals.mentionsHomeschool) {
++    return {
++      persona: "homeschool_family",
++      confidence: "high",
++      reasoning: "Explicitly mentions homeschooling",
++      signals,
++    };
++  }
++  if (signals.mentionsCompetition) {
++    return {
++      persona: "competition_math",
++      confidence:
++        signals.gradeInMiddleSchool || signals.gradeInHighSchool
++          ? "high"
++          : "medium",
++      reasoning: "Mentions competition, AMC, MATHCOUNTS, or advanced/gifted",
++      signals,
++    };
++  }
++  if (signals.mentionsFallingBehind) {
++    return {
++      persona: "falling_behind",
++      confidence: "high",
++      reasoning: "Uses urgent language about struggling or grade drop",
++      signals,
++    };
++  }
++  if (signals.mentionsTravelBall) {
++    return {
++      persona: "travel_ball_family",
++      confidence: "high",
++      reasoning: "Mentions travel sports, AAU, or athletic scholarships",
++      signals,
++    };
++  }
++  if (
++    signals.mentionsSuburbanProactive ||
++    (grade && grade >= 5 && grade <= 10)
++  ) {
++    return {
++      persona: "proactive_suburban",
++      confidence: signals.mentionsSuburbanProactive ? "medium" : "low",
++      reasoning: signals.mentionsSuburbanProactive
++        ? "Uses growth/readiness language"
++        : "Default for grade 5-10 students without other strong signals",
++      signals,
++    };
++  }
++  return {
++    persona: "unclassified",
++    confidence: "low",
++    reasoning: "Not enough signals to classify",
++    signals,
++  };
++}
++
++export const PERSONA_LABELS: Record<Persona, string> = {
++  proactive_suburban: "Proactive Suburban",
++  travel_ball_family: "Travel Ball Family",
++  homeschool_family: "Homeschool Family",
++  falling_behind: "Falling Behind",
++  competition_math: "Competition Math",
++  school_partner: "School Partner",
++  unclassified: "Unclassified",
++};
++
++export const PERSONA_COLORS: Record<Persona, string> = {
++  proactive_suburban: "bg-blue-100 text-blue-800",
++  travel_ball_family: "bg-orange-100 text-orange-800",
++  homeschool_family: "bg-emerald-100 text-emerald-800",
++  falling_behind: "bg-red-100 text-red-800",
++  competition_math: "bg-purple-100 text-purple-800",
++  school_partner: "bg-indigo-100 text-indigo-800",
++  unclassified: "bg-slate-100 text-slate-600",
++};
++
++export const PERSONA_PRIORITY: Record<Persona, number> = {
++  falling_behind: 1,
++  school_partner: 2,
++  competition_math: 3,
++  travel_ball_family: 4,
++  homeschool_family: 5,
++  proactive_suburban: 6,
++  unclassified: 7,
++};
++
++export const PERSONA_RECOMMENDATIONS: Record<Persona, string> = {
++  proactive_suburban:
++    "Emphasize named coach, mastery tracking, and structured progress. Foundation program fits best; upsell to Acceleration.",
++  travel_ball_family:
++    "Position as 'the travel ball of math'. Compare ROI vs sports spend. Acceleration is primary; Elite for advanced students.",
++  homeschool_family:
++    "Lead with homeschool compliance exports and mastery portfolio. Foundation fits most. Highlight peer interaction in small cohorts.",
++  falling_behind:
++    "Urgent — respond within 24 hours. Summer clinic ($249) as low-risk entry. Free diagnostic reveals exact gap. Foundation for rebuilding.",
++  competition_math:
++    "Elite program is the primary fit. Highlight Mathathlon + AMC/MATHCOUNTS prep. Emphasize small cohort vs RSM's 20-student classes.",
++  school_partner:
++    "B2B sales cycle. Send partnership deck. Focus on diagnostic-driven placement, mastery data for admins, and coach certification.",
++  unclassified:
++    "Follow up with a discovery call to identify the primary need and recommend the appropriate persona pathway.",
++};
+diff --git a/src/types/views.ts b/src/types/views.ts
+index 3d2158e..9fd8506 100644
+--- a/src/types/views.ts
++++ b/src/types/views.ts
+@@ -52,6 +52,8 @@ export interface LeadRecord {
+   notes: string | null;
+   assigned_user: { full_name: string } | null;
+   next_follow_up_at: string | null;
++  persona?: string;
++  persona_confidence?: string | null;
+ }
+ 
+ /** Lead analytics source stats */
+-- 
+2.43.0
+

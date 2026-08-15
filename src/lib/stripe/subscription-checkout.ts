@@ -18,8 +18,6 @@ export async function createSubscriptionCheckout({
 }: CreateSubscriptionCheckoutOptions): Promise<
   { url: string; sessionId: string } | { error: string }
 > {
-  if (!stripe) return { error: "Stripe is not configured" };
-
   const priceId = priceIdForTier(tier);
   if (!priceId) {
     return {

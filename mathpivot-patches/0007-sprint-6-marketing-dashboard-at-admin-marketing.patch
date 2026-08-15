@@ -1,0 +1,639 @@
+From ff0346e1a8db31110228c9836555ded7f0d4b0c4 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 2 Aug 2026 02:28:35 +0000
+Subject: [PATCH 7/7] sprint 6: marketing dashboard at /admin/marketing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Top-level KPIs: Total leads, conversion rate, active MRR, projected LTV
+Leads by source: horizontal bar chart with conversion rate per source
+Leads by persona: table with avg MRR + projected LTV visual bars
+Channel playbook: 10 channels with cost/leads/conversion/CAC from research
+Year 1 target callout: $500/mo → 7:1 return
+
+Backend:
+- marketing-constants.ts: PERSONA_MONTHLY_REVENUE + PERSONA_RETENTION_MONTHS
+- getMarketingMetrics: server action queries leads and computes segmented metrics
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Qjoh5TNLXgQyXHU7KQUouF
+---
+ src/app/(dashboard)/admin/marketing/page.tsx | 447 +++++++++++++++++++
+ src/app/actions/marketing.ts                 | 121 +++++
+ src/lib/marketing-constants.ts               |  21 +
+ 3 files changed, 589 insertions(+)
+ create mode 100644 src/app/(dashboard)/admin/marketing/page.tsx
+ create mode 100644 src/app/actions/marketing.ts
+ create mode 100644 src/lib/marketing-constants.ts
+
+diff --git a/src/app/(dashboard)/admin/marketing/page.tsx b/src/app/(dashboard)/admin/marketing/page.tsx
+new file mode 100644
+index 0000000..fd28763
+--- /dev/null
++++ b/src/app/(dashboard)/admin/marketing/page.tsx
+@@ -0,0 +1,447 @@
++import { redirect } from "next/navigation";
++import Link from "next/link";
++import { createClient } from "@/lib/supabase/server";
++import { getMarketingMetrics } from "@/app/actions/marketing";
++import { PERSONA_LABELS, PERSONA_COLORS, type Persona } from "@/lib/persona";
++import { TrendingUp, DollarSign, Users, Target } from "lucide-react";
++
++export const dynamic = "force-dynamic";
++
++function fmtDollars(n: number): string {
++  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
++  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}k`;
++  return `$${Math.round(n).toLocaleString()}`;
++}
++
++function fmtPercent(n: number): string {
++  return `${(n * 100).toFixed(1)}%`;
++}
++
++const SOURCE_LABELS: Record<string, string> = {
++  website: "Website",
++  referral: "Referral",
++  social_media: "Social Media",
++  google_ads: "Google Ads",
++  facebook_ads: "Facebook Ads",
++  walk_in: "Walk-in",
++  phone: "Phone",
++  email: "Email",
++  partner: "Partner",
++  event: "Event",
++  summer_clinic_waitlist: "Summer Waitlist",
++  free_diagnostic: "Free Diagnostic",
++  coach_application: "Coach App",
++  other: "Other",
++};
++
++function StatCard({
++  icon: Icon,
++  label,
++  value,
++  sublabel,
++  color,
++}: {
++  icon: React.ComponentType<{ className?: string }>;
++  label: string;
++  value: string;
++  sublabel: string;
++  color: "blue" | "emerald" | "amber" | "purple";
++}) {
++  const colors = {
++    blue: { bg: "bg-blue-100", text: "text-blue-700" },
++    emerald: { bg: "bg-emerald-100", text: "text-emerald-700" },
++    amber: { bg: "bg-amber-100", text: "text-amber-700" },
++    purple: { bg: "bg-purple-100", text: "text-purple-700" },
++  }[color];
++  return (
++    <div className="bg-white rounded-xl border border-slate-200 p-5">
++      <div className="flex items-center justify-between mb-3">
++        <p className="text-xs uppercase tracking-wide text-slate-500 font-medium">
++          {label}
++        </p>
++        <div
++          className={`w-8 h-8 rounded-lg ${colors.bg} flex items-center justify-center`}
++        >
++          <Icon className={`w-4 h-4 ${colors.text}`} />
++        </div>
++      </div>
++      <p className="text-2xl font-bold text-slate-900">{value}</p>
++      <p className="text-xs text-slate-500 mt-1">{sublabel}</p>
++    </div>
++  );
++}
++
++export default async function AdminMarketingPage() {
++  const supabase = await createClient();
++  const {
++    data: { user },
++  } = await supabase.auth.getUser();
++  if (!user) redirect("/login");
++
++  const { metrics, error } = await getMarketingMetrics();
++  if (error || !metrics) {
++    return (
++      <div className="p-6">
++        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
++          <p className="text-red-700 text-sm">
++            {error || "Unable to load metrics"}
++          </p>
++        </div>
++      </div>
++    );
++  }
++
++  const maxSourceLeads = Math.max(1, ...metrics.bySource.map((s) => s.leads));
++  const maxPersonaLtv = Math.max(
++    1,
++    ...metrics.byPersona.map((p) => p.projectedLtv),
++  );
++
++  return (
++    <div className="p-6 max-w-7xl mx-auto">
++      <div className="flex items-center justify-between mb-6">
++        <div>
++          <h1 className="text-2xl font-bold text-slate-900">
++            Marketing Dashboard
++          </h1>
++          <p className="text-sm text-slate-500">
++            Lead flow, conversion rates, and projected LTV by source and persona
++          </p>
++        </div>
++        <Link
++          href="/admin/leads"
++          className="border border-slate-300 text-slate-700 rounded-lg px-4 py-2 text-sm font-medium hover:bg-slate-50"
++        >
++          View Lead Pipeline →
++        </Link>
++      </div>
++
++      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
++        <StatCard
++          icon={Users}
++          label="Total Leads"
++          value={metrics.totalLeads.toString()}
++          sublabel={`${metrics.totalNew} uncontacted`}
++          color="blue"
++        />
++        <StatCard
++          icon={Target}
++          label="Conversion Rate"
++          value={fmtPercent(metrics.overallConversionRate)}
++          sublabel={`${metrics.totalConverted} converted`}
++          color="emerald"
++        />
++        <StatCard
++          icon={DollarSign}
++          label="Active MRR"
++          value={fmtDollars(metrics.totalActiveMrr)}
++          sublabel="from converted leads"
++          color="amber"
++        />
++        <StatCard
++          icon={TrendingUp}
++          label="Projected LTV"
++          value={fmtDollars(metrics.totalProjectedLtv)}
++          sublabel="all converted"
++          color="purple"
++        />
++      </div>
++
++      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
++        <div className="flex items-baseline justify-between mb-5">
++          <h2 className="text-lg font-bold text-slate-900">Leads by Source</h2>
++          <p className="text-xs text-slate-500">
++            Sorted by lead volume · Conversion rate shown right
++          </p>
++        </div>
++        {metrics.bySource.length === 0 ? (
++          <p className="text-sm text-slate-500 text-center py-8">
++            No leads yet.
++          </p>
++        ) : (
++          <div className="space-y-3">
++            {metrics.bySource.map((s) => (
++              <div key={s.source} className="flex items-center gap-4">
++                <div className="w-40 flex-shrink-0">
++                  <p className="text-sm font-medium text-slate-700">
++                    {SOURCE_LABELS[s.source] || s.source}
++                  </p>
++                </div>
++                <div className="flex-1">
++                  <div className="relative w-full bg-slate-100 rounded-full h-6">
++                    <div
++                      className="absolute inset-y-0 left-0 bg-blue-600 rounded-full flex items-center justify-end px-2"
++                      style={{
++                        width: `${(s.leads / maxSourceLeads) * 100}%`,
++                        minWidth: "40px",
++                      }}
++                    >
++                      <span className="text-xs font-bold text-white">
++                        {s.leads}
++                      </span>
++                    </div>
++                  </div>
++                </div>
++                <div className="w-28 flex-shrink-0 text-right">
++                  <p
++                    className={`text-sm font-semibold ${s.converted > 0 ? "text-emerald-700" : "text-slate-400"}`}
++                  >
++                    {fmtPercent(s.conversionRate)}
++                  </p>
++                  <p className="text-[10px] text-slate-500">
++                    {s.converted}/{s.leads} converted
++                  </p>
++                </div>
++              </div>
++            ))}
++          </div>
++        )}
++      </div>
++
++      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
++        <div className="flex items-baseline justify-between mb-5">
++          <h2 className="text-lg font-bold text-slate-900">
++            Leads by Persona · with Projected LTV
++          </h2>
++          <p className="text-xs text-slate-500">
++            LTV = converted × avg monthly rev × retention months
++          </p>
++        </div>
++        {metrics.byPersona.length === 0 ? (
++          <p className="text-sm text-slate-500 text-center py-8">
++            No leads classified yet.
++          </p>
++        ) : (
++          <div className="overflow-x-auto">
++            <table className="w-full min-w-[700px]">
++              <thead>
++                <tr className="border-b border-slate-200">
++                  <th className="text-left py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                    Persona
++                  </th>
++                  <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                    Leads
++                  </th>
++                  <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                    Converted
++                  </th>
++                  <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                    Conv Rate
++                  </th>
++                  <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                    Avg MRR
++                  </th>
++                  <th className="text-left py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                    Projected LTV
++                  </th>
++                </tr>
++              </thead>
++              <tbody>
++                {metrics.byPersona.map((p) => (
++                  <tr key={p.persona} className="border-b border-slate-100">
++                    <td className="py-3 px-3">
++                      <span
++                        className={`text-xs font-semibold px-2 py-1 rounded-full ${PERSONA_COLORS[p.persona]}`}
++                      >
++                        {PERSONA_LABELS[p.persona]}
++                      </span>
++                    </td>
++                    <td className="py-3 px-3 text-right text-sm text-slate-700 font-medium">
++                      {p.leads}
++                    </td>
++                    <td className="py-3 px-3 text-right text-sm text-slate-700 font-medium">
++                      {p.converted}
++                    </td>
++                    <td
++                      className={`py-3 px-3 text-right text-sm font-semibold ${p.converted > 0 ? "text-emerald-700" : "text-slate-400"}`}
++                    >
++                      {fmtPercent(p.conversionRate)}
++                    </td>
++                    <td className="py-3 px-3 text-right text-sm text-slate-700 font-medium">
++                      ${p.avgMonthlyRevenue.toLocaleString()}
++                    </td>
++                    <td className="py-3 px-3">
++                      <div className="flex items-center gap-3">
++                        <div className="flex-1 bg-slate-100 rounded-full h-2 min-w-[80px]">
++                          <div
++                            className="bg-purple-600 rounded-full h-2"
++                            style={{
++                              width: `${maxPersonaLtv > 0 ? (p.projectedLtv / maxPersonaLtv) * 100 : 0}%`,
++                            }}
++                          />
++                        </div>
++                        <span className="text-sm font-bold text-slate-800 w-16 text-right">
++                          {fmtDollars(p.projectedLtv)}
++                        </span>
++                      </div>
++                    </td>
++                  </tr>
++                ))}
++              </tbody>
++            </table>
++          </div>
++        )}
++      </div>
++
++      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
++        <h2 className="text-lg font-bold text-slate-900 mb-1">
++          Channel Playbook
++        </h2>
++        <p className="text-xs text-slate-500 mb-5">
++          Expected performance per channel — from marketing research
++        </p>
++        <div className="overflow-x-auto">
++          <table className="w-full min-w-[700px]">
++            <thead>
++              <tr className="border-b border-slate-200">
++                <th className="text-left py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                  Channel
++                </th>
++                <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                  Monthly Cost
++                </th>
++                <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                  Expected Leads
++                </th>
++                <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                  Conversion
++                </th>
++                <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                  CAC
++                </th>
++                <th className="text-right py-2 px-3 text-xs font-bold uppercase tracking-wide text-slate-500">
++                  Time-to-Traction
++                </th>
++              </tr>
++            </thead>
++            <tbody className="text-sm">
++              {[
++                [
++                  "Referral Program",
++                  "$0 (credit)",
++                  "8–15",
++                  "20–40%",
++                  "$0–50",
++                  "1–3 mo",
++                ],
++                [
++                  "PTA / School Partnerships",
++                  "$0",
++                  "5–12",
++                  "15–25%",
++                  "$0",
++                  "1–3 mo",
++                ],
++                [
++                  "Facebook Parent Groups",
++                  "$0",
++                  "3–8",
++                  "10–15%",
++                  "$0",
++                  "2–4 wk",
++                ],
++                ["Homeschool Co-ops", "$0", "3–8", "15–25%", "$0", "2–4 wk"],
++                ["Community Workshops", "$0", "3–6", "10–20%", "$0", "2–4 wk"],
++                [
++                  "Email to Existing Leads",
++                  "$30–50",
++                  "2–5",
++                  "23.4% open",
++                  "~$0",
++                  "Immediate",
++                ],
++                [
++                  "Facebook / IG Ads",
++                  "$200–400",
++                  "10–25",
++                  "5–10%",
++                  "$8–21",
++                  "1–2 wk",
++                ],
++                [
++                  "Google Ads",
++                  "$300–500",
++                  "4–7",
++                  "8–12%",
++                  "$68–122",
++                  "Immediate",
++                ],
++                [
++                  "Sports League Cross-Promo",
++                  "$200–500",
++                  "5–10",
++                  "10–15%",
++                  "$30–60",
++                  "1–2 mo",
++                ],
++                [
++                  "SEO / Blog Content",
++                  "$100–300",
++                  "5–20",
++                  "14.6% close",
++                  "Decreases",
++                  "6–12 mo",
++                ],
++              ].map((row) => (
++                <tr key={row[0]} className="border-b border-slate-100">
++                  <td className="py-2.5 px-3 font-medium text-slate-700">
++                    {row[0]}
++                  </td>
++                  <td className="py-2.5 px-3 text-right text-slate-600">
++                    {row[1]}
++                  </td>
++                  <td className="py-2.5 px-3 text-right text-slate-600">
++                    {row[2]}
++                  </td>
++                  <td className="py-2.5 px-3 text-right text-slate-600">
++                    {row[3]}
++                  </td>
++                  <td className="py-2.5 px-3 text-right text-slate-600">
++                    {row[4]}
++                  </td>
++                  <td className="py-2.5 px-3 text-right text-slate-500">
++                    {row[5]}
++                  </td>
++                </tr>
++              ))}
++            </tbody>
++          </table>
++        </div>
++        <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4">
++          <p className="text-sm text-slate-700">
++            <strong className="text-blue-700">Year 1 Target:</strong> $500/mo
++            marketing spend → 30–50 leads/mo → 7–15 conversions → ~$3,500 new
++            MRR = <strong>7:1 return.</strong>
++          </p>
++        </div>
++      </div>
++
++      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
++        <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">
++          LTV assumptions per persona
++        </p>
++        <div className="grid sm:grid-cols-2 gap-2 text-xs text-slate-600">
++          <p>
++            <strong>Proactive Suburban:</strong> Foundation ($349/mo) × 18mo =
++            $6.3k
++          </p>
++          <p>
++            <strong>Travel Ball:</strong> Acceleration ($549/mo) × 24mo = $13.2k
++          </p>
++          <p>
++            <strong>Homeschool:</strong> Foundation ($349/mo) × 30mo = $10.5k
++          </p>
++          <p>
++            <strong>Falling Behind:</strong> Foundation ($349/mo) × 12mo = $4.2k
++          </p>
++          <p>
++            <strong>Competition Math:</strong> Elite ($799/mo) × 24mo = $19.2k
++          </p>
++          <p>
++            <strong>School Partner:</strong> Custom ($2k/mo) × 12mo = $24k
++          </p>
++        </div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/app/actions/marketing.ts b/src/app/actions/marketing.ts
+new file mode 100644
+index 0000000..e4d3b35
+--- /dev/null
++++ b/src/app/actions/marketing.ts
+@@ -0,0 +1,121 @@
++"use server";
++
++import { createClient } from "@/lib/supabase/server";
++import { getCurrentUser } from "@/lib/auth";
++import type { Persona } from "@/lib/persona";
++import {
++  PERSONA_MONTHLY_REVENUE,
++  PERSONA_RETENTION_MONTHS,
++} from "@/lib/marketing-constants";
++
++export interface MarketingMetrics {
++  totalLeads: number;
++  totalNew: number;
++  totalContacted: number;
++  totalConverted: number;
++  overallConversionRate: number;
++  bySource: {
++    source: string;
++    leads: number;
++    converted: number;
++    conversionRate: number;
++    projectedLtv: number;
++  }[];
++  byPersona: {
++    persona: Persona;
++    leads: number;
++    converted: number;
++    conversionRate: number;
++    avgMonthlyRevenue: number;
++    projectedLtv: number;
++  }[];
++  totalProjectedLtv: number;
++  totalActiveMrr: number;
++}
++
++export async function getMarketingMetrics(): Promise<{
++  metrics: MarketingMetrics | null;
++  error: string | null;
++}> {
++  const user = await getCurrentUser();
++  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
++    return { metrics: null, error: "Admin access required" };
++  }
++
++  const supabase = await createClient();
++  const { data: leads, error } = await supabase
++    .from("leads")
++    .select("id, status, source, persona, created_at");
++  if (error) return { metrics: null, error: error.message };
++
++  const list = leads || [];
++  const totalLeads = list.length;
++  const totalNew = list.filter((l) => l.status === "new").length;
++  const totalContacted = list.filter(
++    (l) => l.status !== "new" && l.status !== "lost",
++  ).length;
++  const totalConverted = list.filter((l) => l.status === "converted").length;
++  const overallConversionRate =
++    totalLeads > 0 ? totalConverted / totalLeads : 0;
++
++  const sourceMap = new Map<string, { leads: number; converted: number }>();
++  for (const l of list) {
++    const key = l.source || "other";
++    const entry = sourceMap.get(key) || { leads: 0, converted: 0 };
++    entry.leads++;
++    if (l.status === "converted") entry.converted++;
++    sourceMap.set(key, entry);
++  }
++  const bySource = Array.from(sourceMap.entries())
++    .map(([source, data]) => ({
++      source,
++      leads: data.leads,
++      converted: data.converted,
++      conversionRate: data.leads > 0 ? data.converted / data.leads : 0,
++      projectedLtv: data.converted * 400 * 18,
++    }))
++    .sort((a, b) => b.leads - a.leads);
++
++  const personaMap = new Map<Persona, { leads: number; converted: number }>();
++  for (const l of list) {
++    const key = (l.persona || "unclassified") as Persona;
++    const entry = personaMap.get(key) || { leads: 0, converted: 0 };
++    entry.leads++;
++    if (l.status === "converted") entry.converted++;
++    personaMap.set(key, entry);
++  }
++  const byPersona = Array.from(personaMap.entries())
++    .map(([persona, data]) => ({
++      persona,
++      leads: data.leads,
++      converted: data.converted,
++      conversionRate: data.leads > 0 ? data.converted / data.leads : 0,
++      avgMonthlyRevenue: PERSONA_MONTHLY_REVENUE[persona],
++      projectedLtv:
++        data.converted *
++        PERSONA_MONTHLY_REVENUE[persona] *
++        PERSONA_RETENTION_MONTHS[persona],
++    }))
++    .sort((a, b) => b.leads - a.leads);
++
++  const totalProjectedLtv = byPersona.reduce((s, p) => s + p.projectedLtv, 0);
++  const totalActiveMrr = byPersona.reduce(
++    (s, p) => s + p.converted * p.avgMonthlyRevenue,
++    0,
++  );
++
++  return {
++    metrics: {
++      totalLeads,
++      totalNew,
++      totalContacted,
++      totalConverted,
++      overallConversionRate,
++      bySource,
++      byPersona,
++      totalProjectedLtv,
++      totalActiveMrr,
++    },
++    error: null,
++  };
++}
+diff --git a/src/lib/marketing-constants.ts b/src/lib/marketing-constants.ts
+new file mode 100644
+index 0000000..65a1ecb
+--- /dev/null
++++ b/src/lib/marketing-constants.ts
+@@ -0,0 +1,21 @@
++import type { Persona } from "@/lib/persona";
++
++export const PERSONA_MONTHLY_REVENUE: Record<Persona, number> = {
++  proactive_suburban: 349,
++  travel_ball_family: 549,
++  homeschool_family: 349,
++  falling_behind: 349,
++  competition_math: 799,
++  school_partner: 2000,
++  unclassified: 349,
++};
++
++export const PERSONA_RETENTION_MONTHS: Record<Persona, number> = {
++  proactive_suburban: 18,
++  travel_ball_family: 24,
++  homeschool_family: 30,
++  falling_behind: 12,
++  competition_math: 24,
++  school_partner: 12,
++  unclassified: 12,
++};
+-- 
+2.43.0
+

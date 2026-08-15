@@ -1,0 +1,940 @@
+From 71de8ef27c101fa354d8e3542688b7f92b7f29c8 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 2 Aug 2026 02:06:23 +0000
+Subject: [PATCH 4/7] sprint 3: persona-tailored landing pages at
+ /for/[persona]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Six SEO-optimized landing pages, one per persona:
+- /for/homeschool     — Homeschool families (emerald)
+- /for/competition    — Competition math AMC/MATHCOUNTS (purple)
+- /for/travel-ball    — Travel ball families (orange)
+- /for/schools        — School/district partnerships (indigo)
+- /for/falling-behind — Urgent grade drop (red)
+- /for/proactive      — Proactive suburban parents (blue)
+
+Each has:
+- Tailored hero + pain points + solution bullets
+- Recommended program with justification
+- Persona-specific color scheme
+- Social proof stat + CTAs
+
+Plus /for index page linking to all six.
+Static generation via generateStaticParams for SEO.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Qjoh5TNLXgQyXHU7KQUouF
+---
+ src/app/(public)/for/[persona]/page.tsx | 321 ++++++++++++++++++
+ src/app/(public)/for/page.tsx           | 121 +++++++
+ src/lib/persona-landing-content.ts      | 427 ++++++++++++++++++++++++
+ src/middleware.ts                       |   1 +
+ 4 files changed, 870 insertions(+)
+ create mode 100644 src/app/(public)/for/[persona]/page.tsx
+ create mode 100644 src/app/(public)/for/page.tsx
+ create mode 100644 src/lib/persona-landing-content.ts
+
+diff --git a/src/app/(public)/for/[persona]/page.tsx b/src/app/(public)/for/[persona]/page.tsx
+new file mode 100644
+index 0000000..eb0b2be
+--- /dev/null
++++ b/src/app/(public)/for/[persona]/page.tsx
+@@ -0,0 +1,321 @@
++import Link from "next/link";
++import { notFound } from "next/navigation";
++import type { Metadata } from "next";
++import { PERSONA_LANDING, PERSONA_SLUGS } from "@/lib/persona-landing-content";
++import { ArrowRight, CheckCircle2, GraduationCap } from "lucide-react";
++
++const COLOR_MAP = {
++  blue: {
++    accent: "text-blue-700",
++    accentBg: "bg-blue-700",
++    accentBgHover: "hover:bg-blue-800",
++    softBg: "bg-blue-50",
++    softBorder: "border-blue-200",
++    tag: "text-blue-700 bg-blue-50 border-blue-200",
++    highlight: "bg-gradient-to-r from-blue-100 to-blue-50",
++    check: "text-blue-700",
++    checkBg: "bg-blue-100",
++    programBg: "bg-blue-700",
++  },
++  orange: {
++    accent: "text-orange-600",
++    accentBg: "bg-orange-500",
++    accentBgHover: "hover:bg-orange-600",
++    softBg: "bg-orange-50",
++    softBorder: "border-orange-200",
++    tag: "text-orange-700 bg-orange-50 border-orange-200",
++    highlight: "bg-gradient-to-r from-orange-100 to-orange-50",
++    check: "text-orange-600",
++    checkBg: "bg-orange-100",
++    programBg: "bg-orange-500",
++  },
++  emerald: {
++    accent: "text-emerald-700",
++    accentBg: "bg-emerald-600",
++    accentBgHover: "hover:bg-emerald-700",
++    softBg: "bg-emerald-50",
++    softBorder: "border-emerald-200",
++    tag: "text-emerald-700 bg-emerald-50 border-emerald-200",
++    highlight: "bg-gradient-to-r from-emerald-100 to-emerald-50",
++    check: "text-emerald-600",
++    checkBg: "bg-emerald-100",
++    programBg: "bg-emerald-600",
++  },
++  red: {
++    accent: "text-red-700",
++    accentBg: "bg-red-600",
++    accentBgHover: "hover:bg-red-700",
++    softBg: "bg-red-50",
++    softBorder: "border-red-200",
++    tag: "text-red-700 bg-red-50 border-red-200",
++    highlight: "bg-gradient-to-r from-red-100 to-red-50",
++    check: "text-red-600",
++    checkBg: "bg-red-100",
++    programBg: "bg-red-600",
++  },
++  purple: {
++    accent: "text-purple-700",
++    accentBg: "bg-purple-700",
++    accentBgHover: "hover:bg-purple-800",
++    softBg: "bg-purple-50",
++    softBorder: "border-purple-200",
++    tag: "text-purple-700 bg-purple-50 border-purple-200",
++    highlight: "bg-gradient-to-r from-purple-100 to-purple-50",
++    check: "text-purple-700",
++    checkBg: "bg-purple-100",
++    programBg: "bg-purple-700",
++  },
++  indigo: {
++    accent: "text-indigo-700",
++    accentBg: "bg-indigo-700",
++    accentBgHover: "hover:bg-indigo-800",
++    softBg: "bg-indigo-50",
++    softBorder: "border-indigo-200",
++    tag: "text-indigo-700 bg-indigo-50 border-indigo-200",
++    highlight: "bg-gradient-to-r from-indigo-100 to-indigo-50",
++    check: "text-indigo-700",
++    checkBg: "bg-indigo-100",
++    programBg: "bg-indigo-700",
++  },
++};
++
++export async function generateStaticParams() {
++  return PERSONA_SLUGS.map((slug) => ({ persona: slug }));
++}
++
++export async function generateMetadata({
++  params,
++}: {
++  params: Promise<{ persona: string }>;
++}): Promise<Metadata> {
++  const { persona } = await params;
++  const content = PERSONA_LANDING[persona];
++  if (!content) return { title: "MathPivot" };
++  return { title: content.title, description: content.metaDescription };
++}
++
++export default async function PersonaLandingPage({
++  params,
++}: {
++  params: Promise<{ persona: string }>;
++}) {
++  const { persona } = await params;
++  const content = PERSONA_LANDING[persona];
++  if (!content) notFound();
++  const c = COLOR_MAP[content.color];
++
++  return (
++    <div className="min-h-screen bg-white">
++      <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
++        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
++          <Link href="/" className="flex items-center gap-2">
++            <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
++              <span className="text-white font-bold text-sm">M</span>
++            </div>
++            <span className="font-bold text-slate-800 text-lg">MathPivot</span>
++          </Link>
++          <div className="flex items-center gap-4">
++            <Link
++              href="/pricing"
++              className="text-sm text-slate-600 hover:text-slate-900 hidden sm:block"
++            >
++              Programs
++            </Link>
++            <Link
++              href="/diagnostic"
++              className={`text-sm font-semibold ${c.accentBg} text-white px-4 py-2 rounded-lg ${c.accentBgHover} transition-colors`}
++            >
++              Free Diagnostic
++            </Link>
++          </div>
++        </div>
++      </header>
++
++      <section className={`px-4 pt-16 pb-20 ${c.highlight}`}>
++        <div className="max-w-4xl mx-auto text-center">
++          <span
++            className={`inline-block text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border ${c.tag} mb-6`}
++          >
++            {content.hero.eyebrow}
++          </span>
++          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1]">
++            {content.hero.headline}
++            <br />
++            <span className={c.accent}>{content.hero.headlineAccent}</span>
++          </h1>
++          <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
++            {content.hero.subheadline}
++          </p>
++          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
++            <Link
++              href={content.cta.primaryHref}
++              className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 ${c.accentBg} ${c.accentBgHover} text-white font-semibold px-8 py-3.5 rounded-xl shadow-lg text-base`}
++            >
++              {content.cta.primary}
++              <ArrowRight size={18} />
++            </Link>
++            <Link
++              href={content.cta.secondaryHref}
++              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-slate-700 font-medium px-8 py-3.5 rounded-xl border border-slate-200 hover:border-slate-300 text-base"
++            >
++              {content.cta.secondary}
++            </Link>
++          </div>
++        </div>
++      </section>
++
++      <section className="px-4 py-20 bg-white">
++        <div className="max-w-3xl mx-auto">
++          <h2 className="text-3xl font-bold text-slate-900 text-center mb-10">
++            {content.painPoints.heading}
++          </h2>
++          <div className="space-y-4">
++            {content.painPoints.items.map((item, i) => (
++              <div
++                key={i}
++                className="flex items-start gap-4 bg-slate-50 border border-slate-100 rounded-xl p-5"
++              >
++                <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
++                  <span className="text-sm font-bold text-slate-600">
++                    {i + 1}
++                  </span>
++                </div>
++                <p className="text-slate-700 leading-relaxed">{item}</p>
++              </div>
++            ))}
++          </div>
++        </div>
++      </section>
++
++      <section className={`px-4 py-20 ${c.softBg}`}>
++        <div className="max-w-4xl mx-auto">
++          <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">
++            {content.solution.heading}
++          </h2>
++          <div className="grid sm:grid-cols-2 gap-5">
++            {content.solution.bullets.map((b, i) => (
++              <div
++                key={i}
++                className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm"
++              >
++                <div
++                  className={`w-10 h-10 ${c.checkBg} rounded-xl flex items-center justify-center mb-4`}
++                >
++                  <CheckCircle2 className={`w-5 h-5 ${c.check}`} />
++                </div>
++                <h3 className="font-bold text-slate-900 mb-2">{b.title}</h3>
++                <p className="text-sm text-slate-600 leading-relaxed">
++                  {b.description}
++                </p>
++              </div>
++            ))}
++          </div>
++        </div>
++      </section>
++
++      <section className="px-4 py-20 bg-white">
++        <div className="max-w-3xl mx-auto">
++          <div className="text-center mb-10">
++            <p
++              className={`text-xs font-bold uppercase tracking-widest ${c.accent} mb-2`}
++            >
++              Recommended for you
++            </p>
++            <h2 className="text-3xl font-bold text-slate-900">
++              Your MathPivot pathway
++            </h2>
++          </div>
++          <div
++            className={`rounded-2xl overflow-hidden border-2 ${c.softBorder} bg-white shadow-lg`}
++          >
++            <div className={`${c.programBg} text-white px-8 py-6`}>
++              <div className="flex items-center gap-4">
++                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
++                  <GraduationCap className="w-6 h-6 text-white" />
++                </div>
++                <div>
++                  <p className="text-sm opacity-90">Recommended Program</p>
++                  <p className="text-2xl font-bold">
++                    {content.recommendedProgram.name}
++                  </p>
++                </div>
++                <div className="ml-auto text-right">
++                  <p className="text-3xl font-bold">
++                    {content.recommendedProgram.price}
++                  </p>
++                  <p className="text-sm opacity-90">
++                    {content.recommendedProgram.frequency}
++                  </p>
++                </div>
++              </div>
++            </div>
++            <div className="p-8">
++              <p className="text-slate-700 leading-relaxed">
++                {content.recommendedProgram.reason}
++              </p>
++              <Link
++                href={content.recommendedProgram.href}
++                className={`mt-6 inline-flex items-center gap-2 ${c.accentBg} ${c.accentBgHover} text-white font-semibold px-6 py-3 rounded-xl`}
++              >
++                See Program Details
++                <ArrowRight size={16} />
++              </Link>
++            </div>
++          </div>
++        </div>
++      </section>
++
++      <section className="px-4 py-16 bg-slate-900 text-white">
++        <div className="max-w-3xl mx-auto text-center">
++          <p className="text-xl sm:text-2xl leading-relaxed">
++            &ldquo;{content.socialProof}&rdquo;
++          </p>
++        </div>
++      </section>
++
++      <section className="px-4 py-20 bg-white">
++        <div className="max-w-3xl mx-auto text-center">
++          <h2 className="text-3xl font-bold text-slate-900">Ready to start?</h2>
++          <p className="mt-4 text-slate-600 max-w-xl mx-auto">
++            Every enrollment begins with a free 15-minute diagnostic. It tells
++            you exactly where your child stands and which program fits.
++          </p>
++          <div className="mt-8">
++            <Link
++              href={content.cta.primaryHref}
++              className={`inline-flex items-center justify-center gap-2 ${c.accentBg} ${c.accentBgHover} text-white font-semibold px-8 py-4 rounded-xl shadow-lg text-lg`}
++            >
++              {content.cta.primary}
++              <ArrowRight size={18} />
++            </Link>
++          </div>
++        </div>
++      </section>
++
++      <footer className="bg-slate-900 text-slate-400 py-10 px-4 border-t border-slate-800">
++        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
++          <div className="flex items-center gap-2">
++            <div className="w-6 h-6 bg-blue-700 rounded flex items-center justify-center">
++              <span className="text-white font-bold text-xs">M</span>
++            </div>
++            <span className="text-sm text-slate-500">MathPivot</span>
++          </div>
++          <div className="flex flex-wrap gap-6 text-sm justify-center">
++            <Link href="/" className="hover:text-white">
++              Home
++            </Link>
++            <Link href="/pricing" className="hover:text-white">
++              Programs
++            </Link>
++            <Link href="/summer" className="hover:text-white">
++              Summer
++            </Link>
++            <Link href="/diagnostic" className="hover:text-white">
++              Diagnostic
++            </Link>
++          </div>
++        </div>
++      </footer>
++    </div>
++  );
++}
+diff --git a/src/app/(public)/for/page.tsx b/src/app/(public)/for/page.tsx
+new file mode 100644
+index 0000000..1a05ae5
+--- /dev/null
++++ b/src/app/(public)/for/page.tsx
+@@ -0,0 +1,121 @@
++import Link from "next/link";
++import type { Metadata } from "next";
++import { PERSONA_LANDING } from "@/lib/persona-landing-content";
++import { ArrowRight } from "lucide-react";
++
++export const metadata: Metadata = {
++  title: "MathPivot for Every Family — Find Your Path",
++  description:
++    "MathPivot builds math coaching pathways for homeschool families, competition math students, travel ball families, schools, and more.",
++};
++
++const DESCRIPTIONS: Record<string, string> = {
++  homeschool:
++    "Expert math coaching for the one subject you can't teach past pre-algebra.",
++  competition:
++    "Elite prep for AMC, MATHCOUNTS, AIME. Small cohorts, dedicated coach.",
++  "travel-ball":
++    "The travel ball model applied to math — structure, coach, and season.",
++  schools:
++    "Certified coaches and mastery data for school and district partnerships.",
++  "falling-behind":
++    "Free diagnostic + summer clinic to rebuild confidence fast.",
++  proactive: "Beyond grade level — structured coaching for motivated families.",
++};
++
++export default function ForIndexPage() {
++  const entries = Object.values(PERSONA_LANDING);
++  return (
++    <div className="min-h-screen bg-white">
++      <header className="bg-white border-b border-slate-100">
++        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
++          <Link href="/" className="flex items-center gap-2">
++            <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
++              <span className="text-white font-bold text-sm">M</span>
++            </div>
++            <span className="font-bold text-slate-800 text-lg">MathPivot</span>
++          </Link>
++          <div className="flex items-center gap-4">
++            <Link
++              href="/pricing"
++              className="text-sm text-slate-600 hover:text-slate-900"
++            >
++              Programs
++            </Link>
++            <Link
++              href="/diagnostic"
++              className="text-sm font-semibold bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
++            >
++              Free Diagnostic
++            </Link>
++          </div>
++        </div>
++      </header>
++
++      <section className="px-4 pt-16 pb-12 text-center max-w-4xl mx-auto">
++        <p className="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-3">
++          Find Your Path
++        </p>
++        <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
++          Every family is different.
++          <br />
++          <span className="text-blue-700">Every path should be too.</span>
++        </h1>
++        <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">
++          MathPivot builds coaching pathways for six distinct family types. Find
++          yours below to see how MathPivot fits your situation.
++        </p>
++      </section>
++
++      <section className="px-4 pb-20 max-w-6xl mx-auto">
++        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
++          {entries.map((entry) => (
++            <Link
++              key={entry.slug}
++              href={`/for/${entry.slug}`}
++              className="group block bg-white rounded-2xl border border-slate-200 p-6 hover:border-blue-300 hover:shadow-lg transition-all"
++            >
++              <p className="text-xs font-bold uppercase tracking-widest text-blue-700 mb-3">
++                For {entry.hero.eyebrow.replace("For ", "")}
++              </p>
++              <h2 className="text-xl font-bold text-slate-900 mb-2 leading-tight">
++                {entry.hero.headline}{" "}
++                <span className="text-slate-500">
++                  {entry.hero.headlineAccent}
++                </span>
++              </h2>
++              <p className="text-sm text-slate-600 mt-3 mb-4 leading-relaxed">
++                {DESCRIPTIONS[entry.slug] || entry.metaDescription}
++              </p>
++              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 group-hover:gap-2.5 transition-all">
++                Learn more <ArrowRight size={14} />
++              </span>
++            </Link>
++          ))}
++        </div>
++      </section>
++
++      <footer className="bg-slate-900 text-slate-400 py-10 px-4">
++        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
++          <div className="flex items-center gap-2">
++            <div className="w-6 h-6 bg-blue-700 rounded flex items-center justify-center">
++              <span className="text-white font-bold text-xs">M</span>
++            </div>
++            <span className="text-sm text-slate-500">MathPivot</span>
++          </div>
++          <div className="flex flex-wrap gap-6 text-sm justify-center">
++            <Link href="/" className="hover:text-white">
++              Home
++            </Link>
++            <Link href="/pricing" className="hover:text-white">
++              Programs
++            </Link>
++            <Link href="/diagnostic" className="hover:text-white">
++              Diagnostic
++            </Link>
++          </div>
++        </div>
++      </footer>
++    </div>
++  );
++}
+diff --git a/src/lib/persona-landing-content.ts b/src/lib/persona-landing-content.ts
+new file mode 100644
+index 0000000..33e3f8b
+--- /dev/null
++++ b/src/lib/persona-landing-content.ts
+@@ -0,0 +1,427 @@
++export interface PersonaLandingContent {
++  slug: string;
++  personaKey: string;
++  title: string;
++  metaDescription: string;
++  hero: {
++    eyebrow: string;
++    headline: string;
++    headlineAccent: string;
++    subheadline: string;
++  };
++  painPoints: { heading: string; items: string[] };
++  solution: {
++    heading: string;
++    bullets: { title: string; description: string }[];
++  };
++  recommendedProgram: {
++    name: string;
++    price: string;
++    frequency: string;
++    reason: string;
++    href: string;
++  };
++  socialProof: string;
++  cta: {
++    primary: string;
++    primaryHref: string;
++    secondary: string;
++    secondaryHref: string;
++  };
++  color: "blue" | "orange" | "emerald" | "red" | "purple" | "indigo";
++}
++
++export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
++  homeschool: {
++    slug: "homeschool",
++    personaKey: "homeschool_family",
++    title: "MathPivot for Homeschool Families — Expert Math Coaching",
++    metaDescription:
++      "You can teach reading. We handle math. MathPivot provides expert math coaching, mastery tracking, and compliance-ready records for homeschool families.",
++    hero: {
++      eyebrow: "For Homeschool Families",
++      headline: "You can teach reading.",
++      headlineAccent: "We handle math.",
++      subheadline:
++        "MathPivot provides expert math coaching for the one subject most homeschool parents don't feel confident teaching past pre-algebra. Small cohorts, dedicated coach, and mastery records that double as compliance documentation.",
++    },
++    painPoints: {
++      heading: "The math cliff is real",
++      items: [
++        "Pre-algebra hits around grade 6–7, and even STEM-trained parents struggle to teach it well.",
++        "Math is sequential — a gap in fractions today becomes an algebra crisis tomorrow.",
++        "Homeschool math curriculum ($200–$800/year) is workbooks, not coaching.",
++        "You need attendance logs, mastery portfolios, and progress reports for your state.",
++      ],
++    },
++    solution: {
++      heading: "Why homeschool families choose MathPivot",
++      bullets: [
++        {
++          title: "Expert math coaching for the subject you can't teach",
++          description:
++            "Certified math coaches who specialize in grades 5–12 mathematics — from pre-algebra to pre-calculus.",
++        },
++        {
++          title: "Mastery portfolio is your compliance document",
++          description:
++            "Every concept your child masters is timestamped and exportable. Attendance logs, mastery portfolios, and progress reports are built in.",
++        },
++        {
++          title: "Small cohort with peer interaction",
++          description:
++            "5–6 students per cohort. Your child learns math alongside peers — something worksheets can't provide.",
++        },
++        {
++          title: "Aligned to your state standards",
++          description:
++            "Diagnostic and progression map to NC, TX, FL, VA, and other state standards. Portable and defensible.",
++        },
++      ],
++    },
++    recommendedProgram: {
++      name: "Foundation Coaching",
++      price: "$349/mo",
++      frequency: "2 coaching meetings/week",
++      reason:
++        "Foundation is the standard fit for grades 5–10 homeschool families. Includes named coach, mastery tracking, and compliance exports.",
++      href: "/pricing",
++    },
++    socialProof:
++      "Homeschool students are the fastest-growing segment in K-12 (4.9%/year), and math is the #1 outsourced subject.",
++    cta: {
++      primary: "Take the Free Diagnostic",
++      primaryHref: "/diagnostic",
++      secondary: "View Coaching Programs",
++      secondaryHref: "/pricing",
++    },
++    color: "emerald",
++  },
++  competition: {
++    slug: "competition",
++    personaKey: "competition_math",
++    title: "MathPivot for Competition Math — AMC, MATHCOUNTS, and Beyond",
++    metaDescription:
++      "Elite math coaching for AMC, MATHCOUNTS, and AIME. Small cohorts (5-6 students), dedicated coach, and Mathathlon competition prep — not AoPS self-study or 20-student RSM classes.",
++    hero: {
++      eyebrow: "For Competition Math Families",
++      headline: "Your child doesn't need help.",
++      headlineAccent: "They need a challenge.",
++      subheadline:
++        "MathPivot Elite prepares students for AMC 8/10/12, MATHCOUNTS, and AIME with a dedicated coach in cohorts of 5–6. Not self-paced AoPS. Not 20-student RSM classes. Real coaching.",
++    },
++    painPoints: {
++      heading: "What competition families tell us",
++      items: [
++        "AoPS is powerful but self-paced — no coach, no accountability.",
++        "RSM classes have 20+ students — advanced kids get lost or bored.",
++        "Kumon and Mathnasium are for remediation, not extension.",
++        "AMC/MATHCOUNTS prep requires expert guidance, not just problem sets.",
++      ],
++    },
++    solution: {
++      heading: "Why competition families choose MathPivot",
++      bullets: [
++        {
++          title: "Elite program built for AMC, MATHCOUNTS, AIME",
++          description:
++            "Dedicated Mathathlon competition prep, problem-solving strategies, and past-competition analysis.",
++        },
++        {
++          title: "5–6 student cohorts, not 20+",
++          description:
++            "Small groups let advanced students think out loud, debate approaches, and learn from peers at their level.",
++        },
++        {
++          title: "Named coach who knows your child's ceiling",
++          description:
++            "Same coach throughout — tracks growth, adjusts difficulty, and connects math to future STEM pathways.",
++        },
++        {
++          title: "Career exposure to real STEM professions",
++          description:
++            "Elite students explore actuarial science, engineering, ML, and quantitative finance — math with a destination.",
++        },
++      ],
++    },
++    recommendedProgram: {
++      name: "Elite Coaching",
++      price: "$799/mo",
++      frequency: "2–3 coaching meetings/week + additional opportunities",
++      reason:
++        "Elite is the primary fit for competition-focused families. Includes advanced projects, competition prep, career exploration, and parent strategy reviews.",
++      href: "/pricing",
++    },
++    socialProof:
++      "300,000+ students register for AMC each year. The path to USAMO/MOP starts with structured coaching, not self-study.",
++    cta: {
++      primary: "Take the Free Diagnostic",
++      primaryHref: "/diagnostic",
++      secondary: "Learn About Elite",
++      secondaryHref: "/pricing",
++    },
++    color: "purple",
++  },
++  "travel-ball": {
++    slug: "travel-ball",
++    personaKey: "travel_ball_family",
++    title: "MathPivot for Travel Ball Families — The Travel Ball of Math",
++    metaDescription:
++      "Same development model, better ROI. Named coach, structured seasons, competition, and measurable growth — for math, not sports. From $349/mo.",
++    hero: {
++      eyebrow: "For Travel Ball Families",
++      headline: "The travel ball model",
++      headlineAccent: "applied to math.",
++      subheadline:
++        "You already invest $10,000–$20,000/year in athletic development. MathPivot brings the same structure — named coach, structured seasons, competition, measurable growth — to the subject that opens more scholarship doors: math.",
++    },
++    painPoints: {
++      heading: "Where sport ROI meets academic ROI",
++      items: [
++        "70% of youth athletes drop out by age 13 — the exact age math confidence peaks or crashes.",
++        "Academic scholarships outnumber athletic scholarships 30:1.",
++        "Your child gets coached in sports. Then does homework alone.",
++        "Math confidence at grades 5–8 predicts STEM career choice more than any other factor.",
++      ],
++    },
++    solution: {
++      heading: "The MathPivot method — familiar and proven",
++      bullets: [
++        {
++          title: "Named math coach for the season",
++          description:
++            "One coach throughout — just like your travel ball coach. Builds relationship, knows the athlete, adjusts training.",
++        },
++        {
++          title: "Structured programs, not hourly tutoring",
++          description:
++            "Foundation, Acceleration, Elite — clear pathways with measurable outcomes, not scattered hours.",
++        },
++        {
++          title: "Competition calendar",
++          description:
++            "MATHCOUNTS, AMC 8/10, and Mathathlon — training toward real events with real stakes.",
++        },
++        {
++          title: "5–6 student cohorts",
++          description:
++            "Small squad, focused development. Team spirit meets individual coaching.",
++        },
++      ],
++    },
++    recommendedProgram: {
++      name: "Acceleration Coaching",
++      price: "$549/mo",
++      frequency: "3 coaching meetings/week",
++      reason:
++        "Acceleration is the primary fit for competitive families. Includes competition readiness, advanced problem-solving, and school curriculum anticipation.",
++      href: "/pricing",
++    },
++    socialProof:
++      "MathPivot Acceleration at $549/mo is 30–50% of what most travel ball families spend monthly on sports — for higher lifetime ROI.",
++    cta: {
++      primary: "Take the Free Diagnostic",
++      primaryHref: "/diagnostic",
++      secondary: "See All Programs",
++      secondaryHref: "/pricing",
++    },
++    color: "orange",
++  },
++  schools: {
++    slug: "schools",
++    personaKey: "school_partner",
++    title: "MathPivot for Schools & Districts — Structured Math Support",
++    metaDescription:
++      "Certified math coaches, diagnostic-driven placement, and mastery data for administrators. Small groups, structured programs, state-aligned assessments.",
++    hero: {
++      eyebrow: "For Schools & Districts",
++      headline: "Structured math support.",
++      headlineAccent: "Measurable outcomes.",
++      subheadline:
++        "MathPivot provides certified math coaches, diagnostic-driven placement, and mastery tracking for schools and districts. Not generic tutoring — a coaching system designed for equity and data.",
++    },
++    painPoints: {
++      heading: "The tutoring gap",
++      items: [
++        "ESSER funding ended and tutoring participation dropped 49% → 43%.",
++        "73% of 8th graders are below proficient in math (NAEP 2024).",
++        "Less than 2% of students receive high-quality tutoring.",
++        "Generic programs show no measurable improvement.",
++      ],
++    },
++    solution: {
++      heading: "What we bring to your school",
++      bullets: [
++        {
++          title: "Certified math coaches — not substitutes",
++          description:
++            "All coaches complete MathPivot certification: pedagogy, curriculum, calibration, and monthly quality review.",
++        },
++        {
++          title: "Diagnostic-driven placement",
++          description:
++            "Every student starts with a 15-minute diagnostic that identifies gaps by domain and standard.",
++        },
++        {
++          title: "Mastery data for administrators",
++          description:
++            "Real-time dashboards show cohort mastery progression, attendance, and coach performance metrics.",
++        },
++        {
++          title: "State-aligned assessments",
++          description:
++            "Questions and progressions map to your state standards. Defensible for Title I and ESSER reporting.",
++        },
++      ],
++    },
++    recommendedProgram: {
++      name: "Partnership Program",
++      price: "Custom pricing",
++      frequency: "Bulk cohorts with dedicated program manager",
++      reason:
++        "School partnerships include diagnostic assessment, cohort placement, weekly progress reports, and end-of-program outcome analysis.",
++      href: "/get-started",
++    },
++    socialProof:
++      "Small-group coaching in the research-optimal 5–6 student range produces the strongest measurable outcomes vs. 1:1 tutoring or large-group classes.",
++    cta: {
++      primary: "Request Partnership Consultation",
++      primaryHref: "/get-started",
++      secondary: "Learn About the Diagnostic",
++      secondaryHref: "/diagnostic",
++    },
++    color: "indigo",
++  },
++  "falling-behind": {
++    slug: "falling-behind",
++    personaKey: "falling_behind",
++    title: "MathPivot for Students Falling Behind in Math",
++    metaDescription:
++      "Grades dropping? Homework a struggle? Take our free 15-minute diagnostic to identify exactly where the gap is — then rebuild confidence with a named math coach.",
++    hero: {
++      eyebrow: "When your child needs help now",
++      headline: "Their grades dropped.",
++      headlineAccent: "Let's find the gap.",
++      subheadline:
++        "Our free 15-minute diagnostic identifies exactly where your child's math foundation broke down — then a named MathPivot coach rebuilds it. Summer clinic entry at $249.",
++    },
++    painPoints: {
++      heading: "What we hear from parents",
++      items: [
++        '"Their report card shocked me — I didn\'t see it coming."',
++        "\"They say they 'hate math' now — they didn't a year ago.\"",
++        '"We tried YouTube. We tried the teacher\'s office hours. Nothing stuck."',
++        '"I don\'t know where the gap is or how to help."',
++      ],
++    },
++    solution: {
++      heading: "How MathPivot helps students catch up",
++      bullets: [
++        {
++          title: "Free diagnostic identifies the exact gap",
++          description:
++            "15 minutes. 5 math domains. You'll know where the foundation broke — and where to start rebuilding.",
++        },
++        {
++          title: "Summer clinic — low-risk entry",
++          description:
++            "$249 8-day clinic (Propel Math 7) gets your child immediate support and momentum before the school year starts.",
++        },
++        {
++          title: "Named coach who knows your child",
++          description:
++            "Same coach every session. Builds trust, tracks progress, rebuilds confidence — not a rotating stranger.",
++        },
++        {
++          title: "Weekly progress reports",
++          description:
++            "You'll see mastery gains week by week. Visible progress restores parent confidence too.",
++        },
++      ],
++    },
++    recommendedProgram: {
++      name: "Foundation Coaching",
++      price: "$349/mo",
++      frequency: "2 coaching meetings/week",
++      reason:
++        "Foundation rebuilds confidence and closes learning gaps. Perfect for students transitioning back to grade-level performance.",
++      href: "/pricing",
++    },
++    socialProof:
++      "24% of US families used tutoring in 2025. But less than 2% receive high-quality, structured coaching — the kind that actually produces results.",
++    cta: {
++      primary: "Take the Free Diagnostic Now",
++      primaryHref: "/diagnostic",
++      secondary: "See Summer Clinics",
++      secondaryHref: "/summer",
++    },
++    color: "red",
++  },
++  proactive: {
++    slug: "proactive",
++    personaKey: "proactive_suburban",
++    title: "MathPivot for Proactive Parents — Beyond Grade Level",
++    metaDescription:
++      "Your child isn't failing — but they're not excelling either. MathPivot's structured coaching helps students go beyond grade level with a named coach and mastery tracking.",
++    hero: {
++      eyebrow: "For Parents Investing in the Long Game",
++      headline: "At grade level isn't enough.",
++      headlineAccent: "Build the edge.",
++      subheadline:
++        "Your child isn't failing. They're just not excelling. MathPivot gives motivated families a structured coaching pathway — named coach, mastery tracking, and measurable growth toward advanced coursework.",
++    },
++    painPoints: {
++      heading: "What proactive parents notice",
++      items: [
++        "\"Their teacher says 'meeting standards' — but is that enough?\"",
++        '"Peers are in RSM, Kumon, Mathnasium — what are we missing?"',
++        '"Homework help doesn\'t build long-term mathematical thinking."',
++        '"We want a real system, not just extra practice."',
++      ],
++    },
++    solution: {
++      heading: "The MathPivot advantage",
++      bullets: [
++        {
++          title: "Named coach, not rotating tutors",
++          description:
++            "One coach throughout the program. Knows your child's pattern, adjusts pacing, and builds a real relationship.",
++        },
++        {
++          title: "Mastery dashboard shows real progress",
++          description:
++            "Every concept mapped and tracked. See exactly what your child has mastered — not just hours logged.",
++        },
++        {
++          title: "Structured programs with clear outcomes",
++          description:
++            "Foundation → Acceleration → Elite. Each level has defined outcomes, not open-ended hours.",
++        },
++        {
++          title: "Career exposure makes math relevant",
++          description:
++            "Kids stay engaged when they see how math connects to engineering, data science, finance, and design.",
++        },
++      ],
++    },
++    recommendedProgram: {
++      name: "Foundation Coaching",
++      price: "$349/mo",
++      frequency: "2 coaching meetings/week",
++      reason:
++        "Foundation is our most popular program for proactive families. Upgrade to Acceleration ($549/mo) when your child is ready to push ahead.",
++      href: "/pricing",
++    },
++    socialProof:
++      "Suburban families investing $1,300–$3,000/year on supplementary education — MathPivot Foundation at $349/mo delivers structured coaching that generic tutoring can't.",
++    cta: {
++      primary: "Take the Free Diagnostic",
++      primaryHref: "/diagnostic",
++      secondary: "View All Programs",
++      secondaryHref: "/pricing",
++    },
++    color: "blue",
++  },
++};
++
++export const PERSONA_SLUGS = Object.keys(PERSONA_LANDING);
+diff --git a/src/middleware.ts b/src/middleware.ts
+index 0a280bd..4260ac4 100644
+--- a/src/middleware.ts
++++ b/src/middleware.ts
+@@ -18,6 +18,7 @@ const PUBLIC_ROUTES = [
+   "/diagnostic/math1-print",
+   "/flyer",
+   "/share",
++  "/for",
+ ];
+ 
+ const ROLE_PREFIXES: Record<string, string> = {
+-- 
+2.43.0
+

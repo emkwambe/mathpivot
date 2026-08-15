@@ -1,0 +1,262 @@
+From a3e079a3aaeb0b2554204a2cb89e82a17c3a399d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 26 Jul 2026 04:35:53 +0000
+Subject: [PATCH 1/7] docs: comprehensive environment setup guide
+
+Adds docs/environment-setup.md covering every env var needed for
+production, categorized by required vs recommended vs optional:
+
+- Supabase (URL, anon key, service role key)
+- App URL
+- Resend (email delivery + domain verification)
+- Stripe (secret, publishable, webhook secret + webhook setup)
+- Anthropic (AI Math Tutor)
+- Sentry (error monitoring)
+- Google (Calendar / Classroom integrations)
+
+Includes:
+- Complete .env.local template for local dev
+- Vercel environment variable checklist
+- Supabase post-setup steps (migrations, RLS verify, auth URLs, admin promotion)
+- First-time deploy order (10 steps)
+- Verification command via /api/health
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Qjoh5TNLXgQyXHU7KQUouF
+---
+ docs/environment-setup.md | 223 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 223 insertions(+)
+ create mode 100644 docs/environment-setup.md
+
+diff --git a/docs/environment-setup.md b/docs/environment-setup.md
+new file mode 100644
+index 0000000..b3d40c4
+--- /dev/null
++++ b/docs/environment-setup.md
+@@ -0,0 +1,223 @@
++# MathPivot Environment Setup
++
++Complete list of environment variables and third-party service setup needed to run MathPivot in production.
++
++## Where to set environment variables
++
++**Vercel Dashboard** → Your project → **Settings** → **Environment Variables**
++
++Add each variable for the environments you need: **Production**, **Preview**, and/or **Development**.
++
++After adding, **redeploy** the site (Deployments → latest → ⋯ → Redeploy) for changes to take effect.
++
++---
++
++## Required — Site does not work without these
++
++### Supabase (Database + Auth)
++
++| Variable | Where to get it | Notes |
++|---|---|---|
++| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → Project Settings → API → Project URL | Public — safe to expose |
++| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Project Settings → API → `anon` `public` key | Public — safe to expose |
++| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Project Settings → API → `service_role` `secret` key | **NEVER expose to client.** Used by admin/API routes only. |
++
++### App URL
++
++| Variable | Value | Notes |
++|---|---|---|
++| `NEXT_PUBLIC_APP_URL` | `https://mathpivot.com` (production) or your Vercel preview URL | Used for redirect URLs, email links, etc. |
++
++---
++
++## Highly Recommended — Site works partially without these
++
++### Resend (Transactional Email)
++
++Sends: diagnostic results, session reminders, purchase confirmations, weekly digests, partnership inquiry notifications.
++
++| Variable | Where to get it | Notes |
++|---|---|---|
++| `RESEND_API_KEY` | Resend Dashboard → API Keys → Create with **Sending access** | Starts with `re_` |
++| `EMAIL_FROM` | `MathPivot <noreply@mathpivot.com>` | Must be from a domain verified in Resend |
++
++**Setup steps:**
++1. Sign up at resend.com
++2. Verify `mathpivot.com` domain (add DNS records they provide)
++3. Create API key with **Sending access** (not Full access)
++4. Add both env vars above and redeploy
++
++Without this: emails silently fail. Users still see success messages, but no email arrives.
++
++---
++
++## Optional but valuable
++
++### Stripe (Payments)
++
++Powers: summer clinic checkout, coaching subscriptions, coach payouts (future).
++
++| Variable | Where to get it | Notes |
++|---|---|---|
++| `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API Keys → **Secret key** | `sk_test_...` for testing, `sk_live_...` for production |
++| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard → Developers → API Keys → **Publishable key** | `pk_test_...` for testing, `pk_live_...` for production |
++| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Developers → Webhooks → your endpoint → **Signing secret** | `whsec_...` |
++
++**Webhook setup:**
++1. Stripe Dashboard → Developers → Webhooks → Add endpoint
++2. Endpoint URL: `https://mathpivot.com/api/stripe/webhook`
++3. Events to send: `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed`
++4. Copy the signing secret → set as `STRIPE_WEBHOOK_SECRET`
++
++Without this: purchase pages show but "Buy" button fails. Fine for pre-launch testing.
++
++### Anthropic (AI Math Tutor)
++
++Powers: `/student/ai-tutor` chat.
++
++| Variable | Where to get it |
++|---|---|
++| `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys |
++
++Without this: AI Tutor page loads but responses fail with an error message.
++
++### Sentry (Error Monitoring)
++
++Catches JavaScript errors + server exceptions in production.
++
++| Variable | Where to get it |
++|---|---|
++| `NEXT_PUBLIC_SENTRY_DSN` | sentry.io → Your project → Settings → Client Keys (DSN) |
++| `SENTRY_AUTH_TOKEN` | sentry.io → Settings → Auth Tokens (for source map uploads) |
++
++Without this: no crash reports; you find bugs when users complain.
++
++### Google Integrations (Calendar / Classroom)
++
++Powers: coach calendar sync, classroom roster imports.
++
++| Variable | Where to get it |
++|---|---|
++| `GOOGLE_CLIENT_ID` | Google Cloud Console → Credentials → OAuth 2.0 Client ID |
++| `GOOGLE_CLIENT_SECRET` | Same location as client ID |
++
++**Redirect URI to register:** `https://mathpivot.com/api/integrations/google/callback`
++
++Without this: Google Calendar / Classroom features on `/settings/integrations` don't work. Core coaching still functions.
++
++---
++
++## Vercel Live Preview Toolbar
++
++Already handled in `next.config.ts` CSP allowlist — no env var needed.
++
++---
++
++## Complete `.env.local` Template (for local development)
++
++Create this file at the repo root as `.env.local` (never commit):
++
++```env
++# Required
++NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
++NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
++SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
++NEXT_PUBLIC_APP_URL=http://localhost:3000
++
++# Email
++RESEND_API_KEY=re_...
++EMAIL_FROM=MathPivot <noreply@mathpivot.com>
++
++# Stripe (test keys for local dev)
++STRIPE_SECRET_KEY=sk_test_...
++NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
++STRIPE_WEBHOOK_SECRET=whsec_...
++
++# AI Math Tutor
++ANTHROPIC_API_KEY=sk-ant-...
++
++# Monitoring
++NEXT_PUBLIC_SENTRY_DSN=https://...@sentry.io/...
++SENTRY_AUTH_TOKEN=sntrys_...
++
++# Google (optional)
++GOOGLE_CLIENT_ID=...apps.googleusercontent.com
++GOOGLE_CLIENT_SECRET=GOCSPX-...
++```
++
++---
++
++## Vercel Environment Variable Checklist
++
++Copy this into your Vercel project:
++
++- [ ] `NEXT_PUBLIC_SUPABASE_URL` (Production, Preview, Development)
++- [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production, Preview, Development)
++- [ ] `SUPABASE_SERVICE_ROLE_KEY` (Production, Preview) — **do not add to Development**
++- [ ] `NEXT_PUBLIC_APP_URL` (per-environment; `https://mathpivot.com` for production)
++- [ ] `RESEND_API_KEY` (Production, Preview)
++- [ ] `EMAIL_FROM` (Production, Preview)
++- [ ] `STRIPE_SECRET_KEY` (Production=live key, Preview=test key)
++- [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (matching production/test keys)
++- [ ] `STRIPE_WEBHOOK_SECRET` (matching production/test webhooks)
++- [ ] `ANTHROPIC_API_KEY` (Production, Preview)
++- [ ] `NEXT_PUBLIC_SENTRY_DSN` (Production)
++- [ ] `SENTRY_AUTH_TOKEN` (Production build only)
++
++---
++
++## Supabase Post-Setup
++
++### Run migrations
++
++If setting up a new Supabase project, run all SQL files in `supabase/migrations/` in order (00001 through 00047) in Supabase SQL Editor.
++
++### Verify RLS is enabled
++
++In Supabase → Authentication → Policies, confirm every table has Row Level Security **enabled**. Every migration adds the appropriate policies.
++
++### Configure Auth
++
++Supabase → Authentication → URL Configuration:
++- **Site URL:** `https://mathpivot.com`
++- **Redirect URLs:** add `https://mathpivot.com/auth/callback`, `https://mathpivot.com/auth/confirm`, `https://mathpivot.com/**` (and your preview URLs)
++
++### Create initial admin account
++
++After first deploy, sign up normally, then in SQL Editor:
++
++```sql
++UPDATE users_profile
++SET role = 'super_admin'
++WHERE email = 'your-admin@email.com';
++```
++
++---
++
++## Deploy Order (First Time)
++
++1. Create Supabase project → run all migrations → configure auth URLs
++2. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` in Vercel
++3. Set `NEXT_PUBLIC_APP_URL` in Vercel
++4. Deploy Vercel → verify site loads
++5. Verify Resend domain → set `RESEND_API_KEY`, `EMAIL_FROM` → redeploy
++6. Sign up, promote to super_admin via SQL
++7. Test lead capture (public forms), verify email arrives
++8. Add Stripe (test mode) → configure webhook → test purchase
++9. Add remaining optional services (Anthropic, Sentry, Google) as needed
++10. Switch Stripe to live mode when ready to accept real payments
++
++---
++
++## Verification Commands
++
++After each env var change and redeploy:
++
++```bash
++# Test the /api/health endpoint
++curl https://mathpivot.com/api/health
++
++# Should return: {"status":"ok","supabase":"connected"}
++```
++
++If Supabase is misconfigured, this will fail with a clear error.
+-- 
+2.43.0
+
