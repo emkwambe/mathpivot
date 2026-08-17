@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh run watch *)",
+      "Bash(npm run build)",
+      "Bash(npm run build *)",
+      "Bash(NODE_ENV=production npm run build)",
+      "Bash(docker compose ps)",
+      "Bash(docker compose ps *)",
+      "Bash(docker compose logs *)",
+      "Bash(git fetch *)",
+      "Bash(git check-ignore *)",
+      "Bash(npx supabase status)",
+      "Bash(curl -s http://localhost:*)",
+      "Bash(curl -s http://127.0.0.1:*)",
+      "mcp__Claude_Browser__navigate",
+      "mcp__Claude_Browser__get_page_text",
+      "mcp__Claude_Browser__read_page",
+      "mcp__context7__query-docs",
+      "mcp__context7__resolve-library-id"
+    ]
+  }
+}
