@@ -208,18 +208,48 @@ Sprint 9 is complete in test mode. Flip to live when ready:
 
 1. Stripe Dashboard → toggle off Test mode → **Product catalog** → create
    the same three products (Foundation $349, Acceleration $549, Elite
-   $799, monthly recurring). Copy the live `price_...` IDs.
-2. Update Vercel Production env vars from step 1 with the live price IDs.
-3. Change `STRIPE_SECRET_KEY` in Vercel Production from `sk_test_...` to
-   `sk_live_...`.
-4. Stripe Dashboard (live mode) → Developers → Webhooks → add endpoint at
-   `https://www.mathpivot.com/api/stripe/subscription-webhook`, subscribe
-   to the same 6 events, copy the live signing secret, set
-   `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` in Vercel Production to that
-   value.
-5. `vercel --prod` and run the same smoke test with a real card at $349
-   Foundation, confirm the row lands, then cancel the subscription
-   immediately from the Stripe Dashboard.
+   $799, monthly recurring). Copy the live `price_...` IDs. These are what
+   Stripe actually charges — the amounts in `PROGRAMS` are display-only.
+2. Stripe Dashboard (live mode) → Developers → Webhooks → register **both**
+   endpoints and copy each one's signing secret. Do this before step 3, so
+   there is never a window where a live key is deployed against a
+   test-mode signing secret.
+
+   | Endpoint | Events | Secret env var |
+   |---|---|---|
+   | `/api/stripe/subscription-webhook` | `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed` | `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` |
+   | `/api/stripe/webhook` | `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed` | `STRIPE_WEBHOOK_SECRET` |
+
+   **Five events on the subscription endpoint, not six.** Earlier drafts
+   listed `invoice.payment_succeeded`; the handler has no case for it and
+   it falls through to `default: break`. Subscribing anyway is harmless
+   but writes a dedupe row per delivery for no reason. Renewals are
+   already picked up via `customer.subscription.updated`.
+
+   **Both endpoints must exist in live mode with distinct secrets.** The
+   credits endpoint is pre-existing and unrelated to this sprint, but
+   Stripe issues a separate signing secret per endpoint, so a live
+   deployment that only sets `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` leaves
+   `/api/stripe/webhook` rejecting every live event with a 400. Never
+   copy one secret into both vars — see S2.1.
+3. Update the Vercel Production env vars — **via the Dashboard web UI, not
+   `vercel env add`** (S5.1). Six values:
+   `STRIPE_SECRET_KEY` (`sk_test_...` → `sk_live_...`, standard secret key
+   only), `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` and `STRIPE_WEBHOOK_SECRET`
+   from step 2, and the three `STRIPE_PRICE_ID_*` values from step 1.
+4. `vercel --prod`. A missing or malformed `STRIPE_SECRET_KEY` now fails
+   the build outright (`src/lib/stripe/index.ts` throws at module load), so
+   an empty paste is caught here. A *valid but wrong* key — live secret
+   from another account — is not caught by anything.
+5. Smoke test with a real card at $349 Foundation. Verify in order:
+   `/enroll/success` renders → row in `program_subscriptions` with
+   `status = 'active'` and both period columns non-null → `auth.users` row
+   with `email_confirmed_at` set → welcome email arrives → **the magic
+   link resolves to `https://www.mathpivot.com/parent`, not localhost**
+   (the S5.5 fix, never yet exercised against live mode).
+6. Cancel the subscription immediately from the Stripe Dashboard, then
+   confirm `customer.subscription.deleted` flowed through and the row's
+   status changed. That proves the live webhook works in both directions.
 
 ---
 
