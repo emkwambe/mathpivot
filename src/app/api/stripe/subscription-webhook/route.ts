@@ -8,6 +8,11 @@ import {
 } from "@/lib/stripe";
 import { isValidTier, type ProgramTier } from "@/lib/stripe/programs";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase/admin";
+import {
+  claimWebhookEvent,
+  markWebhookEventProcessed,
+  markWebhookEventFailed,
+} from "@/lib/stripe/webhook-events";
 import { sendEmail } from "@/lib/email";
 
 // Force this to run in the Node runtime so we get the raw body.
@@ -39,26 +44,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // Claim the event before doing any work. The insert itself is the lock: a
-  // SELECT-then-INSERT would race between concurrent deliveries, whereas the
-  // unique constraint on stripe_event_id lets exactly one delivery win.
-  const { error: claimErr } = await supabaseAdmin
-    .from("stripe_webhook_events")
-    .insert({
-      stripe_event_id: event.id,
-      event_type: event.type,
-      payload_json: event.data.object as unknown as Record<string, unknown>,
-    });
+  // Claim the event before doing any work. Completion is tracked by
+  // processed_at, not by the row's existence — a delivery whose handler died
+  // leaves the row claimed but unprocessed, and the next Stripe retry re-runs
+  // it. See claimWebhookEvent for why the row alone is not enough.
+  const claim = await claimWebhookEvent(
+    event.id,
+    event.type,
+    event.data.object as unknown as Record<string, unknown>,
+  );
 
-  if (claimErr) {
-    // 23505 = unique_violation: this event.id was already claimed by a prior
-    // delivery. Ack with 200 so Stripe stops retrying; do not re-run handlers.
-    if (claimErr.code === "23505") {
-      return NextResponse.json({ received: true, deduped: true });
-    }
+  if (claim.status === "duplicate") {
+    return NextResponse.json({ received: true, deduped: true });
+  }
+  if (claim.status === "in_flight") {
+    return NextResponse.json({ received: true, inFlight: true });
+  }
+  if (claim.status === "error") {
     console.error(
       "[subscription-webhook] could not claim event:",
-      claimErr.message,
+      claim.message,
     );
     return NextResponse.json({ error: "Claim failed" }, { status: 500 });
   }
@@ -82,9 +87,13 @@ export async function POST(request: NextRequest) {
         break;
     }
 
+    await markWebhookEventProcessed(event.id, "[subscription-webhook]");
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error("[subscription-webhook] handler error:", err);
+    // Leaves processed_at NULL, so Stripe's retry re-runs the handler rather
+    // than being deduped away.
+    await markWebhookEventFailed(event.id, err, "[subscription-webhook]");
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 },
