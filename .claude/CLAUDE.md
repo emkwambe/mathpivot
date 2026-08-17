@@ -19,33 +19,9 @@ MathPivot is a mathematics coaching academy that develops confidence, mastery, a
 - **Sessions:** 60 minutes + 10-min grace max. Mon-Thu 5:30-7:45 PM, Sat 10:00-12:15 PM
 - **Pricing philosophy:** Never sell hours. Sell development pathways. Focus on outcomes, mastery, confidence.
 
-## Tech Stack
+## Design Tokens
 
-- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4
-- **Backend:** Supabase (PostgreSQL + Auth + RLS)
-- **UI:** shadcn/ui components, Lucide icons
-- **AI:** Claude API, Gemini API
-- **Email:** Resend (noreply@mathpivot.com)
-- **Monitoring:** Sentry
 - **Colors:** Royal Blue (#1D4ED8/blue-700), Slate (#334155/slate-700), Orange accent (#F97316/orange-500 — isolated to CTAs only)
-
-## Project Structure
-
-```
-mathpivot/
-├── src/
-│   ├── app/
-│   │   ├── (dashboard)/     # Role-based dashboards (student, parent, tutor, admin)
-│   │   ├── (public)/        # Public pages (get-started, pricing, careers, about, summer)
-│   │   ├── actions/         # Server actions
-│   │   └── api/             # API routes
-│   ├── components/          # React components
-│   ├── lib/                 # Utilities
-│   └── types/               # TypeScript types
-├── supabase/                # Database migrations (00001-00041)
-├── docs/                    # Strategic docs (infrastructure-directive.md, sprint plans)
-└── public/                  # Static assets
-```
 
 ## Key Systems Built
 
@@ -61,14 +37,11 @@ mathpivot/
 ## DB Notes
 
 - Role "tutor" in database — do NOT rename. User-facing = "Math Coach"
-- Migrations: 00001-00041 (latest: coaching_schedules + cohort system)
 - Views: coach_schedule_overview (fill status, enrollment counts)
 
 ## Development Commands
 
 ```bash
-npm install                        # Install dependencies
-npm run dev                        # Start dev server
 NODE_ENV=production npm run build  # Build (required in this environment)
 ```
 
