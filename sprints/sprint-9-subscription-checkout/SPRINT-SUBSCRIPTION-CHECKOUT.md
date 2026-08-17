@@ -164,14 +164,17 @@ None of these are code bugs, but each cost a debug cycle. Documented in
 
 ## S6 — Env vars required in Vercel Production
 
-| Variable | Value | Notes |
-|---|---|---|
-| `STRIPE_SECRET_KEY` | `sk_test_...` (test) / `sk_live_...` (live) | Must be the STANDARD secret key, not publishable or restricted |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` for `/api/stripe/webhook` | Belongs to the older credit-purchase endpoint, unchanged by this sprint |
-| `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` | `whsec_...` for `/api/stripe/subscription-webhook` | New in S2. Do NOT reuse `STRIPE_WEBHOOK_SECRET` — Stripe issues a distinct signing secret per endpoint |
-| `STRIPE_PRICE_ID_FOUNDATION` | `price_...` | From the Foundation product created in Stripe |
-| `STRIPE_PRICE_ID_ACCELERATION` | `price_...` | From the Acceleration product |
-| `STRIPE_PRICE_ID_ELITE` | `price_...` | From the Elite product |
+| Variable | Value | When to update | Notes |
+|---|---|---|---|
+| `STRIPE_SECRET_KEY` | `sk_test_...` (test) / `sk_live_...` (live) | On every mode switch. See S8 for the live swap | Must be the STANDARD secret key, not publishable or restricted |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...` for `/api/stripe/webhook` | Whenever you register the credits endpoint in a new mode (test / live). See S8 for the live swap | Signing secret for the older credit-purchase endpoint (`/api/stripe/webhook`), separate from `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET`. Do NOT share one value between the two — Stripe issues a distinct signing secret per endpoint |
+| `STRIPE_SUBSCRIPTION_WEBHOOK_SECRET` | `whsec_...` for `/api/stripe/subscription-webhook` | Whenever you register the subscription endpoint in a new mode (test / live). See S8 for the live swap | New in S2. Do NOT reuse `STRIPE_WEBHOOK_SECRET` — Stripe issues a distinct signing secret per endpoint |
+| `STRIPE_PRICE_ID_FOUNDATION` | `price_...` | On every mode switch — test and live products have different price IDs | From the Foundation product created in Stripe |
+| `STRIPE_PRICE_ID_ACCELERATION` | `price_...` | On every mode switch | From the Acceleration product |
+| `STRIPE_PRICE_ID_ELITE` | `price_...` | On every mode switch | From the Elite product |
+
+All six are mode-scoped: none of them carry over from test to live. S8 is
+the ordered procedure for swapping them.
 
 Also required (pre-existing): `SUPABASE_SERVICE_ROLE_KEY`,
 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
