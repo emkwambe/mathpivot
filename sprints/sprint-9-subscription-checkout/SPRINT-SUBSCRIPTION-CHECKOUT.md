@@ -238,3 +238,22 @@ Sprint 9 is complete in test mode. Flip to live when ready:
   webhook creates the row.
 - **Reconciliation cron** — schedule `83977cd`'s read-only audit as a
   daily Vercel cron and page on drift.
+- **Course-volume PDF library (light)** — unit-level PDFs named
+  `<course>_vol<N>_<unit_slug>.pdf`, private `course-volumes/` storage
+  bucket with signed URLs, `scripts/import-course.ts`, and a library
+  panel in the parent / student / coach dashboards. **Starts at
+  migration `00051`** — see the numbering note below.
+
+### Migration numbering
+
+`00050` is **taken** by `00050_stripe_event_dedupe.sql` (the UNIQUE
+assertion on `stripe_webhook_events.stripe_event_id` plus the
+`processed_at` index). Earlier planning notes assigned `00050` to the
+course-library tables; that slot is gone. The next free number is
+`00051`.
+
+Note also that `00050`'s header comment says a handler that dies leaves a
+row needing "a manual replay." That is stale as of `dec950c` — Stripe's
+own retry now re-runs those handlers automatically. The comment was left
+in place rather than edited, since rewriting an already-applied migration
+risks a Supabase CLI checksum mismatch.
