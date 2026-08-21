@@ -937,6 +937,12 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
+          <div className="mt-8 pt-6 border-t border-slate-800 text-xs text-slate-500 text-center">
+            &copy; 2026 Mpingo Systems, LLC. MathPivot is a Mpingo Systems, LLC
+            brand. Payments appear as{" "}
+            <span className="font-mono">MPINGO*MATHPIVOT</span> on your
+            statement.
+          </div>
         </div>
       </footer>
     </div>
