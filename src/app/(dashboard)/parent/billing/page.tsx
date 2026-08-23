@@ -8,6 +8,8 @@ import {
   Badge,
 } from "@/components/ui";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { PROGRAMS } from "@/lib/stripe/programs";
+import { ManageSubscriptionButton } from "./ManageSubscriptionButton";
 
 type PurchaseStatus = "pending" | "completed" | "failed" | "refunded";
 
@@ -19,6 +21,20 @@ const STATUS_COLORS: Record<
   completed: "success",
   failed: "danger",
   refunded: "secondary",
+};
+
+const SUBSCRIPTION_STATUS_COLORS: Record<
+  string,
+  "warning" | "success" | "danger" | "secondary" | "info"
+> = {
+  trialing: "info",
+  active: "success",
+  past_due: "warning",
+  unpaid: "danger",
+  paused: "secondary",
+  canceled: "secondary",
+  incomplete: "warning",
+  incomplete_expired: "secondary",
 };
 
 export default async function ParentBillingPage() {
@@ -36,6 +52,25 @@ export default async function ParentBillingPage() {
     .single();
 
   const familyId = familyMember?.family_id;
+
+  // Coaching subscription. Scoped to this user explicitly rather than relying
+  // on RLS alone: migration 00049 also grants admins FOR ALL on this table, so
+  // a policy-only query would show an admin some other family's subscription
+  // when they open their own billing page.
+  const ownedBy = familyId
+    ? `parent_user_id.eq.${user.id},family_id.eq.${familyId}`
+    : `parent_user_id.eq.${user.id}`;
+
+  const { data: subscription } = await supabase
+    .from("program_subscriptions")
+    .select(
+      "program_tier, status, price_monthly_cents, current_period_end, cancel_at_period_end, canceled_at",
+    )
+    .or(ownedBy)
+    .neq("status", "incomplete_expired")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   // Get purchase history
   const { data: purchases } = await supabase
@@ -128,6 +163,49 @@ export default async function ParentBillingPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Coaching Subscription */}
+      {subscription && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Coaching Subscription</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h4 className="font-semibold text-slate-900">
+                    {PROGRAMS[
+                      subscription.program_tier as keyof typeof PROGRAMS
+                    ]?.displayName ?? "Coaching Program"}
+                  </h4>
+                  <Badge
+                    variant={
+                      SUBSCRIPTION_STATUS_COLORS[subscription.status] ??
+                      "secondary"
+                    }
+                  >
+                    {subscription.status.replace(/_/g, " ")}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-slate-900">
+                  {formatCurrency(subscription.price_monthly_cents)}
+                  <span className="text-slate-500"> / month</span>
+                </p>
+                {subscription.current_period_end && (
+                  <p className="mt-1 text-sm text-slate-500">
+                    {subscription.cancel_at_period_end ||
+                    subscription.canceled_at
+                      ? `Ends ${formatDate(subscription.current_period_end)}`
+                      : `Renews ${formatDate(subscription.current_period_end)}`}
+                  </p>
+                )}
+              </div>
+              <ManageSubscriptionButton />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Purchase History */}
       <Card>
