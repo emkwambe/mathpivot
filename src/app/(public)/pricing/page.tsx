@@ -35,13 +35,13 @@ const PROGRAMS = [
     sessions: "3x per week",
     sessionsDetail: "12 coaching meetings/month",
     description:
-      "Move ahead of school expectations. For motivated learners preparing for honors-level coursework and seeking additional challenge.",
+      "Move ahead of school expectations. For motivated learners preparing for honors and pre-AP coursework, or seeking additional challenge.",
     features: [
       "Everything in Foundation",
       "3 coaching meetings per week",
       "Academic acceleration pathway",
-      "Advanced problem-solving",
-      "Competition readiness",
+      "Pre-AP algebra & geometry readiness",
+      "Competition readiness (AMC 8, MATHCOUNTS)",
       "School curriculum anticipation",
     ],
     grades: "Grades 6–12",
@@ -58,8 +58,8 @@ const PROGRAMS = [
       "Develop exceptional mathematical talent and future STEM readiness. Elite is defined by additional opportunities, guidance, and personalized development — not just more hours.",
     features: [
       "Everything in Acceleration",
-      "Advanced projects & challenges",
-      "Competition preparation (AMC, MATHCOUNTS)",
+      "AP Calculus AB/BC & AP Statistics prep",
+      "Advanced competition prep (AMC 10/12, AIME)",
       "Career exploration modules",
       "Parent strategy reviews",
       "Personalized academic planning",

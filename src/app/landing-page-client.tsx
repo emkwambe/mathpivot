@@ -381,9 +381,10 @@ export default function LandingPage() {
           </h1>
 
           <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            We bring the discipline of athletic training to academic and career
-            success — with a named coach, structured programs, and measurable
-            mastery. Not hourly sessions. A development pathway.
+            We bring the discipline of athletic training to academic success — a
+            named coach, structured programs, and measurable mastery that gets
+            students AP-ready, competition-ready, and career-ready. Not hourly
+            sessions. A development pathway.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -565,8 +566,8 @@ export default function LandingPage() {
                 popular: true,
                 features: [
                   "Everything in Foundation",
-                  "Mathathlon competition prep",
-                  "AMC 8 / MATHCOUNTS readiness",
+                  "Pre-AP algebra & geometry readiness",
+                  "AMC 8 / MATHCOUNTS competition prep",
                   "Applied math projects",
                   "Career mentorship sessions",
                 ],
@@ -581,10 +582,10 @@ export default function LandingPage() {
                 badge: "bg-purple-100 text-purple-800",
                 features: [
                   "Everything in Acceleration",
-                  "1-on-1 intensive coaching",
+                  "AP Calculus AB/BC & AP Statistics prep",
                   "AMC 10/12 and AIME prep",
                   "College readiness portfolio",
-                  "Competition team placement",
+                  "1-on-1 intensive coaching",
                 ],
               },
             ].map((program) => (
