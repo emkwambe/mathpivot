@@ -524,6 +524,105 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Outcomes / Pathways */}
+      <section className="py-20 px-4 bg-gradient-to-b from-white to-slate-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              What families join for
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+              Four pathways. One foundation.
+            </h2>
+            <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+              Every family arrives with a different goal. Every student builds
+              the same core —{" "}
+              <span className="font-semibold text-slate-900">
+                measurable mastery
+              </span>{" "}
+              — that unlocks all of them.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              {
+                icon: Target,
+                title: "Concept Mastery",
+                who: "Students underperforming, lacking confidence, or with prior-grade gaps",
+                outcome:
+                  "179 atomic concepts tracked from Not Started to Mastered. Fill the specific gaps that keep your child stuck each quarter. Every session ends with a logged mastery outcome — no more guessing what stuck.",
+                bestFor: "Foundation",
+                bestForColor: "bg-blue-100 text-blue-800",
+                accent: "text-blue-600",
+                iconBg: "bg-blue-50",
+                cta: "Start with a free diagnostic",
+                href: "/diagnostic",
+              },
+              {
+                icon: GraduationCap,
+                title: "AP Readiness",
+                who: "Families targeting AP Calc, AP Statistics, and honors sequences",
+                outcome:
+                  "Pre-AP algebra and geometry preparation in Acceleration. Full AP Calc AB/BC + AP Statistics coaching in Elite. Aligned to College Board prerequisites so your child qualifies for AP tracks — and succeeds in them.",
+                bestFor: "Acceleration or Elite",
+                bestForColor: "bg-purple-100 text-purple-800",
+                accent: "text-purple-600",
+                iconBg: "bg-purple-50",
+                cta: "See the AP pathway",
+                href: "/pricing",
+              },
+            ].map((pathway) => {
+              const Icon = pathway.icon;
+              return (
+                <div
+                  key={pathway.title}
+                  className="bg-white rounded-2xl border border-slate-200 p-8 flex flex-col hover:border-slate-300 hover:shadow-md transition-all"
+                >
+                  <div
+                    className={`w-12 h-12 rounded-xl ${pathway.iconBg} flex items-center justify-center mb-4`}
+                  >
+                    <Icon className={pathway.accent} size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-1">
+                    {pathway.title}
+                  </h3>
+                  <p className="text-sm text-slate-500 mb-4">{pathway.who}</p>
+                  <p className="text-sm text-slate-700 leading-relaxed flex-1 mb-6">
+                    {pathway.outcome}
+                  </p>
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100 gap-3 flex-wrap">
+                    <span
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full ${pathway.bestForColor}`}
+                    >
+                      Best fit: {pathway.bestFor}
+                    </span>
+                    <Link
+                      href={pathway.href}
+                      className={`text-sm font-semibold ${pathway.accent} hover:underline flex items-center gap-1`}
+                    >
+                      {pathway.cta}
+                      <ArrowRight size={14} />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-8 text-center text-sm text-slate-500">
+            Also serving competition math (AMC, MATHCOUNTS, AIME) and STEM
+            career pathways —{" "}
+            <Link
+              href="/pricing"
+              className="text-blue-600 hover:underline font-medium"
+            >
+              see all programs →
+            </Link>
+          </p>
+        </div>
+      </section>
+
       {/* Programs */}
       <section id="programs" className="py-20 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto">
