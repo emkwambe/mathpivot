@@ -26,10 +26,10 @@ BEGIN
       AND t.relname = 'stripe_webhook_events'
       AND c.contype = 'u'
       AND (
-        SELECT array_agg(a.attname ORDER BY a.attname)
+        SELECT array_agg(a.attname::text ORDER BY a.attname::text)
         FROM unnest(c.conkey) AS k
         JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = k
-      ) = ARRAY['stripe_event_id']
+      ) = ARRAY['stripe_event_id']::text[]
   ) THEN
     ALTER TABLE public.stripe_webhook_events
       ADD CONSTRAINT stripe_webhook_events_event_id_key
