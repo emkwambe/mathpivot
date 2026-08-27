@@ -1,74 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { PROGRAMS, VALID_TIERS } from "@/lib/stripe/programs";
 
 export const metadata: Metadata = {
-  title: "Coaching Programs — MathPivot",
+  title: "Programs — MathPivot",
   description:
-    "MathPivot coaching programs: Foundation ($349/mo), Acceleration ($549/mo), Elite ($799/mo). Dedicated coach, mastery tracking, micro-cohort learning.",
+    "MathPivot mathematical coaching programs — Foundation ($349/mo), Acceleration ($549/mo), Advanced ($799/mo). Individualized mastery pathway inside intentionally small cohorts of typically 5 students, never more than 6.",
 };
-
-const PROGRAMS = [
-  {
-    tier: "foundation",
-    name: "Foundation",
-    price: "349",
-    sessions: "2x per week",
-    sessionsDetail: "8 coaching meetings/month",
-    description:
-      "Build confidence and close foundational learning gaps. For students lacking confidence, performing below potential, or transitioning into higher-level mathematics.",
-    features: [
-      "Dedicated math coach",
-      "2 coaching meetings per week",
-      "Diagnostic assessment & learning roadmap",
-      "Mastery tracking dashboard",
-      "Weekly progress reports",
-      "Parent communication rhythm",
-    ],
-    grades: "Grades 5–10",
-    color: "blue",
-    featured: false,
-  },
-  {
-    tier: "acceleration",
-    name: "Acceleration",
-    price: "549",
-    sessions: "3x per week",
-    sessionsDetail: "12 coaching meetings/month",
-    description:
-      "Move ahead of school expectations. For motivated learners preparing for honors and pre-AP coursework, or seeking additional challenge.",
-    features: [
-      "Everything in Foundation",
-      "3 coaching meetings per week",
-      "Academic acceleration pathway",
-      "Pre-AP algebra & geometry readiness",
-      "Competition readiness (AMC 8, MATHCOUNTS)",
-      "School curriculum anticipation",
-    ],
-    grades: "Grades 6–12",
-    color: "amber",
-    featured: true,
-  },
-  {
-    tier: "elite",
-    name: "Elite",
-    price: "799",
-    sessions: "2–3x per week",
-    sessionsDetail: "Additional opportunities & guidance",
-    description:
-      "Develop exceptional mathematical talent and future STEM readiness. Elite is defined by additional opportunities, guidance, and personalized development — not just more hours.",
-    features: [
-      "Everything in Acceleration",
-      "AP Calculus AB/BC & AP Statistics prep",
-      "Advanced competition prep (AMC 10/12, AIME)",
-      "Career exploration modules",
-      "Parent strategy reviews",
-      "Personalized academic planning",
-    ],
-    grades: "Grades 6–12",
-    color: "purple",
-    featured: false,
-  },
-];
 
 const colorMap: Record<
   string,
@@ -85,27 +23,54 @@ const colorMap: Record<
     bg: "bg-blue-50",
     border: "border-blue-200",
     badge: "bg-blue-600 text-white",
-    accent: "text-blue-600",
-    button: "bg-blue-600 hover:bg-blue-700 text-white",
-    feature: "text-blue-500",
+    accent: "text-blue-700",
+    button: "bg-blue-700 hover:bg-blue-800 text-white",
+    feature: "text-blue-600",
   },
   amber: {
     bg: "bg-white",
-    border: "border-amber-300 ring-2 ring-amber-200",
-    badge: "bg-amber-500 text-white",
-    accent: "text-amber-600",
-    button: "bg-amber-500 hover:bg-amber-600 text-white",
-    feature: "text-amber-500",
+    border: "border-amber-300 ring-2 ring-amber-100",
+    badge: "bg-amber-600 text-white",
+    accent: "text-amber-700",
+    button: "bg-amber-600 hover:bg-amber-700 text-white",
+    feature: "text-amber-600",
   },
   purple: {
     bg: "bg-purple-50",
     border: "border-purple-200",
-    badge: "bg-purple-600 text-white",
-    accent: "text-purple-600",
-    button: "bg-purple-600 hover:bg-purple-700 text-white",
-    feature: "text-purple-500",
+    badge: "bg-purple-700 text-white",
+    accent: "text-purple-700",
+    button: "bg-purple-700 hover:bg-purple-800 text-white",
+    feature: "text-purple-600",
   },
 };
+
+const CARD_CTAS: Record<string, { label: string; href: string }> = {
+  foundation: { label: "Find My Starting Point", href: "/diagnostic" },
+  acceleration: {
+    label: "Explore Acceleration",
+    href: "/pricing#acceleration",
+  },
+  advanced: { label: "Explore Advanced Pathways", href: "/pricing#advanced" },
+};
+
+const THREE_DIRECTIONS = [
+  {
+    symbol: "↩",
+    title: "Close what is missing.",
+    desc: "Repair the prerequisite gaps under today's schoolwork — without labeling students as behind.",
+  },
+  {
+    symbol: "→",
+    title: "Ensure current success.",
+    desc: "Make your student genuinely capable in the mathematics their course requires — not just able to finish tonight's homework.",
+  },
+  {
+    symbol: "↗",
+    title: "Build slightly ahead.",
+    desc: "When mastery allows, coaching anticipates upcoming concepts so your student meets new material already prepared.",
+  },
+];
 
 export default function PricingPage() {
   return (
@@ -113,7 +78,7 @@ export default function PricingPage() {
       <header className="border-b border-slate-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">M</span>
             </div>
             <span className="font-bold text-slate-900 text-lg">MathPivot</span>
@@ -138,177 +103,213 @@ export default function PricingPage() {
               Sign In
             </Link>
             <Link
-              href="/get-started"
-              className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700"
+              href="/diagnostic"
+              className="bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-800"
             >
-              Get Started
+              Free Diagnostic
             </Link>
           </div>
         </div>
       </header>
 
-      <section className="max-w-6xl mx-auto px-4 pt-16 pb-12 text-center">
-        <p className="text-blue-600 font-semibold text-sm uppercase tracking-wide mb-3">
-          Coaching Programs
+      {/* Section intro */}
+      <section className="max-w-6xl mx-auto px-4 pt-16 pb-8 text-center">
+        <p className="text-blue-700 font-semibold text-sm uppercase tracking-wide mb-3">
+          Programs
         </p>
         <h1 className="text-4xl font-bold text-slate-900">
-          Build Confidence. Master Mathematics. Expand Opportunities.
+          Meet your student where they are. Move them where they&apos;re going.
         </h1>
-        <p className="text-lg text-slate-600 mt-3 max-w-2xl mx-auto">
-          MathPivot develops mathematical thinkers through personalized
-          roadmaps, dedicated coaches, mastery tracking, and micro-cohort
-          learning environments limited to 5–6 students.
+        <p className="text-lg text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+          MathPivot is{" "}
+          <span className="font-semibold">mathematical coaching</span>, not
+          tutoring by the hour. We close the prerequisite gaps under
+          today&apos;s schoolwork, ensure your student is genuinely capable in
+          the mathematics their course requires, and — when mastery allows —
+          build slightly ahead so they&apos;re ready for what comes next.
+        </p>
+        <p className="mt-6 text-sm text-slate-700 font-medium">
+          <span className="italic">Individualized, not isolated.</span> Every
+          student follows an individual mastery pathway inside an intentionally
+          small cohort — typically 5 students, never more than 6.
         </p>
       </section>
 
-      <section className="max-w-5xl mx-auto px-4 pb-16">
-        <div className="grid md:grid-cols-3 gap-6">
-          {PROGRAMS.map((plan) => {
-            const colors = colorMap[plan.color];
-            return (
-              <div
-                key={plan.name}
-                className={`relative rounded-2xl border-2 ${colors.border} ${colors.bg} p-6 flex flex-col ${plan.featured ? "scale-105" : ""}`}
-              >
-                {plan.featured && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-
-                <div className="mb-4">
-                  <span
-                    className={`text-xs font-bold px-2.5 py-1 rounded-full ${colors.badge}`}
-                  >
-                    {plan.name}
-                  </span>
-                  <p className="text-sm text-slate-500 mt-3">
-                    {plan.description}
-                  </p>
-                </div>
-
-                <div className="mb-1">
-                  <span className={`text-4xl font-bold ${colors.accent}`}>
-                    ${plan.price}
-                  </span>
-                  <span className="text-slate-500 text-sm">/month</span>
-                </div>
-                <p className="text-xs text-slate-400 mb-6">
-                  {plan.sessions} &middot; {plan.sessionsDetail} &middot;
-                  3-month minimum
+      {/* Three directions block */}
+      <section className="max-w-5xl mx-auto px-4 pb-12">
+        <div className="rounded-2xl bg-slate-50 border border-slate-100 p-6 sm:p-8">
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-5 text-center">
+            How the coaching works — in three directions simultaneously
+          </p>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {THREE_DIRECTIONS.map((d) => (
+              <div key={d.title}>
+                <p className="text-2xl text-blue-700 mb-2" aria-hidden="true">
+                  {d.symbol}
                 </p>
-
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <svg
-                        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${colors.feature}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2.5}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span className="text-slate-700">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={`/enroll/${plan.tier}`}
-                  className={`block text-center font-semibold py-3 rounded-xl transition-colors ${colors.button}`}
-                >
-                  Enroll Now
-                </Link>
-
-                <p className="text-xs text-slate-400 text-center mt-3">
-                  {plan.grades}
+                <p className="text-sm font-semibold text-slate-900 mb-1">
+                  {d.title}
                 </p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-slate-900 text-center mb-8">
-            What every program includes
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Dedicated Math Coach",
-                desc: "Same coach throughout the program",
-              },
-              {
-                title: "Diagnostic Assessment",
-                desc: "Identifies gaps and builds your roadmap",
-              },
-              {
-                title: "Mastery Tracking",
-                desc: "Concept-level progress visibility",
-              },
-              {
-                title: "Micro-Cohort Learning",
-                desc: "5–6 students for personalized attention",
-              },
-              {
-                title: "Progress Reports",
-                desc: "Weekly mastery and growth updates",
-              },
-              {
-                title: "Personalized Roadmap",
-                desc: "Development pathway, not homework help",
-              },
-              {
-                title: "60-Min Coaching",
-                desc: "Structured sessions with clear outcomes",
-              },
-              {
-                title: "Homeschool Records",
-                desc: "Exportable compliance documents",
-              },
-            ].map((item) => (
-              <div key={item.title} className="text-center">
-                <h3 className="font-semibold text-slate-900 text-sm">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  {d.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Program cards */}
+      <section className="max-w-6xl mx-auto px-4 pb-16">
+        <div className="grid md:grid-cols-3 gap-6">
+          {VALID_TIERS.map((tier) => {
+            const program = PROGRAMS[tier];
+            const colors = colorMap[program.color];
+            const cta = CARD_CTAS[tier];
+            return (
+              <div
+                key={program.tier}
+                id={program.tier}
+                className={`relative rounded-2xl border-2 ${colors.border} ${colors.bg} p-6 sm:p-7 flex flex-col scroll-mt-20`}
+              >
+                <div className="mb-4">
+                  <span
+                    className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full ${colors.badge}`}
+                  >
+                    {program.name}
+                  </span>
+                </div>
+
+                <h2 className="text-2xl font-bold text-slate-900 leading-snug">
+                  {program.capability}
+                </h2>
+                <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                  {program.tagline}
+                </p>
+
+                <div className="mt-5 flex items-baseline gap-2">
+                  <span className={`text-3xl font-bold ${colors.accent}`}>
+                    ${program.priceMonthly}
+                  </span>
+                  <span className="text-sm text-slate-500">/ month</span>
+                </div>
+
+                <p className="mt-1 text-sm text-slate-700 font-medium">
+                  {program.cadence}
+                </p>
+
+                <div className="mt-6 pt-5 border-t border-slate-100">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
+                    Included
+                  </p>
+                  <ul className="space-y-2 flex-1">
+                    {program.features.map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-2 text-sm text-slate-700"
+                      >
+                        <svg
+                          className={`w-4 h-4 mt-0.5 flex-shrink-0 ${colors.feature}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {tier === "advanced" && (
+                  <p className="mt-4 text-xs text-slate-500 leading-relaxed border-l-2 border-purple-200 pl-3">
+                    Advanced students follow one of several distinct pathways —
+                    AP Precalculus, AP Calculus AB, AP Calculus BC, AP
+                    Statistics, competition mathematics, or other individually
+                    approved pathways. Placement is discussed during onboarding.
+                  </p>
+                )}
+
+                <div className="mt-6 pt-5 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+                  <p>Typically 5 students · Never more than 6</p>
+                  <p>3-month minimum</p>
+                </div>
+
+                <Link
+                  href={cta.href}
+                  className={`mt-6 block text-center font-semibold py-3 rounded-xl transition-colors ${colors.button}`}
+                >
+                  {cta.label}
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Why small cohorts matter */}
+      <section className="bg-slate-50 py-14 border-y border-slate-100">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">
+            Cohort model
+          </p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
+            Why small cohorts matter.
+          </h2>
+          <p className="text-slate-700 leading-relaxed">
+            Small enough for individualized feedback, intentionally matched so
+            students can also reason, discuss, and solve mathematics with peers.
+            Five is the pedagogical design, not the maximum.
+          </p>
+          <p className="text-slate-700 leading-relaxed mt-3">
+            Mathematical development benefits from students explaining
+            reasoning, comparing approaches, and learning from mistakes together
+            — while still receiving substantial individual attention from a
+            dedicated coach.
+          </p>
+        </div>
+      </section>
+
+      {/* Supporting message */}
       <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-bold text-slate-900 mb-4">
-            Start with a free diagnostic
+            Grade tells us where your student is enrolled. Mastery tells us
+            where to begin.
           </h2>
-          <p className="text-slate-600 mb-8">
-            Every enrollment begins with a diagnostic assessment so we can build
-            a personalized learning roadmap. No commitment required.
+          <p className="text-slate-700 leading-relaxed mb-4">
+            Two students in the same grade can have very different mathematical
+            needs and goals. MathPivot placement considers what a student
+            already understands, where they want to go, the demands of that
+            mathematics, and the support required to get there.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <p className="text-slate-700 leading-relaxed">
+            <span className="font-semibold text-slate-900">
+              Today&apos;s mathematics should expand tomorrow&apos;s choices.
+            </span>{" "}
+            MathPivot stays aligned with your student&apos;s school curriculum —
+            but school curriculum is not the ceiling. When mastery allows,
+            coaching moves ahead so your student is prepared for the mathematics
+            that comes next.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/diagnostic"
               className="inline-flex items-center justify-center bg-blue-700 text-white font-medium px-8 py-3 rounded-xl hover:bg-blue-800 transition-colors"
             >
-              Take the Free Diagnostic
+              Start With a Placement Assessment
             </Link>
             <Link
               href="/get-started"
               className="inline-flex items-center justify-center border border-slate-200 text-slate-700 font-medium px-8 py-3 rounded-xl hover:bg-slate-50 transition-colors"
             >
-              Request Consultation
+              Talk to a Coach
             </Link>
           </div>
         </div>
@@ -317,7 +318,7 @@ export default function PricingPage() {
       <footer className="bg-slate-900 text-slate-400 py-10 px-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+            <div className="w-6 h-6 bg-blue-700 rounded flex items-center justify-center">
               <span className="text-white font-bold text-xs">M</span>
             </div>
             <span className="text-sm text-slate-500">MathPivot</span>
@@ -336,6 +337,11 @@ export default function PricingPage() {
               Sign In
             </Link>
           </div>
+        </div>
+        <div className="max-w-6xl mx-auto mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+          &copy; 2026 Mpingo Systems, LLC. MathPivot is a Mpingo Systems, LLC
+          brand. Payments appear as{" "}
+          <span className="font-mono">MPINGO*MATHPIVOT</span> on your statement.
         </div>
       </footer>
     </div>

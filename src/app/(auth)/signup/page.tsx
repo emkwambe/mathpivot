@@ -64,7 +64,7 @@ export default function SignupPage() {
             {[
               { value: "$349", label: "Foundation" },
               { value: "$549", label: "Acceleration" },
-              { value: "$799", label: "Elite" },
+              { value: "$799", label: "Advanced" },
             ].map((tier) => (
               <div
                 key={tier.label}

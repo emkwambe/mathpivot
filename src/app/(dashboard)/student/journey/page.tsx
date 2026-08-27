@@ -95,12 +95,14 @@ export default async function StudentJourneyPage() {
     foundation: "from-blue-500 to-blue-600",
     acceleration: "from-amber-500 to-amber-600",
     elite: "from-purple-500 to-purple-600",
+    advanced: "from-purple-500 to-purple-600",
   };
 
   const trackBadgeColors: Record<string, string> = {
     foundation: "bg-blue-100 text-blue-800",
     acceleration: "bg-amber-100 text-amber-800",
     elite: "bg-purple-100 text-purple-800",
+    advanced: "bg-purple-100 text-purple-800",
   };
 
   const firstName = (profile?.full_name || "Student").split(" ")[0];
@@ -256,17 +258,17 @@ export default async function StudentJourneyPage() {
               title: "Advance to Next Track",
               desc:
                 trackLevel === "foundation"
-                  ? "Hit 80% mastery to unlock the Acceleration track — competition prep and applied projects."
+                  ? "Hit 80% mastery to unlock the Acceleration track — advanced problem-solving and enrichment."
                   : trackLevel === "acceleration"
-                    ? "Excel in competitions to qualify for the Elite track — 1:1 coaching and college prep."
-                    : "You're in the Elite track — focus on AMC/AIME prep and building your college portfolio.",
+                    ? "Excel in advanced mathematics to move into the Advanced track — AP-level and specialized pathways."
+                    : "You're in the Advanced track — focus on AP, competition, and specialized pathway work.",
               metric:
-                trackLevel === "elite"
+                trackLevel === "advanced" || trackLevel === "elite"
                   ? "Top track"
                   : masteryPct >= 80
                     ? "Ready"
                     : `${80 - masteryPct}% to go`,
-              done: trackLevel === "elite",
+              done: trackLevel === "advanced" || trackLevel === "elite",
               link: "/student/progress",
             },
           ].map((milestone) => (

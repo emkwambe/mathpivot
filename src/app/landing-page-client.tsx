@@ -561,11 +561,11 @@ export default function LandingPage() {
               },
               {
                 icon: GraduationCap,
-                title: "AP Readiness",
+                title: "AP Readiness & AP Pathways",
                 who: "Families targeting AP Calc, AP Statistics, and honors sequences",
                 outcome:
-                  "Pre-AP algebra and geometry preparation in Acceleration. Full AP Calc AB/BC + AP Statistics coaching in Elite. Aligned to College Board prerequisites so your child qualifies for AP tracks — and succeeds in them.",
-                bestFor: "Acceleration or Elite",
+                  "Acceleration builds readiness for advanced and AP-level mathematics. Advanced supports students already pursuing AP Calc AB/BC, AP Statistics, and other specialized pathways. Aligned to College Board prerequisites so your child qualifies for AP tracks — and succeeds in them.",
+                bestFor: "Acceleration or Advanced",
                 bestForColor: "bg-purple-100 text-purple-800",
                 accent: "text-purple-600",
                 iconBg: "bg-purple-50",
@@ -625,13 +625,25 @@ export default function LandingPage() {
 
       <section id="programs" className="py-20 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
-              Structured programs, not hourly sessions
+              Meet your student where they are. Move them where they&apos;re
+              going.
             </h2>
-            <p className="mt-4 text-lg text-slate-600">
-              Every program includes a named coach, mastery tracking, and
-              competition access.
+            <p className="mt-4 text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              MathPivot is{" "}
+              <span className="font-semibold">mathematical coaching</span>, not
+              tutoring by the hour. We close the prerequisite gaps under
+              today&apos;s schoolwork, ensure your student is genuinely capable
+              in the mathematics their course requires, and — when mastery
+              allows — build slightly ahead so they&apos;re ready for what comes
+              next.
+            </p>
+            <p className="mt-5 text-sm text-slate-700 font-medium max-w-2xl mx-auto">
+              <span className="italic">Individualized, not isolated.</span>{" "}
+              Every student follows an individual mastery pathway inside an
+              intentionally small cohort — typically 5 students, never more than
+              6.
             </p>
           </div>
 
@@ -639,107 +651,164 @@ export default function LandingPage() {
             {[
               {
                 name: "Foundation",
+                slug: "foundation",
                 price: "$349",
-                sessions: "2x per week (8 sessions/month)",
-                grades: "Grades 5-8",
+                capability: "Establish Capability",
+                tagline:
+                  "Strengthen essential mathematics, resolve prerequisite gaps, and establish the mastery future learning depends upon.",
+                cadence: "2 guided sessions each week",
                 color: "border-blue-200 bg-blue-50",
-                accent: "text-blue-600",
+                accent: "text-blue-700",
                 badge: "bg-blue-100 text-blue-800",
+                button: "bg-blue-700 hover:bg-blue-800",
                 features: [
-                  "Named coach for the duration",
-                  "60-minute coaching sessions",
-                  "Mastery tracking dashboard",
-                  "Career exposure modules",
-                  "Weekly progress reports",
+                  "Individual mastery plan",
+                  "Mastery-matched cohort",
+                  "Guided instruction",
+                  "Purposeful practice",
+                  "Coach feedback",
+                  "Progress monitoring",
                 ],
+                cta: "Find My Starting Point",
+                href: "/diagnostic",
               },
               {
                 name: "Acceleration",
+                slug: "acceleration",
                 price: "$549",
-                sessions: "3x per week (12 sessions/month)",
-                grades: "Grades 6-10",
+                capability: "Expand Capability",
+                tagline:
+                  "Progress deeper or faster, remain ahead of current course demands, and prepare for increasingly advanced mathematics.",
+                cadence: "3 guided sessions each week",
                 color: "border-amber-200 bg-amber-50",
-                accent: "text-amber-600",
+                accent: "text-amber-700",
                 badge: "bg-amber-100 text-amber-800",
-                popular: true,
+                button: "bg-amber-600 hover:bg-amber-700",
                 features: [
-                  "Everything in Foundation",
-                  "Pre-AP algebra & geometry readiness",
-                  "AMC 8 / MATHCOUNTS competition prep",
-                  "Applied math projects",
-                  "Career mentorship sessions",
+                  "Accelerated mastery plan",
+                  "Mastery-matched cohort",
+                  "Guided instruction",
+                  "Advanced practice & enrichment",
+                  "Coach feedback",
+                  "Progress monitoring",
                 ],
+                cta: "Explore Acceleration",
+                href: "/pricing#acceleration",
               },
               {
-                name: "Elite",
+                name: "Advanced",
+                slug: "advanced",
                 price: "$799",
-                sessions: "4x per week (16 sessions/month)",
-                grades: "Grades 7-12",
+                capability: "Advance Capability",
+                tagline:
+                  "Pursue demanding mathematics — advanced high-school coursework, AP mathematics, competition pathways, and preparation for quantitatively demanding college and career directions.",
+                cadence:
+                  "2–3 guided sessions each week + pathway-specific opportunities",
                 color: "border-purple-200 bg-purple-50",
-                accent: "text-purple-600",
+                accent: "text-purple-700",
                 badge: "bg-purple-100 text-purple-800",
+                button: "bg-purple-700 hover:bg-purple-800",
                 features: [
-                  "Everything in Acceleration",
-                  "AP Calculus AB/BC & AP Statistics prep",
-                  "AMC 10/12 and AIME prep",
-                  "College readiness portfolio",
-                  "1-on-1 intensive coaching",
+                  "Advanced mastery plan",
+                  "Mastery-matched cohort",
+                  "Specialized guided instruction",
+                  "Advanced practice & extended problem solving",
+                  "Specialized feedback",
+                  "Progress monitoring",
+                  "Pathway-specific opportunities",
                 ],
+                cta: "Explore Advanced Pathways",
+                href: "/pricing#advanced",
               },
             ].map((program) => (
               <div
-                key={program.name}
-                className={`relative rounded-2xl border-2 ${program.color} p-8 flex flex-col`}
+                key={program.slug}
+                className={`relative rounded-2xl border-2 ${program.color} p-6 sm:p-7 flex flex-col`}
               >
-                {program.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1 rounded-full">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
                 <span
                   className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full w-fit ${program.badge}`}
                 >
                   {program.name}
                 </span>
-                <div className="mt-4">
-                  <span className={`text-4xl font-bold ${program.accent}`}>
-                    {program.price}
-                  </span>
-                  <span className="text-slate-500 text-sm">/month</span>
-                </div>
-                <p className="text-xs text-slate-400 mt-1">
-                  {program.sessions} &middot; {program.grades} &middot; 3-month
-                  minimum
+                <h3 className="mt-3 text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+                  {program.capability}
+                </h3>
+                <p className="mt-2 text-sm text-slate-700 leading-relaxed">
+                  {program.tagline}
                 </p>
 
-                <ul className="mt-6 space-y-3 flex-1">
-                  {program.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check
-                        size={16}
-                        className={`mt-0.5 flex-shrink-0 ${program.accent}`}
-                      />
-                      <span className="text-slate-700">{f}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-5 flex items-baseline gap-2">
+                  <span className={`text-3xl font-bold ${program.accent}`}>
+                    {program.price}
+                  </span>
+                  <span className="text-slate-500 text-sm">/ month</span>
+                </div>
+                <p className="mt-1 text-sm text-slate-700 font-medium">
+                  {program.cadence}
+                </p>
+
+                <div className="mt-5 pt-4 border-t border-slate-100">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
+                    Included
+                  </p>
+                  <ul className="space-y-2 flex-1">
+                    {program.features.map((f) => (
+                      <li
+                        key={f}
+                        className="flex items-start gap-2 text-sm text-slate-700"
+                      >
+                        <Check
+                          size={16}
+                          className={`mt-0.5 flex-shrink-0 ${program.accent}`}
+                        />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+                  <p>Typically 5 students · Never more than 6</p>
+                  <p>3-month minimum</p>
+                </div>
 
                 <Link
-                  href={`/enroll/${program.name.toLowerCase()}`}
-                  className={`mt-8 block text-center py-3 rounded-xl text-white font-medium transition-colors ${
-                    program.name === "Foundation"
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : program.name === "Acceleration"
-                        ? "bg-amber-600 hover:bg-amber-700"
-                        : "bg-purple-600 hover:bg-purple-700"
-                  }`}
+                  href={program.href}
+                  className={`mt-6 block text-center py-3 rounded-xl text-white font-medium transition-colors ${program.button}`}
                 >
-                  Enroll Now
+                  {program.cta}
                 </Link>
               </div>
             ))}
+          </div>
+
+          <div className="mt-12 max-w-3xl mx-auto text-center">
+            <h3 className="text-xl font-bold text-slate-900">
+              Grade tells us where your student is enrolled. Mastery tells us
+              where to begin.
+            </h3>
+            <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+              Two students in the same grade can have very different
+              mathematical needs and goals. Placement considers what a student
+              already understands, where they want to go, the demands of that
+              mathematics, and the support required to get there.
+            </p>
+            <p className="mt-3 text-sm text-slate-700 leading-relaxed">
+              <span className="font-semibold">
+                Today&apos;s mathematics should expand tomorrow&apos;s choices.
+              </span>{" "}
+              MathPivot stays aligned with school curriculum — but school
+              curriculum is not the ceiling.
+            </p>
+            <p className="mt-5 text-sm">
+              <Link
+                href="/diagnostic"
+                className="text-blue-700 hover:text-blue-800 font-semibold hover:underline"
+              >
+                Not sure which program fits? Start with a MathPivot placement
+                assessment →
+              </Link>
+            </p>
           </div>
         </div>
       </section>

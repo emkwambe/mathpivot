@@ -150,7 +150,7 @@ export default function SummerHandout() {
                     Focus: Advanced Functions, Trig, Pre-Calculus
                   </p>
                   <p className="text-[10px] text-blue-600 mt-1">
-                    $150 enrollment credit toward Elite Coaching
+                    $150 enrollment credit toward MathPivot Advanced
                   </p>
                 </div>
               </div>

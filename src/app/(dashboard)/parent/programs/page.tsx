@@ -18,6 +18,13 @@ const trackColors = {
     accent: "text-amber-600",
     button: "bg-amber-600 hover:bg-amber-700",
   },
+  advanced: {
+    bg: "bg-purple-50",
+    border: "border-purple-200",
+    badge: "bg-purple-100 text-purple-800",
+    accent: "text-purple-600",
+    button: "bg-purple-600 hover:bg-purple-700",
+  },
   elite: {
     bg: "bg-purple-50",
     border: "border-purple-200",
@@ -29,34 +36,49 @@ const trackColors = {
 
 const trackDescriptions: Record<string, string> = {
   foundation:
-    "Build strong fundamentals with grade-level mastery. Perfect for students who need structured support and confidence building.",
+    "Strengthen essential mathematics, resolve prerequisite gaps, and establish the mastery future learning depends upon.",
   acceleration:
-    "Push beyond grade level with competition prep and applied projects. For students ready to challenge themselves.",
+    "Progress deeper or faster, remain ahead of current course demands, and prepare for increasingly advanced mathematics.",
+  advanced:
+    "Pursue demanding mathematics — advanced high-school coursework, AP mathematics, competition pathways, and preparation for quantitatively demanding college and career directions.",
   elite:
-    "Intensive coaching for advanced students pursuing competition excellence and early career exposure.",
+    "Pursue demanding mathematics — advanced high-school coursework, AP mathematics, competition pathways, and preparation for quantitatively demanding college and career directions.",
 };
 
 const trackFeatures: Record<string, string[]> = {
   foundation: [
-    "Named coach for the duration",
-    "2x per week (60-min sessions)",
-    "Mastery tracking dashboard",
-    "Career exposure modules",
-    "Weekly progress reports",
+    "Individual mastery plan",
+    "Mastery-matched cohort",
+    "Guided instruction",
+    "Purposeful practice",
+    "Coach feedback",
+    "Progress monitoring",
   ],
   acceleration: [
-    "Everything in Foundation",
-    "3x per week (60-min sessions)",
-    "Mathathlon competition prep",
-    "AMC 8 / MATHCOUNTS readiness",
-    "Applied math projects",
+    "Accelerated mastery plan",
+    "Mastery-matched cohort",
+    "Guided instruction",
+    "Advanced practice & enrichment",
+    "Coach feedback",
+    "Progress monitoring",
+  ],
+  advanced: [
+    "Advanced mastery plan",
+    "Mastery-matched cohort",
+    "Specialized guided instruction",
+    "Advanced practice & extended problem solving",
+    "Specialized feedback",
+    "Progress monitoring",
+    "Pathway-specific opportunities",
   ],
   elite: [
-    "Everything in Acceleration",
-    "4x per week (60-min sessions)",
-    "1-on-1 intensive coaching",
-    "AMC 10/12 and AIME prep",
-    "College readiness portfolio",
+    "Advanced mastery plan",
+    "Mastery-matched cohort",
+    "Specialized guided instruction",
+    "Advanced practice & extended problem solving",
+    "Specialized feedback",
+    "Progress monitoring",
+    "Pathway-specific opportunities",
   ],
 };
 

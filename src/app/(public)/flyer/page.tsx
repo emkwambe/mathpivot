@@ -136,7 +136,7 @@ export default function FlyerPage() {
                 </p>
               </div>
               <div className="border border-slate-200 rounded-xl p-5">
-                <p className="font-bold text-slate-900">Elite</p>
+                <p className="font-bold text-slate-900">Advanced</p>
                 <p className="text-2xl font-bold text-blue-700 mt-1">
                   $799
                   <span className="text-sm text-slate-400 font-normal">

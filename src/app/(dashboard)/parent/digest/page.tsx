@@ -92,6 +92,7 @@ export default async function ParentDigestPage() {
     foundation: "bg-blue-100 text-blue-800",
     acceleration: "bg-amber-100 text-amber-800",
     elite: "bg-purple-100 text-purple-800",
+    advanced: "bg-purple-100 text-purple-800",
   };
 
   return (
