@@ -1,4 +1,4 @@
-export type ProgramTier = "foundation" | "acceleration" | "advanced";
+export type ProgramTier = "foundation" | "acceleration" | "elite";
 
 export interface ProgramConfig {
   tier: ProgramTier;
@@ -7,7 +7,6 @@ export interface ProgramConfig {
   priceMonthly: number;
   priceMonthlyCents: number;
   cadence: string;
-  capability: string;
   tagline: string;
   color: "blue" | "amber" | "purple";
   features: string[];
@@ -18,76 +17,69 @@ export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
   foundation: {
     tier: "foundation",
     name: "Foundation",
-    displayName: "MathPivot Foundation",
+    displayName: "Foundation Coaching",
     priceMonthly: 349,
     priceMonthlyCents: 34900,
-    cadence: "2 guided sessions each week",
-    capability: "Establish Capability",
-    tagline:
-      "Strengthen essential mathematics, resolve prerequisite gaps, and establish the mastery future learning depends upon.",
+    cadence: "2 coaching sessions / week",
+    tagline: "Rebuild confidence and close mastery gaps.",
     color: "blue",
     features: [
-      "Individual mastery plan",
-      "Mastery-matched cohort",
-      "Guided instruction",
-      "Purposeful practice",
-      "Coach feedback",
-      "Progress monitoring",
+      "Dedicated math coach",
+      "2 coaching meetings per week (60 min each)",
+      "Diagnostic-driven learning roadmap",
+      "Mastery tracking dashboard",
+      "Weekly progress reports",
+      "Micro-cohort of 5-6 students",
     ],
     bestFor:
-      "For students strengthening essential mathematics, closing prerequisite gaps, or building dependable mastery before advancing.",
+      "Students who need to rebuild confidence and close specific mastery gaps.",
   },
   acceleration: {
     tier: "acceleration",
     name: "Acceleration",
-    displayName: "MathPivot Acceleration",
+    displayName: "Acceleration Coaching",
     priceMonthly: 549,
     priceMonthlyCents: 54900,
-    cadence: "3 guided sessions each week",
-    capability: "Expand Capability",
-    tagline:
-      "Progress deeper or faster, remain ahead of current course demands, and prepare for increasingly advanced mathematics.",
+    cadence: "3 coaching sessions / week",
+    tagline: "Fill gaps and move ahead of grade level.",
     color: "amber",
     features: [
-      "Accelerated mastery plan",
-      "Mastery-matched cohort",
-      "Guided instruction",
-      "Advanced practice & enrichment",
-      "Coach feedback",
-      "Progress monitoring",
+      "Everything in Foundation",
+      "3 coaching meetings per week",
+      "Academic acceleration pathway",
+      "Advanced problem-solving",
+      "Honors & competition readiness",
+      "School curriculum anticipation",
     ],
     bestFor:
-      "For students with sufficient foundations to progress deeper or faster, remain ahead of current course demands, and prepare for increasingly advanced mathematics.",
+      "Motivated students preparing for honors coursework or seeking additional challenge.",
   },
-  advanced: {
-    tier: "advanced",
-    name: "Advanced",
-    displayName: "MathPivot Advanced",
+  elite: {
+    tier: "elite",
+    name: "Elite",
+    displayName: "Elite Coaching",
     priceMonthly: 799,
     priceMonthlyCents: 79900,
-    cadence: "2–3 guided sessions each week + pathway-specific opportunities",
-    capability: "Advance Capability",
-    tagline:
-      "Pursue demanding mathematics — advanced high-school coursework, AP mathematics, competition pathways, and preparation for quantitatively demanding college and career directions.",
+    cadence: "2-3 sessions / week + enrichment opportunities",
+    tagline: "Accelerate, compete, and lead.",
     color: "purple",
     features: [
-      "Advanced mastery plan",
-      "Mastery-matched cohort",
-      "Specialized guided instruction",
-      "Advanced practice & extended problem solving",
-      "Specialized feedback",
-      "Progress monitoring",
-      "Pathway-specific opportunities",
+      "Everything in Acceleration",
+      "Competition prep (AMC, MATHCOUNTS, AIME)",
+      "Advanced projects & guided research",
+      "Career exploration & mentorship",
+      "Parent strategy reviews",
+      "Personalized academic planning",
     ],
     bestFor:
-      "For students pursuing demanding mathematics, including advanced high-school coursework, AP mathematics, competition pathways, and preparation for quantitatively demanding college and career directions.",
+      "High-performing students ready to accelerate, compete, and explore STEM career pathways.",
   },
 };
 
 export const VALID_TIERS: ProgramTier[] = [
   "foundation",
   "acceleration",
-  "advanced",
+  "elite",
 ];
 
 export function isValidTier(v: unknown): v is ProgramTier {
@@ -100,13 +92,7 @@ export function priceIdForTier(tier: ProgramTier): string | undefined {
       return process.env.STRIPE_PRICE_ID_FOUNDATION;
     case "acceleration":
       return process.env.STRIPE_PRICE_ID_ACCELERATION;
-    case "advanced":
-      return process.env.STRIPE_PRICE_ID_ADVANCED;
+    case "elite":
+      return process.env.STRIPE_PRICE_ID_ELITE;
   }
 }
-
-// Legacy tier value retained ONLY as historic marker for Sprint 9 test-mode
-// rows created before the Elite → Advanced rename. Application MUST NOT
-// create new subscriptions with this value; VALID_TIERS excludes it, so
-// isValidTier() returns false for "elite" going forward.
-export const LEGACY_TIER_ELITE = "elite" as const;

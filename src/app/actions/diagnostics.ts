@@ -25,11 +25,9 @@ export interface DomainScore {
   percentage: number;
 }
 
-import { PROGRAMS, type ProgramTier } from "@/lib/stripe/programs";
-
 export interface PlacementResult {
   recommendedProgram: string;
-  programTier: ProgramTier;
+  programTier: "foundation" | "acceleration" | "elite";
   programDescription: string;
   programPriceMonthly: number;
   programCadence: string;
@@ -40,24 +38,48 @@ export interface PlacementResult {
   assessmentId: string;
 }
 
-// Placement description is longer than the pricing tagline — it's rendered
-// in the diagnostic results email + results page after a real assessment,
-// so it should speak to what the student's score revealed. Program name,
-// price, and cadence come from the canonical PROGRAMS config so a pricing
-// or copy change updates both surfaces in one place.
-const PLACEMENT_DESCRIPTIONS: Record<ProgramTier, string> = {
-  foundation:
-    "Foundation coaching strengthens essential mathematics and resolves prerequisite gaps, establishing the mastery future learning depends upon — with a dedicated coach and a small mastery-matched cohort.",
-  acceleration:
-    "Acceleration coaching moves your student ahead of current course demands — deeper problem solving, enrichment, and preparation for increasingly advanced mathematics with a dedicated coach.",
-  advanced:
-    "Advanced coaching supports demanding mathematics — advanced high-school coursework, AP mathematics, competition preparation, and other specialized pathways — with pathway-specific opportunities beyond the weekly sessions.",
+interface CoachingProgram {
+  tier: "foundation" | "acceleration" | "elite";
+  name: string;
+  priceMonthly: number;
+  cadence: string;
+  description: (grade?: number) => string;
+}
+
+const COACHING_PROGRAMS: Record<
+  "foundation" | "acceleration" | "elite",
+  CoachingProgram
+> = {
+  foundation: {
+    tier: "foundation",
+    name: "Foundation Coaching",
+    priceMonthly: 349,
+    cadence: "2 sessions / week",
+    description: () =>
+      "Rebuild confidence and close specific mastery gaps with a named math coach. Weekly coaching, structured progression, and measurable mastery — not hourly tutoring.",
+  },
+  acceleration: {
+    tier: "acceleration",
+    name: "Acceleration Coaching",
+    priceMonthly: 549,
+    cadence: "3 sessions / week",
+    description: () =>
+      "Fill remaining gaps while advancing beyond grade level. Three coaching meetings per week with a dedicated coach, mastery tracking, and a personalized roadmap.",
+  },
+  elite: {
+    tier: "elite",
+    name: "Elite Coaching",
+    priceMonthly: 799,
+    cadence: "2-3 sessions / week + enrichment",
+    description: () =>
+      "Ready to accelerate. Elite coaching adds competition prep (AMC, MATHCOUNTS), advanced problem-solving, and additional development opportunities alongside grade-level mastery.",
+  },
 };
 
-function selectProgramTier(overallScore: number): ProgramTier {
-  if (overallScore < 40) return "foundation";
-  if (overallScore < 70) return "acceleration";
-  return "advanced";
+function selectProgram(overallScore: number): CoachingProgram {
+  if (overallScore < 40) return COACHING_PROGRAMS.foundation;
+  if (overallScore < 70) return COACHING_PROGRAMS.acceleration;
+  return COACHING_PROGRAMS.elite;
 }
 
 export async function getAssessmentQuestions(
@@ -186,10 +208,10 @@ export async function submitAssessment(
   const weakestDomain = sorted[0]?.domain || "";
   const strongestDomain = sorted[sorted.length - 1]?.domain || "";
 
-  const programTier = selectProgramTier(overallScore);
-  const program = PROGRAMS[programTier];
-  const recommendedProgram = program.displayName;
-  const programDescription = PLACEMENT_DESCRIPTIONS[programTier];
+  const program = selectProgram(overallScore);
+  const recommendedProgram = program.name;
+  const programTier = program.tier;
+  const programDescription = program.description(gradeHint);
   const programPriceMonthly = program.priceMonthly;
   const programCadence = program.cadence;
 

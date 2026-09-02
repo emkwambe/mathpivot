@@ -11,24 +11,6 @@ const nextConfig: NextConfig = {
     "ical-generator",
   ],
 
-  async redirects() {
-    // /enroll/elite was the launch URL for the Sprint 9 pricing tier that has
-    // since been renamed to Advanced. 301 keeps SEO, bookmarks, and any old
-    // flyer / share links working.
-    return [
-      {
-        source: "/enroll/elite",
-        destination: "/enroll/advanced",
-        permanent: true,
-      },
-      {
-        source: "/enroll/elite/:path*",
-        destination: "/enroll/advanced/:path*",
-        permanent: true,
-      },
-    ];
-  },
-
   async headers() {
     return [
       {

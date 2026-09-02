@@ -145,9 +145,9 @@ export default async function EnrollTierPage({
             <div className="flex items-start gap-2">
               <Users className="w-4 h-4 text-slate-500 mt-0.5 shrink-0" />
               <div>
-                <p className="font-semibold text-slate-700">Small cohort</p>
+                <p className="font-semibold text-slate-700">Micro-cohort</p>
                 <p className="text-slate-500">
-                  Typically 5 students · Never more than 6.
+                  5-6 students target for personalized attention.
                 </p>
               </div>
             </div>

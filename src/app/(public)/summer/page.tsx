@@ -66,7 +66,7 @@ const programs = [
     outcome:
       "Prepare for advanced high school mathematics and future STEM coursework.",
     creditExample:
-      "Receive a $150 enrollment credit if you continue into MathPivot Advanced.",
+      "Receive a $150 enrollment credit if you continue into Elite Coaching.",
     wave: 2,
     dates: "July 20 – August 1",
   },
