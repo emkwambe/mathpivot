@@ -6,7 +6,7 @@ import {
   constructSubscriptionWebhookEvent,
   isStripeConfigured,
 } from "@/lib/stripe";
-import { isValidTier, PROGRAMS, type ProgramTier } from "@/lib/stripe/programs";
+import { isValidTier, type ProgramTier } from "@/lib/stripe/programs";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase/admin";
 import {
   claimWebhookEvent,
@@ -474,11 +474,12 @@ function welcomeEmailHtml(args: {
   tier: ProgramTier;
   magicLink: string;
 }): string {
-  // Derived from PROGRAMS so a tier rename cannot leave this email announcing
-  // a tier that no longer exists. The hardcoded ternary this replaces had no
-  // branch for "advanced" and fell through to "Elite Coaching", so every
-  // Advanced parent was welcomed to a program the product no longer sells.
-  const tierName = PROGRAMS[args.tier].displayName;
+  const tierName =
+    args.tier === "foundation"
+      ? "Foundation Coaching"
+      : args.tier === "acceleration"
+        ? "Acceleration Coaching"
+        : "Elite Coaching";
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;color:#334155;background:#fff;">
       <div style="background:#1D4ED8;padding:28px 24px;text-align:center;border-radius:12px 12px 0 0;">
