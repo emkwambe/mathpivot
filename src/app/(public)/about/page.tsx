@@ -103,7 +103,7 @@ export default function AboutPage() {
               },
               {
                 title: "Structured Programs, Not Sessions",
-                desc: "Three tracks — Foundation (2x/week), Acceleration (3x/week), Elite (4x/week). Each with a structured curriculum, onboarding protocol, and measurable outcomes.",
+                desc: "Three tracks — Foundation (2x/week), Acceleration (3x/week), Advanced (2–3x/week). Each with a structured curriculum, onboarding protocol, and measurable outcomes.",
               },
               {
                 title: "Homeschool Compliance",

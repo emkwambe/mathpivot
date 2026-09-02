@@ -152,7 +152,7 @@ export default function DiagnosticPickerPage() {
               Coaching recommendation
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              Foundation, Acceleration, or Elite — matched to the results.
+              Foundation, Acceleration, or Advanced — matched to the results.
             </p>
           </div>
           <div className="bg-white rounded-xl border border-slate-100 p-5">

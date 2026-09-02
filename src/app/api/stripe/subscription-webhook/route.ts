@@ -6,7 +6,7 @@ import {
   constructSubscriptionWebhookEvent,
   isStripeConfigured,
 } from "@/lib/stripe";
-import { isValidTier, type ProgramTier } from "@/lib/stripe/programs";
+import { isValidTier, PROGRAMS, type ProgramTier } from "@/lib/stripe/programs";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase/admin";
 import {
   claimWebhookEvent,
@@ -474,12 +474,12 @@ function welcomeEmailHtml(args: {
   tier: ProgramTier;
   magicLink: string;
 }): string {
-  const tierName =
-    args.tier === "foundation"
-      ? "Foundation Coaching"
-      : args.tier === "acceleration"
-        ? "Acceleration Coaching"
-        : "Elite Coaching";
+  // Derived from PROGRAMS so this email always names a tier the product
+  // actually sells. The ternary this replaces had branches for only
+  // foundation and acceleration, so advanced fell through to "Elite
+  // Coaching" -- the first thing an Advanced parent read after a $799
+  // charge named a tier that appears nowhere on the site.
+  const tierName = PROGRAMS[args.tier].displayName;
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;color:#334155;background:#fff;">
       <div style="background:#1D4ED8;padding:28px 24px;text-align:center;border-radius:12px 12px 0 0;">

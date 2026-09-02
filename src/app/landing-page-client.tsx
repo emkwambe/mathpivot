@@ -484,7 +484,7 @@ export default function LandingPage() {
               {
                 step: "01",
                 title: "Choose a Program",
-                desc: "Foundation, Acceleration, or Elite — based on your child's level and goals.",
+                desc: "Foundation, Acceleration, or Advanced — based on your child's level and goals.",
                 color: "bg-blue-600",
               },
               {
@@ -907,7 +907,7 @@ export default function LandingPage() {
             <p className="mt-4 text-slate-400 max-w-2xl mx-auto">
               Pick the grade your student is entering. We assess mastery of the
               prior-grade content and recommend a coaching program — Foundation,
-              Acceleration, or Elite — matched to the results.
+              Acceleration, or Advanced — matched to the results.
             </p>
           </div>
 

@@ -228,13 +228,13 @@ export const PERSONA_RECOMMENDATIONS: Record<Persona, string> = {
   proactive_suburban:
     "Emphasize named coach, mastery tracking, and structured progress. Foundation program fits best; upsell to Acceleration.",
   travel_ball_family:
-    "Position as 'the travel ball of math'. Compare ROI vs sports spend. Acceleration is primary; Elite for advanced students.",
+    "Position as 'the travel ball of math'. Compare ROI vs sports spend. Acceleration is primary; Advanced for students pursuing demanding mathematics.",
   homeschool_family:
     "Lead with homeschool compliance exports and mastery portfolio. Foundation fits most. Highlight peer interaction in small cohorts.",
   falling_behind:
     "Urgent — respond within 24 hours. Summer clinic ($249) as low-risk entry. Free diagnostic reveals exact gap. Foundation for rebuilding.",
   competition_math:
-    "Elite program is the primary fit. Highlight Mathathlon + AMC/MATHCOUNTS prep. Emphasize small cohort vs RSM's 20-student classes.",
+    "Advanced program is the primary fit. Highlight Mathathlon + AMC/MATHCOUNTS prep. Emphasize small cohort vs RSM's 20-student classes.",
   school_partner:
     "B2B sales cycle. Send partnership deck. Focus on diagnostic-driven placement, mastery data for admins, and coach certification.",
   unclassified:

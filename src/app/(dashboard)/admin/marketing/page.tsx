@@ -435,7 +435,8 @@ export default async function AdminMarketingPage() {
             <strong>Falling Behind:</strong> Foundation ($349/mo) × 12mo = $4.2k
           </p>
           <p>
-            <strong>Competition Math:</strong> Elite ($799/mo) × 24mo = $19.2k
+            <strong>Competition Math:</strong> Advanced ($799/mo) × 24mo =
+            $19.2k
           </p>
           <p>
             <strong>School Partner:</strong> Custom ($2k/mo) × 12mo = $24k
