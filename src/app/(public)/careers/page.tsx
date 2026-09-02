@@ -110,7 +110,7 @@ export default function CareersPage() {
             {[
               {
                 title: "Own a student portfolio",
-                desc: "3-8 students across Foundation, Acceleration, and Elite programs. You know every student's strengths, gaps, and goals.",
+                desc: "3-8 students across Foundation, Acceleration, and Advanced programs. You know every student's strengths, gaps, and goals.",
               },
               {
                 title: "Run structured 60-minute sessions",
@@ -321,7 +321,7 @@ export default function CareersPage() {
                 Which tracks interest you? *
               </label>
               <div className="flex gap-4">
-                {["Foundation", "Acceleration", "Elite"].map((track) => (
+                {["Foundation", "Acceleration", "Advanced"].map((track) => (
                   <label
                     key={track}
                     className="flex items-center gap-1.5 text-sm"

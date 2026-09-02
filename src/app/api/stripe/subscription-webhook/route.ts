@@ -108,8 +108,23 @@ async function handleSubscriptionCheckoutCompleted(
   if (session.metadata?.flow !== "program_subscription") return;
 
   const tierRaw = session.metadata?.program_tier;
+  // Legacy Sprint 9 test-mode subscriptions carry program_tier: "elite" in
+  // Stripe metadata. Those were already processed; if Stripe re-delivers such
+  // an event we skip rather than 500. Live-mode events after the rename carry
+  // "advanced" and pass the isValidTier check.
+  if (tierRaw === "elite") {
+    console.info(
+      "[subscription-webhook] skipping legacy 'elite' tier event",
+      session.id,
+    );
+    return;
+  }
   if (!tierRaw || !isValidTier(tierRaw)) {
-    console.error("[subscription-webhook] invalid tier on session", session.id);
+    console.error(
+      "[subscription-webhook] invalid tier on session",
+      session.id,
+      tierRaw,
+    );
     return;
   }
   const tier = tierRaw as ProgramTier;

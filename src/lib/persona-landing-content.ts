@@ -102,13 +102,13 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     personaKey: "competition_math",
     title: "MathPivot for Competition Math — AMC, MATHCOUNTS, and Beyond",
     metaDescription:
-      "Elite math coaching for AMC, MATHCOUNTS, and AIME. Small cohorts (5-6 students), dedicated coach, and Mathathlon competition prep — not AoPS self-study or 20-student RSM classes.",
+      "Advanced math coaching for AMC, MATHCOUNTS, and AIME. Small cohorts (5-6 students), dedicated coach, and Mathathlon competition prep — not AoPS self-study or 20-student RSM classes.",
     hero: {
       eyebrow: "For Competition Math Families",
       headline: "Your child doesn't need help.",
       headlineAccent: "They need a challenge.",
       subheadline:
-        "MathPivot Elite prepares students for AMC 8/10/12, MATHCOUNTS, and AIME with a dedicated coach in cohorts of 5–6. Not self-paced AoPS. Not 20-student RSM classes. Real coaching.",
+        "MathPivot Advanced prepares students for AMC 8/10/12, MATHCOUNTS, and AIME with a dedicated coach in cohorts of 5–6. Not self-paced AoPS. Not 20-student RSM classes. Real coaching.",
     },
     painPoints: {
       heading: "What competition families tell us",
@@ -123,7 +123,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
       heading: "Why competition families choose MathPivot",
       bullets: [
         {
-          title: "Elite program built for AMC, MATHCOUNTS, AIME",
+          title: "Advanced program built for AMC, MATHCOUNTS, AIME",
           description:
             "Dedicated Mathathlon competition prep, problem-solving strategies, and past-competition analysis.",
         },
@@ -140,16 +140,16 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
         {
           title: "Career exposure to real STEM professions",
           description:
-            "Elite students explore actuarial science, engineering, ML, and quantitative finance — math with a destination.",
+            "Advanced students explore actuarial science, engineering, ML, and quantitative finance — math with a destination.",
         },
       ],
     },
     recommendedProgram: {
-      name: "Elite Coaching",
+      name: "MathPivot Advanced",
       price: "$799/mo",
       frequency: "2–3 coaching meetings/week + additional opportunities",
       reason:
-        "Elite is the primary fit for competition-focused families. Includes advanced projects, competition prep, career exploration, and parent strategy reviews.",
+        "Advanced is the primary fit for competition-focused families. Includes advanced projects, competition prep, career exploration, and parent strategy reviews.",
       href: "/pricing",
     },
     socialProof:
@@ -157,7 +157,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     cta: {
       primary: "Take the Free Diagnostic",
       primaryHref: "/diagnostic",
-      secondary: "Learn About Elite",
+      secondary: "Learn About Advanced",
       secondaryHref: "/pricing",
     },
     color: "purple",
@@ -195,7 +195,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
         {
           title: "Structured programs, not hourly tutoring",
           description:
-            "Foundation, Acceleration, Elite — clear pathways with measurable outcomes, not scattered hours.",
+            "Foundation, Acceleration, Advanced — clear pathways with measurable outcomes, not scattered hours.",
         },
         {
           title: "Competition calendar",
@@ -395,7 +395,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
         {
           title: "Structured programs with clear outcomes",
           description:
-            "Foundation → Acceleration → Elite. Each level has defined outcomes, not open-ended hours.",
+            "Foundation → Acceleration → Advanced. Each level has defined outcomes, not open-ended hours.",
         },
         {
           title: "Career exposure makes math relevant",
