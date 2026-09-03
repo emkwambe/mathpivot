@@ -46,12 +46,12 @@ const colorMap: Record<
 };
 
 const CARD_CTAS: Record<string, { label: string; href: string }> = {
-  foundation: { label: "Find My Starting Point", href: "/diagnostic" },
+  foundation: { label: "Enroll in Foundation", href: "/enroll/foundation" },
   acceleration: {
-    label: "Explore Acceleration",
-    href: "/pricing#acceleration",
+    label: "Enroll in Acceleration",
+    href: "/enroll/acceleration",
   },
-  advanced: { label: "Explore Advanced Pathways", href: "/pricing#advanced" },
+  advanced: { label: "Enroll in Advanced", href: "/enroll/advanced" },
 };
 
 const THREE_DIRECTIONS = [
