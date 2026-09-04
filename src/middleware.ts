@@ -22,6 +22,7 @@ const PUBLIC_ROUTES = [
   "/partnerships",
   "/compare",
   "/enroll",
+  "/coach-apply",
 ];
 
 const ROLE_PREFIXES: Record<string, string> = {
