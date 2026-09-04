@@ -20,6 +20,47 @@ import {
   GraduationCap,
   Scale,
 } from "lucide-react";
+import { PROGRAMS, VALID_TIERS } from "@/lib/stripe/programs";
+
+// Tier color class map — landing page uses different Tailwind variants than
+// /pricing (light backgrounds, bolder accents) so the map lives here rather
+// than in the shared PROGRAMS config.
+const TIER_STYLES: Record<
+  "blue" | "amber" | "purple",
+  {
+    border: string;
+    bg: string;
+    accent: string;
+    badge: string;
+    button: string;
+    feature: string;
+  }
+> = {
+  blue: {
+    border: "border-blue-200",
+    bg: "bg-blue-50",
+    accent: "text-blue-700",
+    badge: "bg-blue-100 text-blue-800",
+    button: "bg-blue-700 hover:bg-blue-800",
+    feature: "text-blue-600",
+  },
+  amber: {
+    border: "border-amber-200",
+    bg: "bg-amber-50",
+    accent: "text-amber-700",
+    badge: "bg-amber-100 text-amber-800",
+    button: "bg-amber-600 hover:bg-amber-700",
+    feature: "text-amber-600",
+  },
+  purple: {
+    border: "border-purple-200",
+    bg: "bg-purple-50",
+    accent: "text-purple-700",
+    badge: "bg-purple-100 text-purple-800",
+    button: "bg-purple-700 hover:bg-purple-800",
+    feature: "text-purple-600",
+  },
+};
 
 const PERSONA_LINKS = [
   {
@@ -648,138 +689,74 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Foundation",
-                slug: "foundation",
-                price: "$349",
-                capability: "Establish Capability",
-                tagline:
-                  "Strengthen essential mathematics, resolve prerequisite gaps, and establish the mastery future learning depends upon.",
-                cadence: "2 guided sessions each week",
-                color: "border-blue-200 bg-blue-50",
-                accent: "text-blue-700",
-                badge: "bg-blue-100 text-blue-800",
-                button: "bg-blue-700 hover:bg-blue-800",
-                features: [
-                  "Individual mastery plan",
-                  "Mastery-matched cohort",
-                  "Guided instruction",
-                  "Purposeful practice",
-                  "Coach feedback",
-                  "Progress monitoring",
-                ],
-                cta: "Find My Starting Point",
-                href: "/diagnostic",
-              },
-              {
-                name: "Acceleration",
-                slug: "acceleration",
-                price: "$549",
-                capability: "Expand Capability",
-                tagline:
-                  "Progress deeper or faster, remain ahead of current course demands, and prepare for increasingly advanced mathematics.",
-                cadence: "3 guided sessions each week",
-                color: "border-amber-200 bg-amber-50",
-                accent: "text-amber-700",
-                badge: "bg-amber-100 text-amber-800",
-                button: "bg-amber-600 hover:bg-amber-700",
-                features: [
-                  "Accelerated mastery plan",
-                  "Mastery-matched cohort",
-                  "Guided instruction",
-                  "Advanced practice & enrichment",
-                  "Coach feedback",
-                  "Progress monitoring",
-                ],
-                cta: "Explore Acceleration",
-                href: "/pricing#acceleration",
-              },
-              {
-                name: "Advanced",
-                slug: "advanced",
-                price: "$799",
-                capability: "Advance Capability",
-                tagline:
-                  "Pursue demanding mathematics — advanced high-school coursework, AP mathematics, competition pathways, and preparation for quantitatively demanding college and career directions.",
-                cadence:
-                  "2–3 guided sessions each week + pathway-specific opportunities",
-                color: "border-purple-200 bg-purple-50",
-                accent: "text-purple-700",
-                badge: "bg-purple-100 text-purple-800",
-                button: "bg-purple-700 hover:bg-purple-800",
-                features: [
-                  "Advanced mastery plan",
-                  "Mastery-matched cohort",
-                  "Specialized guided instruction",
-                  "Advanced practice & extended problem solving",
-                  "Specialized feedback",
-                  "Progress monitoring",
-                  "Pathway-specific opportunities",
-                ],
-                cta: "Explore Advanced Pathways",
-                href: "/pricing#advanced",
-              },
-            ].map((program) => (
-              <div
-                key={program.slug}
-                className={`relative rounded-2xl border-2 ${program.color} p-6 sm:p-7 flex flex-col`}
-              >
-                <span
-                  className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full w-fit ${program.badge}`}
+            {VALID_TIERS.map((tier) => {
+              const program = PROGRAMS[tier];
+              const styles = TIER_STYLES[program.color];
+              return (
+                <div
+                  key={program.tier}
+                  className={`relative rounded-2xl border-2 ${styles.border} ${styles.bg} p-6 sm:p-7 flex flex-col`}
                 >
-                  {program.name}
-                </span>
-                <h3 className="mt-3 text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
-                  {program.capability}
-                </h3>
-                <p className="mt-2 text-sm text-slate-700 leading-relaxed">
-                  {program.tagline}
-                </p>
-
-                <div className="mt-5 flex items-baseline gap-2">
-                  <span className={`text-3xl font-bold ${program.accent}`}>
-                    {program.price}
+                  <span
+                    className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full w-fit ${styles.badge}`}
+                  >
+                    {program.name}
                   </span>
-                  <span className="text-slate-500 text-sm">/ month</span>
-                </div>
-                <p className="mt-1 text-sm text-slate-700 font-medium">
-                  {program.cadence}
-                </p>
-
-                <div className="mt-5 pt-4 border-t border-slate-100">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
-                    Included
+                  <h3
+                    className={`mt-3 text-xl sm:text-2xl font-bold leading-snug ${styles.accent}`}
+                  >
+                    {program.capability}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-700 leading-relaxed">
+                    {program.tagline}
                   </p>
-                  <ul className="space-y-2 flex-1">
-                    {program.features.map((f) => (
-                      <li
-                        key={f}
-                        className="flex items-start gap-2 text-sm text-slate-700"
-                      >
-                        <Check
-                          size={16}
-                          className={`mt-0.5 flex-shrink-0 ${program.accent}`}
-                        />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
 
-                <div className="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
-                  <p>Typically 5 students · Never more than 6</p>
-                  <p>3-month minimum</p>
-                </div>
+                  <div className="mt-5 flex items-baseline gap-2">
+                    <span className={`text-3xl font-bold ${styles.accent}`}>
+                      ${program.priceMonthly}
+                    </span>
+                    <span className="text-slate-500 text-sm">/ month</span>
+                  </div>
+                  <p className="mt-1 text-sm text-slate-700 font-medium">
+                    {program.cadence}
+                  </p>
 
-                <Link
-                  href={program.href}
-                  className={`mt-6 block text-center py-3 rounded-xl text-white font-medium transition-colors ${program.button}`}
-                >
-                  {program.cta}
-                </Link>
-              </div>
-            ))}
+                  <div className="mt-5 pt-4 border-t border-slate-100">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
+                      Included
+                    </p>
+                    <ul className="space-y-2 flex-1">
+                      {program.features.map((f) => (
+                        <li
+                          key={f}
+                          className="flex items-start gap-2 text-sm text-slate-700"
+                        >
+                          <Check
+                            size={16}
+                            className={`mt-0.5 flex-shrink-0 ${styles.feature}`}
+                          />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+                    <p>Typically 5 students · Never more than 6</p>
+                    <p>
+                      3-month minimum · 14-day placement and program-fit review
+                    </p>
+                  </div>
+
+                  <Link
+                    href={`/enroll/${program.tier}`}
+                    className={`mt-6 block text-center py-3 rounded-xl text-white font-medium transition-colors ${styles.button}`}
+                  >
+                    Enroll in {program.name}
+                  </Link>
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-12 max-w-3xl mx-auto text-center">

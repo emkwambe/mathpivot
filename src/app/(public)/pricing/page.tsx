@@ -227,18 +227,30 @@ export default function PricingPage() {
                   </ul>
                 </div>
 
-                {tier === "advanced" && (
-                  <p className="mt-4 text-xs text-slate-500 leading-relaxed border-l-2 border-purple-200 pl-3">
-                    Advanced students follow one of several distinct pathways —
-                    AP Precalculus, AP Calculus AB, AP Calculus BC, AP
-                    Statistics, competition mathematics, or other individually
-                    approved pathways. Placement is discussed during onboarding.
-                  </p>
-                )}
+                <div className="mt-6 pt-5 border-t border-slate-100 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">
+                      Best for
+                    </p>
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                      {program.bestFor}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">
+                      Primary outcome
+                    </p>
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                      {program.primaryOutcome}
+                    </p>
+                  </div>
+                </div>
 
                 <div className="mt-6 pt-5 border-t border-slate-100 text-xs text-slate-500 space-y-1">
                   <p>Typically 5 students · Never more than 6</p>
-                  <p>3-month minimum</p>
+                  <p>
+                    3-month minimum · 14-day placement and program-fit review
+                  </p>
                 </div>
 
                 <Link
@@ -250,6 +262,56 @@ export default function PricingPage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* How the programs work together */}
+      <section className="py-14 border-t border-slate-100">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-3">
+              Program architecture
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              How the programs work together.
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-6">
+            <div className="border-l-2 border-blue-200 pl-4">
+              <p className="text-sm font-bold text-blue-700 mb-1">
+                Foundation restores readiness.
+              </p>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                The student closes the gaps that prevent success in the current
+                course.
+              </p>
+            </div>
+            <div className="border-l-2 border-amber-300 pl-4">
+              <p className="text-sm font-bold text-amber-700 mb-1">
+                Acceleration creates momentum.
+              </p>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                The student strengthens current mastery while preparing
+                selectively for upcoming work.
+              </p>
+            </div>
+            <div className="border-l-2 border-purple-200 pl-4">
+              <p className="text-sm font-bold text-purple-700 mb-1">
+                Advanced expands direction.
+              </p>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                The student develops deeper mathematical ability and connects
+                present achievement to future opportunities.
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-10 text-center text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Students are not permanently labeled by their starting program.
+            Placement is based on current needs, and students may move between
+            programs following a progress review.
+          </p>
         </div>
       </section>
 
