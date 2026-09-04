@@ -3,6 +3,7 @@
 import { randomBytes } from "node:crypto";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 export interface CoachApplication {
@@ -52,8 +53,12 @@ export interface SubmitApplicationInput {
 }
 
 // Public — anyone can submit an application from /coach-apply.
+// Runs through the admin client so the write is not subject to RLS: the
+// public form is trusted server-side (input is validated here), and using
+// the user-scoped client failed for anonymous visitors and for an
+// authenticated non-admin user hitting the UPDATE branch of the upsert.
 export async function submitCoachApplication(input: SubmitApplicationInput) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const email = input.email.trim().toLowerCase();
   if (!email || !email.includes("@")) {
@@ -63,8 +68,8 @@ export async function submitCoachApplication(input: SubmitApplicationInput) {
     return { success: false, error: "Please provide your full name." };
   }
 
-  // Reject duplicate email — the applicant can update their existing
-  // submission by re-applying (upsert semantics keep things simple in v1).
+  // Upsert on email — re-applying with the same email updates the row
+  // rather than erroring.
   const { error } = await supabase.from("coach_applications").upsert(
     {
       full_name: input.fullName.trim(),
