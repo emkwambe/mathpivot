@@ -1,8 +1,9 @@
 import { stripe } from "./index";
-import { priceIdForTier, type ProgramTier } from "./programs";
+import { priceIdForTier, type BillingPlan, type ProgramTier } from "./programs";
 
 export interface CreateSubscriptionCheckoutOptions {
   tier: ProgramTier;
+  plan: BillingPlan;
   successUrl: string;
   cancelUrl: string;
   parentEmail?: string;
@@ -11,6 +12,7 @@ export interface CreateSubscriptionCheckoutOptions {
 
 export async function createSubscriptionCheckout({
   tier,
+  plan,
   successUrl,
   cancelUrl,
   parentEmail,
@@ -18,10 +20,10 @@ export async function createSubscriptionCheckout({
 }: CreateSubscriptionCheckoutOptions): Promise<
   { url: string; sessionId: string } | { error: string }
 > {
-  const priceId = priceIdForTier(tier);
+  const priceId = priceIdForTier(tier, plan);
   if (!priceId) {
     return {
-      error: `Missing STRIPE_PRICE_ID for ${tier}. Set it in Vercel env vars.`,
+      error: `Missing STRIPE_PRICE_ID for ${tier} ${plan}. Set it in Vercel env vars.`,
     };
   }
 
@@ -61,11 +63,13 @@ export async function createSubscriptionCheckout({
     subscription_data: {
       metadata: {
         program_tier: tier,
+        billing_plan: plan,
         ...(metadata ?? {}),
       },
     },
     metadata: {
       program_tier: tier,
+      billing_plan: plan,
       flow: "program_subscription",
       ...(metadata ?? {}),
     },

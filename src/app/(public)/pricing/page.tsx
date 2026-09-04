@@ -193,9 +193,13 @@ export default function PricingPage() {
                   </span>
                   <span className="text-sm text-slate-500">/ month</span>
                 </div>
-
                 <p className="mt-1 text-sm text-slate-700 font-medium">
                   {program.cadence}
+                </p>
+                <p className="mt-2 text-xs text-emerald-700 font-medium">
+                  Or ${program.quarterly.priceUpfront.toFixed(2)} upfront every
+                  3 months — save {program.quarterly.savingsPercent}% ($
+                  {program.quarterly.priceEffectiveMonthly.toFixed(2)}/mo)
                 </p>
 
                 <div className="mt-6 pt-5 border-t border-slate-100">
@@ -249,10 +253,6 @@ export default function PricingPage() {
                 <div className="mt-6 pt-5 border-t border-slate-100 text-xs text-slate-500 space-y-1">
                   <p>Typically 5 students · Never more than 6</p>
                   <p>Month-to-month · Cancel anytime</p>
-                  <p className="text-slate-600 font-medium">
-                    Save 10% with 3-month commitment — use code{" "}
-                    <span className="font-mono">COMMIT10</span> at checkout
-                  </p>
                 </div>
 
                 <Link

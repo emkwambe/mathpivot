@@ -108,13 +108,12 @@ export default async function EnrollTierPage({
         <div
           className={`bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 ${styles.ring} p-6 sm:p-8`}
         >
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className={`text-4xl font-bold ${styles.accent}`}>
-              ${program.priceMonthly}
-            </span>
-            <span className="text-sm text-slate-500">/ month</span>
-          </div>
-          <p className="text-sm text-slate-600">{program.cadence}</p>
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold text-slate-800">
+              {program.capability}
+            </span>{" "}
+            · {program.cadence}
+          </p>
 
           <div className="mt-5 pt-5 border-t border-slate-100">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">

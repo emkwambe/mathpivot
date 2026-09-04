@@ -720,6 +720,10 @@ export default function LandingPage() {
                   <p className="mt-1 text-sm text-slate-700 font-medium">
                     {program.cadence}
                   </p>
+                  <p className="mt-2 text-xs text-emerald-700 font-medium">
+                    Or ${program.quarterly.priceUpfront.toFixed(2)} upfront
+                    every 3 months — save {program.quarterly.savingsPercent}%
+                  </p>
 
                   <div className="mt-5 pt-4 border-t border-slate-100">
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
@@ -744,10 +748,6 @@ export default function LandingPage() {
                   <div className="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1">
                     <p>Typically 5 students · Never more than 6</p>
                     <p>Month-to-month · Cancel anytime</p>
-                    <p className="text-slate-600 font-medium">
-                      Save 10% with 3-month commitment — code{" "}
-                      <span className="font-mono">COMMIT10</span>
-                    </p>
                   </div>
 
                   <Link

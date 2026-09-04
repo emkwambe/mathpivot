@@ -1,4 +1,12 @@
 export type ProgramTier = "foundation" | "acceleration" | "advanced";
+export type BillingPlan = "monthly" | "quarterly";
+
+export interface QuarterlyPricing {
+  priceUpfront: number;
+  priceUpfrontCents: number;
+  priceEffectiveMonthly: number;
+  savingsPercent: number;
+}
 
 export interface ProgramConfig {
   tier: ProgramTier;
@@ -6,6 +14,7 @@ export interface ProgramConfig {
   displayName: string;
   priceMonthly: number;
   priceMonthlyCents: number;
+  quarterly: QuarterlyPricing;
   cadence: string;
   capability: string;
   tagline: string;
@@ -16,13 +25,24 @@ export interface ProgramConfig {
   primaryOutcome: string;
 }
 
+// Ladder chosen to keep per-hour rate under $55 across every tier, with the
+// quarterly plan discounted 10%. Foundation = 2 sessions/wk (8 hrs/mo) at
+// $379 = $47.38/hr. Acceleration = 3 sessions/wk (12 hrs/mo) at $549 =
+// $45.75/hr. Advanced = 3 sessions/wk + monthly 30-min 1:1 (12.5 hrs/mo)
+// at $649 = $51.92/hr.
 export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
   foundation: {
     tier: "foundation",
     name: "Foundation",
     displayName: "MathPivot Foundation",
-    priceMonthly: 349,
-    priceMonthlyCents: 34900,
+    priceMonthly: 379,
+    priceMonthlyCents: 37900,
+    quarterly: {
+      priceUpfront: 1023.3,
+      priceUpfrontCents: 102330,
+      priceEffectiveMonthly: 341.1,
+      savingsPercent: 10,
+    },
     cadence: "Two 60-minute sessions per week",
     capability: "Ground",
     tagline:
@@ -39,7 +59,6 @@ export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
       "Preparation for important assessments when materials and dates are provided",
       "Progress updates for parents",
       "MathPivot School Strategy Checklist",
-      "14-day placement and program-fit review",
     ],
     bestFor:
       "Students who frequently feel lost in class, have persistent knowledge gaps, struggle to work independently, or need to rebuild confidence before accelerating.",
@@ -52,6 +71,12 @@ export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
     displayName: "MathPivot Acceleration",
     priceMonthly: 549,
     priceMonthlyCents: 54900,
+    quarterly: {
+      priceUpfront: 1482.3,
+      priceUpfrontCents: 148230,
+      priceEffectiveMonthly: 494.1,
+      savingsPercent: 10,
+    },
     cadence: "Three 60-minute sessions per week",
     capability: "Align",
     tagline:
@@ -79,8 +104,14 @@ export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
     tier: "advanced",
     name: "Advanced",
     displayName: "MathPivot Advanced",
-    priceMonthly: 799,
-    priceMonthlyCents: 79900,
+    priceMonthly: 649,
+    priceMonthlyCents: 64900,
+    quarterly: {
+      priceUpfront: 1752.3,
+      priceUpfrontCents: 175230,
+      priceEffectiveMonthly: 584.1,
+      savingsPercent: 10,
+    },
     cadence: "Three 60-minute sessions per week + monthly one-to-one",
     capability: "Propel",
     tagline:
@@ -113,11 +144,35 @@ export const VALID_TIERS: ProgramTier[] = [
   "advanced",
 ];
 
+export const VALID_BILLING_PLANS: BillingPlan[] = ["monthly", "quarterly"];
+
 export function isValidTier(v: unknown): v is ProgramTier {
   return typeof v === "string" && VALID_TIERS.includes(v as ProgramTier);
 }
 
-export function priceIdForTier(tier: ProgramTier): string | undefined {
+export function isValidBillingPlan(v: unknown): v is BillingPlan {
+  return (
+    typeof v === "string" && VALID_BILLING_PLANS.includes(v as BillingPlan)
+  );
+}
+
+// The optional plan arg keeps every existing caller working (default is
+// monthly), while /enroll can pass "quarterly" to route the parent to the
+// upfront 10%-off price. Every plan/tier has its own Stripe price ID.
+export function priceIdForTier(
+  tier: ProgramTier,
+  plan: BillingPlan = "monthly",
+): string | undefined {
+  if (plan === "quarterly") {
+    switch (tier) {
+      case "foundation":
+        return process.env.STRIPE_PRICE_ID_FOUNDATION_QUARTERLY;
+      case "acceleration":
+        return process.env.STRIPE_PRICE_ID_ACCELERATION_QUARTERLY;
+      case "advanced":
+        return process.env.STRIPE_PRICE_ID_ADVANCED_QUARTERLY;
+    }
+  }
   switch (tier) {
     case "foundation":
       return process.env.STRIPE_PRICE_ID_FOUNDATION;
