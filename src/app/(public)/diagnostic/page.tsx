@@ -7,6 +7,7 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
+import { BOOKING_URL } from "@/lib/booking";
 
 export const metadata: Metadata = {
   title: "Free Math Diagnostic by Grade — MathPivot",
@@ -83,12 +84,14 @@ export default function DiagnosticPickerPage() {
             >
               Programs
             </Link>
-            <Link
-              href="/get-started"
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-slate-600 hover:text-slate-900"
             >
               Talk to a coach
-            </Link>
+            </a>
           </div>
         </div>
       </header>

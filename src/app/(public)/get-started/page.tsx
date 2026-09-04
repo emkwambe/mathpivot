@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { captureLeadAction } from "@/app/actions/leads";
+import { BOOKING_URL } from "@/lib/booking";
 
 const SUBJECTS = [
   "Algebra",
@@ -77,6 +78,45 @@ export default function GetStartedPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="mb-10 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-6 sm:p-8 text-center">
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
+            Fastest way to get answers
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+            Book a free 15-minute call with a coach
+          </h2>
+          <p className="text-slate-600 mt-2 max-w-lg mx-auto text-sm sm:text-base">
+            We&apos;ll discuss your student&apos;s current course, recent
+            performance, and which program is the right fit — no pressure, no
+            sales pitch.
+          </p>
+          <a
+            href={BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 mt-5 bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-800 transition-colors"
+          >
+            Pick a time
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
+            </svg>
+          </a>
+          <p className="text-xs text-slate-500 mt-3">
+            Prefer to share details first? Use the form below and we&apos;ll
+            reach out within 24 hours.
+          </p>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-12">
           {/* Left — Value Prop */}
           <div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PROGRAMS, VALID_TIERS } from "@/lib/stripe/programs";
+import { BOOKING_URL } from "@/lib/booking";
 
 export const metadata: Metadata = {
   title: "Programs — MathPivot",
@@ -369,12 +370,14 @@ export default function PricingPage() {
             >
               Start With a Placement Assessment
             </Link>
-            <Link
-              href="/get-started"
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center border border-slate-200 text-slate-700 font-medium px-8 py-3 rounded-xl hover:bg-slate-50 transition-colors"
             >
               Talk to a Coach
-            </Link>
+            </a>
           </div>
         </div>
       </section>

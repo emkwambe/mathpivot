@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
+import { BOOKING_URL } from "@/lib/booking";
 
 export const metadata: Metadata = {
   title: "Checkout canceled — MathPivot",
@@ -37,12 +38,14 @@ export default function EnrollCancelPage() {
             <ArrowLeft className="w-4 h-4" />
             Back to programs
           </Link>
-          <Link
-            href="/get-started"
+          <a
+            href={BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 border border-slate-200 bg-white text-slate-700 font-semibold px-6 py-3 rounded-xl hover:bg-slate-50 transition-colors"
           >
             Talk to a coach
-          </Link>
+          </a>
         </div>
       </div>
     </div>

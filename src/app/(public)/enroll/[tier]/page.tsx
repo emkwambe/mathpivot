@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PROGRAMS, VALID_TIERS, type ProgramTier } from "@/lib/stripe/programs";
+import { BOOKING_URL } from "@/lib/booking";
 import { Check, ShieldCheck, Users, Calendar } from "lucide-react";
 import EnrollForm from "./EnrollForm";
 
@@ -73,12 +74,14 @@ export default async function EnrollTierPage({
             >
               Compare programs
             </Link>
-            <Link
-              href="/get-started"
+            <a
+              href={BOOKING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-slate-600 hover:text-slate-900"
             >
               Talk to a coach
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -170,9 +173,14 @@ export default async function EnrollTierPage({
             Compare all three programs
           </Link>{" "}
           or{" "}
-          <Link href="/get-started" className="text-blue-700 hover:underline">
+          <a
+            href={BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-700 hover:underline"
+          >
             talk to a coach first
-          </Link>
+          </a>
           .
         </div>
 
