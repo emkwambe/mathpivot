@@ -248,8 +248,10 @@ export default function PricingPage() {
 
                 <div className="mt-6 pt-5 border-t border-slate-100 text-xs text-slate-500 space-y-1">
                   <p>Typically 5 students · Never more than 6</p>
-                  <p>
-                    3-month minimum · 14-day placement and program-fit review
+                  <p>Month-to-month · Cancel anytime</p>
+                  <p className="text-slate-600 font-medium">
+                    Save 10% with 3-month commitment — use code{" "}
+                    <span className="font-mono">COMMIT10</span> at checkout
                   </p>
                 </div>
 
