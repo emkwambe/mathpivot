@@ -53,6 +53,17 @@ export async function getTrainingModules(tier?: string) {
   return (data || []) as TrainingModule[];
 }
 
+export async function getModuleBySlug(slug: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("training_modules")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .maybeSingle();
+  return (data as TrainingModule | null) ?? null;
+}
+
 export async function getCoachProgress(coachId?: string) {
   const user = await getCurrentUser();
   if (!user) return { modules: [] as ModuleProgress[], status: null };
@@ -124,6 +135,50 @@ export async function startModule(moduleId: string) {
   if (!user || user.role !== "tutor") return { success: false };
 
   const supabase = await createClient();
+
+  // Enforce lock rules server-side so the UI can't be bypassed:
+  //   - Certified Coach Assessment (module 10) requires the other nine
+  //     required certified modules to be completed.
+  //   - Master modules require Certified Coach status (all certified
+  //     required modules completed).
+  //   - Master Coach Assessment requires all master modules 1-4.
+  const { data: mod } = await supabase
+    .from("training_modules")
+    .select("slug, certification_tier")
+    .eq("id", moduleId)
+    .maybeSingle();
+
+  if (!mod) return { success: false, error: "Module not found" };
+
+  const { status } = await getCoachProgress();
+  if (!status) return { success: false };
+
+  if (mod.slug === "mp-certification-assessment") {
+    if (status.certifiedModulesDone < status.certifiedModulesTotal - 1) {
+      return {
+        success: false,
+        error: "Complete Modules 1–9 before the Certified Coach Assessment.",
+      };
+    }
+  } else if (mod.certification_tier === "master") {
+    if (!status.certifiedEligible) {
+      return {
+        success: false,
+        error:
+          "Master Coach training becomes available after Certified Coach status has been earned.",
+      };
+    }
+    if (
+      mod.slug === "mp-master-assessment" &&
+      status.masterModulesDone < status.masterModulesTotal - 1
+    ) {
+      return {
+        success: false,
+        error:
+          "Complete Master Modules M1–M4 before the Master Coach Assessment.",
+      };
+    }
+  }
 
   await supabase.from("coach_training_progress").upsert(
     {
