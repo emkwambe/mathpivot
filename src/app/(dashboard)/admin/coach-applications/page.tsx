@@ -91,9 +91,9 @@ export default async function CoachApplicationsAdminPage({
                     {app.email}
                     {app.location ? ` · ${app.location}` : ""}
                   </p>
-                  {app.current_role && (
+                  {app.applicant_role && (
                     <p className="text-sm text-slate-600 mt-1">
-                      {app.current_role}
+                      {app.applicant_role}
                       {app.years_teaching != null
                         ? ` · ${app.years_teaching} yrs teaching`
                         : ""}

@@ -11,7 +11,7 @@ export interface CoachApplication {
   email: string;
   phone: string | null;
   location: string | null;
-  current_role: string | null;
+  applicant_role: string | null;
   years_teaching: number | null;
   specialties: string[];
   resume_url: string | null;
@@ -71,7 +71,7 @@ export async function submitCoachApplication(input: SubmitApplicationInput) {
       email,
       phone: input.phone?.trim() || null,
       location: input.location?.trim() || null,
-      current_role: input.currentRole?.trim() || null,
+      applicant_role: input.currentRole?.trim() || null,
       years_teaching: input.yearsTeaching ?? null,
       specialties: input.specialties?.filter(Boolean) ?? [],
       resume_url: input.resumeUrl?.trim() || null,

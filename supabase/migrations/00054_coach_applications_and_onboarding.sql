@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS coach_applications (
   email TEXT NOT NULL,
   phone TEXT,
   location TEXT,
-  current_role TEXT,
+  applicant_role TEXT,
   years_teaching INTEGER,
   specialties TEXT[] DEFAULT '{}',
   resume_url TEXT,

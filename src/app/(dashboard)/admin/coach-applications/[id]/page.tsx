@@ -123,7 +123,7 @@ export default async function CoachApplicationDetailPage({
         <Row label="Email" value={app.email} />
         <Row label="Phone" value={app.phone} />
         <Row label="Location" value={app.location} />
-        <Row label="Current role" value={app.current_role} />
+        <Row label="Current role" value={app.applicant_role} />
         <Row
           label="Years teaching"
           value={app.years_teaching != null ? String(app.years_teaching) : null}
