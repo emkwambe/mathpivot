@@ -259,6 +259,14 @@ export default async function ModuleDetailPage({
             <p className="text-sm text-slate-800">
               {content.completionEvidence}
             </p>
+            {slug === "mp-session-structure" && (
+              <Link
+                href="/tutor/resources/session-plan-template"
+                className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline mt-3"
+              >
+                Open the session plan template →
+              </Link>
+            )}
           </div>
         </section>
       )}
