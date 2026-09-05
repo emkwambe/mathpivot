@@ -1,10 +1,12 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
+import { headers } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { sendEmail, emailTemplates, isEmailConfigured } from "@/lib/email";
 
 export interface CoachApplication {
   id: string;
@@ -155,10 +157,18 @@ export async function updateApplicationStatus(
   return { success: true };
 }
 
-// Approve + generate invitation token. The admin then copies the
-// resulting URL and sends it to the applicant (email integration comes
-// later). The applicant clicks the URL, signs up (or signs in), and the
-// accept flow links the resulting user to this application.
+async function absoluteBaseUrl(): Promise<string> {
+  const h = await headers();
+  const host =
+    h.get("x-forwarded-host") ?? h.get("host") ?? "www.mathpivot.com";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  return `${proto}://${host}`;
+}
+
+// Approve + generate invitation token + email the applicant. If Resend
+// is not configured (dev, or key missing) the send silently logs
+// instead — the returned invite URL is still shown in the admin UI so
+// the flow works either way.
 export async function approveAndInvite(id: string, adminNotes?: string) {
   const admin = await requireAdmin();
   if (!admin) return { success: false, error: "Not authorized" };
@@ -166,7 +176,7 @@ export async function approveAndInvite(id: string, adminNotes?: string) {
   const supabase = await createClient();
   const { data: existing } = await supabase
     .from("coach_applications")
-    .select("invite_token, status")
+    .select("invite_token, status, email, full_name")
     .eq("id", id)
     .maybeSingle();
   if (!existing) return { success: false, error: "Application not found" };
@@ -190,9 +200,76 @@ export async function approveAndInvite(id: string, adminNotes?: string) {
 
   if (error) return { success: false, error: error.message };
 
+  const inviteUrl = `${await absoluteBaseUrl()}/coach-apply/accept/${token}`;
+  const emailResult = await sendEmail({
+    to: existing.email as string,
+    ...emailTemplates.coachInvitation({
+      coachName: (existing.full_name as string) || "there",
+      inviteUrl,
+      adminNotes: adminNotes ?? null,
+    }),
+  });
+
   revalidatePath("/admin/coach-applications");
   revalidatePath(`/admin/coach-applications/${id}`);
-  return { success: true, inviteToken: token };
+  return {
+    success: true,
+    inviteToken: token,
+    emailSent: emailResult.success,
+    emailConfigured: isEmailConfigured(),
+    emailError: emailResult.error,
+  };
+}
+
+// Send the invitation email again — e.g. if the applicant lost the
+// email or the initial send failed. Requires an existing token; regenerate
+// via approveAndInvite if there is none.
+export async function resendCoachInvitation(id: string) {
+  const admin = await requireAdmin();
+  if (!admin) return { success: false, error: "Not authorized" };
+
+  const supabase = await createClient();
+  const { data: app } = await supabase
+    .from("coach_applications")
+    .select("invite_token, email, full_name, admin_notes, status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!app) return { success: false, error: "Application not found" };
+  if (!app.invite_token) {
+    return {
+      success: false,
+      error: "This application has not been approved yet.",
+    };
+  }
+  if (app.status !== "approved" && app.status !== "accepted") {
+    return {
+      success: false,
+      error: "This application is no longer in an approved state.",
+    };
+  }
+
+  const inviteUrl = `${await absoluteBaseUrl()}/coach-apply/accept/${app.invite_token}`;
+  const emailResult = await sendEmail({
+    to: app.email as string,
+    ...emailTemplates.coachInvitation({
+      coachName: (app.full_name as string) || "there",
+      inviteUrl,
+      adminNotes: (app.admin_notes as string | null) ?? null,
+    }),
+  });
+
+  await supabase
+    .from("coach_applications")
+    .update({ invited_at: new Date().toISOString(), invited_by: admin.id })
+    .eq("id", id);
+
+  revalidatePath(`/admin/coach-applications/${id}`);
+  return {
+    success: emailResult.success,
+    error: emailResult.error,
+    emailConfigured: isEmailConfigured(),
+  };
 }
 
 export interface CreateApplicationForExistingUserInput {

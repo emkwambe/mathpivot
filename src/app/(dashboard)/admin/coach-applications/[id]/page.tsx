@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui";
 import {
   approveAndInvite,
   getCoachApplication,
+  resendCoachInvitation,
   updateApplicationStatus,
 } from "@/app/actions/coach-applications";
+import { isEmailConfigured } from "@/lib/email";
 import { getOnboardingForCoach } from "@/app/actions/coach-onboarding";
 import {
   adminActivateCoach,
@@ -49,6 +51,13 @@ async function activateAction(formData: FormData) {
   const coachId = formData.get("coachId") as string;
   await adminActivateCoach(coachId);
   revalidatePath(`/admin/coach-applications/${formData.get("id")}`);
+}
+
+async function resendInviteAction(formData: FormData) {
+  "use server";
+  const id = formData.get("id") as string;
+  await resendCoachInvitation(id);
+  revalidatePath(`/admin/coach-applications/${id}`);
 }
 
 async function getBaseUrl() {
@@ -202,19 +211,39 @@ export default async function CoachApplicationDetailPage({
             <p className="text-xs font-bold uppercase tracking-wide text-blue-700 mb-2">
               Invitation link
             </p>
-            <p className="text-sm text-slate-800 mb-2">
-              Send this URL to {app.email}. They&apos;ll sign up (or sign in)
-              with that email, and their coach role plus onboarding checklist
-              are provisioned automatically.
-            </p>
+            {isEmailConfigured() ? (
+              <p className="text-sm text-slate-800 mb-2">
+                An invitation email was sent to <strong>{app.email}</strong>{" "}
+                automatically. The link below is the same URL — use it as a
+                fallback if the email is lost.
+              </p>
+            ) : (
+              <p className="text-sm text-amber-800 mb-2">
+                Email sending is not configured (Resend key missing). Copy the
+                URL below and send it to <strong>{app.email}</strong> manually.
+              </p>
+            )}
             <code className="block w-full text-xs bg-white border border-slate-200 rounded p-2 break-all">
               {inviteUrl}
             </code>
-            {app.invited_at && (
-              <p className="text-xs text-slate-500 mt-2">
-                Generated {new Date(app.invited_at).toLocaleString()}
-              </p>
-            )}
+            <div className="flex items-center justify-between gap-3 mt-3">
+              {app.invited_at && (
+                <p className="text-xs text-slate-500">
+                  Last sent {new Date(app.invited_at).toLocaleString()}
+                </p>
+              )}
+              {isEmailConfigured() && (
+                <form action={resendInviteAction} className="ml-auto">
+                  <input type="hidden" name="id" value={app.id} />
+                  <button
+                    type="submit"
+                    className="text-xs font-medium text-blue-700 hover:underline"
+                  >
+                    Resend invitation email →
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
         )}
 

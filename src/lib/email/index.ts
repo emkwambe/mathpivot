@@ -465,6 +465,65 @@ export const emailTemplates = {
   }),
 
   /**
+   * Coach invitation — sent when admin approves a coach application.
+   * The applicant clicks the invite URL, signs up (or signs in) with the
+   * same email, and lands on /tutor/onboarding.
+   */
+  coachInvitation: ({
+    coachName,
+    inviteUrl,
+    adminNotes,
+  }: {
+    coachName: string;
+    inviteUrl: string;
+    adminNotes?: string | null;
+  }) => ({
+    subject: "You're invited to coach with MathPivot",
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #0f172a;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="display: inline-block; width: 48px; height: 48px; background: #1D4ED8; border-radius: 10px; line-height: 48px; color: #fff; font-weight: bold; font-size: 20px;">M</div>
+        </div>
+        <h1 style="font-size: 22px; color: #0f172a; margin: 0 0 12px;">Welcome to MathPivot, ${coachName}.</h1>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          Thanks for applying to coach with us. Your application has been approved.
+          Click below to set up your coach account and begin the onboarding checklist —
+          background-check attestation, MathPivot Coach Code of Conduct, and the
+          Certified Coach training program.
+        </p>
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${inviteUrl}"
+             style="display: inline-block; background: #1D4ED8; color: #ffffff; text-decoration: none;
+                    padding: 14px 28px; border-radius: 10px; font-weight: 600; font-size: 15px;">
+            Accept invitation
+          </a>
+        </div>
+        <p style="font-size: 13px; color: #64748b; line-height: 1.6;">
+          Or paste this link into your browser:<br>
+          <span style="word-break: break-all; color: #1D4ED8;">${inviteUrl}</span>
+        </p>
+        ${
+          adminNotes
+            ? `<div style="margin-top: 24px; padding: 16px; background: #f8fafc; border-left: 3px solid #1D4ED8; border-radius: 6px;">
+                <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px; font-weight: 600;">A note from the MathPivot team</p>
+                <p style="font-size: 14px; color: #334155; margin: 0; white-space: pre-wrap;">${adminNotes}</p>
+              </div>`
+            : ""
+        }
+        <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin-top: 28px;">
+          Coaching at MathPivot means teaching small cohorts of five students in a mastery-centered,
+          school-aligned model — not tutoring by the hour. The onboarding checklist walks you through
+          every step; most coaches complete it within a week.
+        </p>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+          You received this because you applied to coach at MathPivot with this email address.
+          If this wasn&#39;t you, ignore this message and no account will be created.
+        </p>
+      </div>
+    `,
+  }),
+
+  /**
    * Purchase confirmation email
    */
   purchaseConfirmation: ({
