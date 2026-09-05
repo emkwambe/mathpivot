@@ -25,6 +25,12 @@ const DAY_SHORT: Record<string, string> = {
 };
 
 const PROGRAMS = [
+  // Year-round coaching tiers. Slugs MUST match program_subscriptions.program_tier
+  // so the placement queue can auto-match unplaced students to a schedule.
+  { slug: "foundation", name: "Foundation (year-round)" },
+  { slug: "acceleration", name: "Acceleration (year-round)" },
+  { slug: "advanced", name: "Advanced (year-round)" },
+  // Summer clinics
   { slug: "propel-7", name: "Propel Math 7" },
   { slug: "advantage-8", name: "Advantage Math 8" },
   { slug: "ignite-math1", name: "Ignite Math 1" },
