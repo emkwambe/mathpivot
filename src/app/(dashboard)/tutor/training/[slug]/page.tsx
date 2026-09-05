@@ -277,32 +277,53 @@ export default async function ModuleDetailPage({
               You completed this module.
             </span>
           )}
+          {moduleStatus === "failed" && isCertifiedAssessment && (
+            <span className="text-sm text-amber-700">
+              Previous attempt did not pass. Retake below.
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
-          {!locked && moduleStatus === "not_started" && (
-            <form action={startAction}>
-              <input type="hidden" name="moduleId" value={mod.id} />
-              <input type="hidden" name="slug" value={slug} />
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-800"
-              >
-                Start module
-              </button>
-            </form>
+          {/* Certified Coach Assessment has a real quiz — route there
+              instead of the generic Start/Mark-complete flow. */}
+          {!locked && isCertifiedAssessment && moduleStatus !== "completed" && (
+            <Link
+              href="/tutor/training/mp-certification-assessment/take"
+              className="inline-flex items-center gap-2 bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-800"
+            >
+              {moduleStatus === "failed"
+                ? "Retake assessment"
+                : "Take assessment"}
+            </Link>
           )}
-          {!locked && moduleStatus === "in_progress" && (
-            <form action={completeAction}>
-              <input type="hidden" name="moduleId" value={mod.id} />
-              <input type="hidden" name="slug" value={slug} />
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 bg-emerald-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-emerald-700"
-              >
-                Mark complete
-              </button>
-            </form>
-          )}
+          {!locked &&
+            !isCertifiedAssessment &&
+            moduleStatus === "not_started" && (
+              <form action={startAction}>
+                <input type="hidden" name="moduleId" value={mod.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-800"
+                >
+                  Start module
+                </button>
+              </form>
+            )}
+          {!locked &&
+            !isCertifiedAssessment &&
+            moduleStatus === "in_progress" && (
+              <form action={completeAction}>
+                <input type="hidden" name="moduleId" value={mod.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 bg-emerald-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-emerald-700"
+                >
+                  Mark complete
+                </button>
+              </form>
+            )}
         </div>
       </div>
     </div>

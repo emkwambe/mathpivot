@@ -318,7 +318,7 @@ export const MODULE_CONTENT: Record<string, ModuleContent> = {
       },
     ],
     completionEvidence:
-      "Contact your program administrator to schedule and complete the assessment. Assessment is proctored; results are recorded by the administrator.",
+      "Take the 15-question assessment linked below. A score of 80% or higher passes and unlocks the certification application; anything lower can be retaken immediately.",
   },
 
   "mp-competition-prep": {
