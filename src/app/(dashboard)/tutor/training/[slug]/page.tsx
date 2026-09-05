@@ -10,7 +10,14 @@ import {
   completeModule,
 } from "@/app/actions/training";
 import { getModuleContent } from "@/lib/training/module-content";
-import { ArrowLeft, Clock, CheckCircle2, Lock, BookOpen } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  Lock,
+  BookOpen,
+} from "lucide-react";
 
 async function startAction(formData: FormData) {
   "use server";
@@ -95,6 +102,19 @@ export default async function ModuleDetailPage({
   const moduleNumber = isMasterModule
     ? `M${mod.sort_order - 10}`
     : String(mod.sort_order).padStart(2, "0");
+
+  // Prev / next within the same tier by sort_order. `modules` from
+  // getCoachProgress is already ordered so we can find neighbors with
+  // findIndex. Skip modules the coach cannot access (locked tier).
+  const sameTier = modules.filter(
+    (m) => m.module.certification_tier === mod.certification_tier,
+  );
+  const idxInTier = sameTier.findIndex((m) => m.module.id === mod.id);
+  const prev = idxInTier > 0 ? sameTier[idxInTier - 1] : null;
+  const next =
+    idxInTier >= 0 && idxInTier < sameTier.length - 1
+      ? sameTier[idxInTier + 1]
+      : null;
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6">
@@ -326,14 +346,70 @@ export default async function ModuleDetailPage({
                 <input type="hidden" name="slug" value={slug} />
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 bg-emerald-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-emerald-700"
+                  className="inline-flex items-center gap-2 bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-emerald-700 shadow-sm"
                 >
+                  <CheckCircle2 className="w-4 h-4" />
                   Mark complete
                 </button>
               </form>
             )}
         </div>
       </div>
+
+      {/* Module-to-module navigation. Master modules stay in the master tier;
+          Certified modules stay in the certified tier. If the coach has finished
+          the current module, promote "Next module" as the primary CTA. */}
+      <nav className="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+        {prev ? (
+          <Link
+            href={`/tutor/training/${prev.module.slug}`}
+            className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-900 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            <span className="text-left">
+              <span className="block text-[10px] uppercase tracking-wide font-semibold text-slate-400">
+                Previous
+              </span>
+              <span className="font-medium">{prev.module.title}</span>
+            </span>
+          </Link>
+        ) : (
+          <span />
+        )}
+
+        {next ? (
+          <Link
+            href={`/tutor/training/${next.module.slug}`}
+            className={`inline-flex items-center gap-1.5 text-sm group ${
+              moduleStatus === "completed"
+                ? "bg-blue-700 text-white hover:bg-blue-800 px-4 py-2.5 rounded-lg font-semibold"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <span className="text-right">
+              <span
+                className={`block text-[10px] uppercase tracking-wide font-semibold ${
+                  moduleStatus === "completed"
+                    ? "text-blue-200"
+                    : "text-slate-400"
+                }`}
+              >
+                Next module
+              </span>
+              <span className="font-medium">{next.module.title}</span>
+            </span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        ) : (
+          <Link
+            href="/tutor/training"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-900"
+          >
+            Back to Coach Training
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
+      </nav>
     </div>
   );
 }
