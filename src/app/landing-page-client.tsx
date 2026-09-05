@@ -240,6 +240,13 @@ export default function LandingPage() {
                 Compare
               </Link>
               <Link
+                href="/coaches"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                title="Meet the MathPivot coaching team"
+              >
+                Coaches
+              </Link>
+              <Link
                 href="/diagnostic"
                 className="text-sm font-semibold text-orange-500 hover:text-orange-600"
                 title="Free 15-minute diagnostic by grade"

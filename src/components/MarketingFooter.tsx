@@ -26,6 +26,9 @@ export function MarketingFooter() {
           <Link href="/careers" className="hover:text-slate-900">
             Careers
           </Link>
+          <Link href="/coach-apply" className="hover:text-slate-900">
+            Coach with us
+          </Link>
           <Link href="/get-started" className="hover:text-slate-900">
             Get Started
           </Link>
