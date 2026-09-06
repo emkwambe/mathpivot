@@ -8,6 +8,8 @@ import {
   type UnplacedRow,
   type SuggestedSchedule,
 } from "@/app/actions/placement";
+import { getCohortNudges } from "@/app/actions/cohort-nudges";
+import { CohortNudges } from "@/components/admin/CohortNudges";
 import { PROGRAMS } from "@/lib/stripe/programs";
 
 async function placeAction(formData: FormData) {
@@ -44,7 +46,10 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 export default async function PlacementQueuePage() {
-  const queue = await getPlacementQueue();
+  const [queue, nudges] = await Promise.all([
+    getPlacementQueue(),
+    getCohortNudges(),
+  ]);
 
   // Fetch suggestions per tier up front so we do one query per tier
   // rather than N per row. The page usually shows a small queue.
@@ -73,6 +78,8 @@ export default async function PlacementQueuePage() {
           cohort for the same coach and program at another time.
         </p>
       </div>
+
+      <CohortNudges nudges={nudges} />
 
       {queue.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-10 text-center">

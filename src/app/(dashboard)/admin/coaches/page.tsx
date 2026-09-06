@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { listCoaches } from "@/app/actions/coach-roster";
+import { getCohortNudges } from "@/app/actions/cohort-nudges";
+import { CohortNudges } from "@/components/admin/CohortNudges";
 import { lifecycleStage, type CoachRosterRow } from "@/lib/coach-roster";
 import { Badge } from "@/components/ui";
 
@@ -37,7 +39,7 @@ export default async function AdminCoachesPage({
   const { filter } = await searchParams;
   const activeFilter = filter || "all";
 
-  const all = await listCoaches();
+  const [all, nudges] = await Promise.all([listCoaches(), getCohortNudges()]);
   const rows =
     activeFilter === "all"
       ? all
@@ -66,6 +68,8 @@ export default async function AdminCoachesPage({
           place.
         </p>
       </div>
+
+      <CohortNudges nudges={nudges} />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <StatTile value={counts.total} label="Total coaches" />
