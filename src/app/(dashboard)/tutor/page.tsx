@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, Badge } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { Calendar, ArrowRight, Sparkles } from "lucide-react";
 
 export default async function SmartCoachDashboard() {
   const supabase = await createClient();
@@ -18,6 +19,19 @@ export default async function SmartCoachDashboard() {
   const thirtyDaysAgo = new Date(
     now.getTime() - 30 * 24 * 60 * 60 * 1000,
   ).toISOString();
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).toISOString();
+  const endOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1,
+  ).toISOString();
+  const sevenDaysAhead = new Date(
+    now.getTime() + 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   const [
     { data: enrollments },
@@ -25,6 +39,9 @@ export default async function SmartCoachDashboard() {
     { count: trainingTotal },
     { data: recentSurveys },
     { data: diagnostics },
+    { data: onboarding },
+    { data: todaysBookings },
+    { data: upcomingBookings },
   ] = await Promise.all([
     supabase
       .from("program_enrollments")
@@ -51,6 +68,29 @@ export default async function SmartCoachDashboard() {
       .select("id, student_id")
       .eq("administered_by", user.id)
       .gte("completed_at", thirtyDaysAgo),
+    supabase
+      .from("coach_onboarding_progress")
+      .select(
+        "background_check_attested, admin_verified_background, code_of_conduct_accepted, activated",
+      )
+      .eq("coach_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("bookings")
+      .select("id, start_at, end_at, student_user_id, status, modality")
+      .eq("tutor_user_id", user.id)
+      .gte("start_at", startOfToday)
+      .lt("start_at", endOfToday)
+      .not("status", "eq", "canceled")
+      .order("start_at"),
+    supabase
+      .from("bookings")
+      .select("id, start_at, end_at, student_user_id, status")
+      .eq("tutor_user_id", user.id)
+      .gte("start_at", endOfToday)
+      .lt("start_at", sevenDaysAhead)
+      .not("status", "eq", "canceled")
+      .order("start_at"),
   ]);
 
   const studentIds = [...new Set((enrollments || []).map((e) => e.student_id))];
@@ -121,6 +161,48 @@ export default async function SmartCoachDashboard() {
   const firstName = String(user.user_metadata?.full_name || "Coach").split(
     " ",
   )[0];
+
+  // Onboarding checklist mirrors the six steps on /tutor/onboarding:
+  // profile complete, bg attested, code of conduct accepted, training
+  // done, certified (via approved cert application), activated.
+  const onboardingSteps = [
+    Boolean(user.user_metadata?.full_name),
+    Boolean(onboarding?.background_check_attested),
+    Boolean(onboarding?.code_of_conduct_accepted),
+    trainingPct >= 100,
+    // certified + activated flags aren't fetched here — best-effort;
+    // the /tutor/onboarding page is the source of truth.
+    Boolean(onboarding?.admin_verified_background),
+    Boolean(onboarding?.activated),
+  ];
+  const onboardingDone = onboardingSteps.filter(Boolean).length;
+  const onboardingTotal = onboardingSteps.length;
+  const showOnboardingBanner = !onboarding?.activated;
+
+  // Bookings — resolve student names via the same studentMap when we have
+  // it, and fall back to "Student" for anyone outside the enrollment set.
+  const bookingStudentIds = new Set<string>();
+  for (const b of todaysBookings ?? []) {
+    if (b.student_user_id) bookingStudentIds.add(b.student_user_id);
+  }
+  const missingBookingStudents = [...bookingStudentIds].filter(
+    (id) => !studentMap.has(id),
+  );
+  if (missingBookingStudents.length > 0) {
+    const { data: extra } = await supabase
+      .from("users_profile")
+      .select("id, full_name")
+      .in("id", missingBookingStudents);
+    for (const p of extra ?? []) studentMap.set(p.id, p.full_name);
+  }
+
+  function fmtTime(iso: string) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
 
   const actionItems: {
     label: string;
@@ -200,6 +282,110 @@ export default async function SmartCoachDashboard() {
           </div>
         </div>
       </div>
+
+      {showOnboardingBanner && (
+        <Link
+          href="/tutor/onboarding"
+          className="block rounded-2xl border border-blue-200 bg-blue-50 p-5 hover:border-blue-300 transition-colors"
+        >
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-blue-700 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm font-bold text-blue-900">
+                  Finish your coach onboarding
+                </h2>
+                <span className="text-xs font-medium text-blue-700">
+                  {onboardingDone} of {onboardingTotal} steps
+                </span>
+              </div>
+              <p className="text-sm text-blue-800 mt-1">
+                Complete the checklist so admin can activate you for student
+                assignment.
+              </p>
+              <div className="w-full bg-blue-100 rounded-full h-1.5 mt-3">
+                <div
+                  className="bg-blue-700 h-1.5 rounded-full transition-all"
+                  style={{
+                    width: `${Math.round((onboardingDone / onboardingTotal) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-blue-700 mt-1" />
+          </div>
+        </Link>
+      )}
+
+      {(todaysBookings?.length ?? 0) > 0 && (
+        <div>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-3">
+            Today&apos;s sessions
+          </h2>
+          <div className="space-y-2">
+            {(todaysBookings ?? []).map((b) => {
+              const name = b.student_user_id
+                ? studentMap.get(b.student_user_id) || "Student"
+                : "Student";
+              return (
+                <Link
+                  key={b.id}
+                  href={`/tutor/sessions/${b.id}`}
+                  className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:border-blue-300 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Calendar className="w-4 h-4 text-blue-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900 text-sm truncate">
+                        {name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {fmtTime(b.start_at)}
+                        {b.end_at ? ` – ${fmtTime(b.end_at)}` : ""}
+                        {b.modality ? ` · ${b.modality}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-slate-400" />
+                </Link>
+              );
+            })}
+          </div>
+          {(upcomingBookings?.length ?? 0) > 0 && (
+            <p className="text-xs text-slate-500 mt-2">
+              + {upcomingBookings?.length} more in the next 7 days.{" "}
+              <Link
+                href="/tutor/sessions"
+                className="text-blue-700 hover:underline font-medium"
+              >
+                See all →
+              </Link>
+            </p>
+          )}
+        </div>
+      )}
+
+      {(todaysBookings?.length ?? 0) === 0 &&
+        (upcomingBookings?.length ?? 0) > 0 && (
+          <div className="rounded-xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-4 h-4 text-slate-500" />
+              <p className="text-sm text-slate-700">
+                <span className="font-semibold text-slate-900">
+                  {upcomingBookings?.length}
+                </span>{" "}
+                session{(upcomingBookings?.length ?? 0) === 1 ? "" : "s"}{" "}
+                scheduled in the next 7 days.
+              </p>
+            </div>
+            <Link
+              href="/tutor/sessions"
+              className="text-sm font-medium text-blue-700 hover:underline"
+            >
+              View schedule →
+            </Link>
+          </div>
+        )}
 
       {actionItems.length > 0 && (
         <div>
