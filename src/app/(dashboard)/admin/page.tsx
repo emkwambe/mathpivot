@@ -1,4 +1,11 @@
 import Link from "next/link";
+import {
+  ArrowRight,
+  Inbox,
+  UserCheck,
+  Users2,
+  CalendarClock,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import {
   Card,
@@ -11,13 +18,6 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { getCohortNudges } from "@/app/actions/cohort-nudges";
 import { CohortNudges } from "@/components/admin/CohortNudges";
-import {
-  ArrowRight,
-  Inbox,
-  UserCheck,
-  Users2,
-  CalendarClock,
-} from "lucide-react";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -88,15 +88,11 @@ export default async function AdminDashboardPage() {
     supabase
       .from("coach_applications")
       .select("id", { count: "exact", head: true })
-      .in("status", ["submitted", "screening", "interview_scheduled"]),
+      .in("status", ["submitted", "screening"]),
     supabase
       .from("certification_applications")
       .select("id", { count: "exact", head: true })
       .in("status", ["pending", "under_review"]),
-    // Unplaced = subscribed and paying but no confirmed/active cohort_enrollment.
-    // Approximation via count of active/trialing subscriptions minus a rough
-    // placement rate is expensive; we surface active subscriptions here and
-    // let the placement queue page do the exact join for the row-level view.
     supabase
       .from("program_subscriptions")
       .select("id", { count: "exact", head: true })
@@ -152,36 +148,38 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* Cohort formation nudges — silent when nothing's at target/max */}
       <CohortNudges nudges={nudges} />
 
-      {/* Coach & placement pipeline — new admin surfaces surfaced up front */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Coach pipeline — new apps → certification review → placement → roster */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <PipelineTile
-          label="New coach applications"
-          value={newCoachAppsResult.count ?? 0}
           href="/admin/coach-applications"
-          icon={<Inbox className="w-4 h-4" />}
+          icon={<Inbox className="w-5 h-5" />}
+          label="New coach applications"
+          value={newCoachAppsResult.count || 0}
           tone="blue"
         />
         <PipelineTile
-          label="Certification reviews"
-          value={pendingCertResult.count ?? 0}
           href="/admin/certification-reviews"
-          icon={<UserCheck className="w-4 h-4" />}
-          tone="amber"
+          icon={<UserCheck className="w-5 h-5" />}
+          label="Certification reviews"
+          value={pendingCertResult.count || 0}
+          tone="purple"
         />
         <PipelineTile
-          label="Active subscriptions"
-          value={unplacedSubsResult.count ?? 0}
           href="/admin/placement-queue"
-          icon={<CalendarClock className="w-4 h-4" />}
+          icon={<CalendarClock className="w-5 h-5" />}
+          label="Active subscriptions"
+          value={unplacedSubsResult.count || 0}
           tone="emerald"
+          hint="review placement"
         />
         <PipelineTile
-          label="Coach roster"
-          value={tutorsResult.count ?? 0}
           href="/admin/coaches"
-          icon={<Users2 className="w-4 h-4" />}
+          icon={<Users2 className="w-5 h-5" />}
+          label="Coach roster"
+          value={tutorsResult.count || 0}
           tone="slate"
         />
       </div>
@@ -326,37 +324,45 @@ export default async function AdminDashboardPage() {
 }
 
 function PipelineTile({
-  label,
-  value,
   href,
   icon,
+  label,
+  value,
   tone,
+  hint,
 }: {
-  label: string;
-  value: number;
   href: string;
   icon: React.ReactNode;
-  tone: "blue" | "amber" | "emerald" | "slate";
+  label: string;
+  value: number;
+  tone: "blue" | "purple" | "emerald" | "slate";
+  hint?: string;
 }) {
-  const toneStyles = {
-    blue: "text-blue-700 border-blue-100",
-    amber: "text-amber-700 border-amber-100",
-    emerald: "text-emerald-700 border-emerald-100",
-    slate: "text-slate-700 border-slate-200",
+  const toneClass = {
+    blue: "text-blue-700 bg-blue-50 border-blue-100",
+    purple: "text-purple-700 bg-purple-50 border-purple-100",
+    emerald: "text-emerald-700 bg-emerald-50 border-emerald-100",
+    slate: "text-slate-700 bg-slate-50 border-slate-100",
   }[tone];
+
   return (
     <Link
       href={href}
-      className="group block bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 hover:shadow-sm transition-all"
+      className="group block bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md hover:border-slate-300 transition-all"
     >
-      <div className={`flex items-center gap-2 ${toneStyles.split(" ")[0]}`}>
-        {icon}
-        <p className="text-xs font-semibold uppercase tracking-wide">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <span
+          className={`inline-flex items-center justify-center w-9 h-9 rounded-lg border ${toneClass}`}
+        >
+          {icon}
+        </span>
+        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
       </div>
-      <div className="mt-2 flex items-baseline justify-between">
-        <p className="text-2xl font-bold text-slate-900">{value}</p>
-        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition-colors" />
-      </div>
+      <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+      {hint && (
+        <p className="text-[11px] text-slate-400 mt-0.5 italic">{hint}</p>
+      )}
     </Link>
   );
 }
