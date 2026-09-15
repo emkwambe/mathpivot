@@ -1408,10 +1408,28 @@ const studentNavItems: NavItem[] = [
   },
 ];
 
+// Legacy admin nav entries hidden from the sidebar — pages still reachable
+// by URL if needed. Aligns nav with current coaching-modality (subscription
+// programs, remote micro-cohorts, no drop-in / physical rooms / code
+// problems / duplicate certifications).
+const HIDDEN_ADMIN_NAV_LABELS = new Set<string>([
+  "Certifications", // superseded by "Certification Reviews"
+  "Competitions",
+  "Products", // Stripe subscription programs handle this
+  "Invoices", // Stripe handles this
+  "Equipment",
+  "Rooms",
+  "Drop-In",
+  "Code Problems",
+  "Waitlist", // duplicate of Summer Waitlist
+]);
+
 function getNavItems(role: UserRole): NavItem[] {
   switch (role) {
     case "admin":
-      return adminNavItems;
+      return adminNavItems.filter(
+        (item) => !HIDDEN_ADMIN_NAV_LABELS.has(item.label),
+      );
     case "tutor":
       return tutorNavItems;
     case "parent":
