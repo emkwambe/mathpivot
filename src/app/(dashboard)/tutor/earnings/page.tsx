@@ -119,7 +119,7 @@ export default async function CoachEarningsPage() {
               <p className="font-medium text-slate-900">Revenue Share</p>
               <p className="text-slate-600 mt-1">
                 You earn <strong>60%</strong> of each enrolled student&apos;s
-                monthly program fee.
+                monthly subscription in your cohorts.
               </p>
             </div>
             <div className="p-3 bg-slate-50 rounded-lg">
@@ -130,10 +130,12 @@ export default async function CoachEarningsPage() {
               </p>
             </div>
             <div className="p-3 bg-slate-50 rounded-lg">
-              <p className="font-medium text-slate-900">Growth Path</p>
+              <p className="font-medium text-slate-900">Cohort Math</p>
               <p className="text-slate-600 mt-1">
-                12 students x $499/mo avg = <strong>$3,593/mo</strong> at 60%
-                share.
+                Each cohort holds <strong>5&ndash;6 students</strong>. Coaches
+                run up to <strong>3 cohorts</strong> across weekday evenings and
+                Saturday mornings. Example: 3 cohorts &times; 5 students &times;
+                $549/mo (Acceleration) &times; 60% = <strong>$4,941/mo</strong>.
               </p>
             </div>
           </div>

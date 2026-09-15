@@ -279,47 +279,85 @@ export async function toggleRoom(
 export async function getCalendarEvents(startDate: string, endDate: string) {
   const supabase = await createClient();
 
-  const { data, error } = (await supabase
+  // student_user_id / parent_user_id point at auth.users, which PostgREST
+  // can't traverse from a public-schema select — the previous inline joins
+  // returned "Could not find a relationship between 'bookings' and
+  // 'student_user_id' in the schema cache" and the calendar rendered
+  // nothing. tutor is fine because tutors_profile.user_id is a real FK
+  // from bookings, but we skip it here for uniformity.
+  const { data: rows, error } = await supabase
     .from("bookings")
     .select(
       `
-      id,
-      start_at,
-      end_at,
-      status,
-      modality,
-      is_group_session,
-      notes,
-      room:room_id (name),
-      tutor:tutor_user_id (full_name),
-      student:student_user_id (full_name),
-      parent:parent_user_id (full_name)
+      id, start_at, end_at, status, modality, is_group_session, notes,
+      student_user_id, tutor_user_id, parent_user_id,
+      room:room_id (name)
     `,
     )
     .gte("start_at", startDate)
     .lte("start_at", endDate)
     .neq("status", "canceled")
-    .order("start_at", { ascending: true })) as {
-    data: BookingRow[] | null;
-    error: { message: string } | null;
-  };
+    .order("start_at", { ascending: true });
 
   if (error) return { events: [], error: error.message };
 
-  const events = (data || []).map((b: BookingRow) => ({
-    id: b.id,
-    title: b.is_group_session
-      ? `Group: ${b.tutor?.full_name || "TBD"}`
-      : `${b.student?.full_name || "Student"} — ${b.tutor?.full_name || "Coach"}`,
-    start: b.start_at,
-    end: b.end_at,
-    status: b.status,
-    modality: b.modality,
-    isGroup: b.is_group_session,
-    room: b.room?.name || null,
-    tutorName: b.tutor?.full_name || "",
-    studentName: b.student?.full_name || "",
-  }));
+  type Row = {
+    id: string;
+    start_at: string;
+    end_at: string;
+    status: string;
+    modality: string;
+    is_group_session: boolean;
+    notes: string | null;
+    student_user_id: string;
+    tutor_user_id: string;
+    parent_user_id: string;
+    room: { name: string } | { name: string }[] | null;
+  };
+  const bookings = (rows ?? []) as Row[];
+
+  const userIds = Array.from(
+    new Set(
+      bookings.flatMap((b) => [
+        b.student_user_id,
+        b.tutor_user_id,
+        b.parent_user_id,
+      ]),
+    ),
+  ).filter(Boolean);
+
+  const { data: profiles } = userIds.length
+    ? await supabase
+        .from("users_profile")
+        .select("id, full_name")
+        .in("id", userIds)
+    : { data: [] as { id: string; full_name: string | null }[] };
+
+  const nameMap = new Map(
+    (profiles ?? []).map((p) => [p.id, p.full_name ?? ""]),
+  );
+
+  const events = bookings.map((b) => {
+    const studentName = nameMap.get(b.student_user_id) || "Student";
+    const tutorName = nameMap.get(b.tutor_user_id) || "Coach";
+    const room = Array.isArray(b.room)
+      ? (b.room[0]?.name ?? null)
+      : (b.room?.name ?? null);
+    return {
+      id: b.id,
+      title: b.is_group_session
+        ? `Group: ${tutorName}`
+        : `${studentName} — ${tutorName}`,
+      start: b.start_at,
+      end: b.end_at,
+      status: b.status,
+      modality: b.modality,
+      isGroup: b.is_group_session,
+      room,
+      tutorName,
+      studentName,
+    };
+  });
 
   return { events, error: null };
 }
