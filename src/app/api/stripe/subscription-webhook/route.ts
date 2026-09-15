@@ -83,6 +83,10 @@ export async function POST(request: NextRequest) {
       case "invoice.payment_failed":
         await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
         break;
+      case "invoice.payment_succeeded":
+      case "invoice.paid":
+        await handleInvoicePaid(event.data.object as Stripe.Invoice);
+        break;
       default:
         break;
     }
@@ -371,6 +375,68 @@ async function syncSubscriptionState(sub: Stripe.Subscription) {
       syncErr.message,
     );
     throw new Error(`program_subscriptions sync: ${syncErr.message}`);
+  }
+}
+
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  // Only record charges that actually cleared. Manual/void/draft invoices
+  // fire this too on some flows — skip anything without money in.
+  const amount = invoice.amount_paid ?? 0;
+  if (amount <= 0) return;
+
+  const stripeSubId = subscriptionIdFromInvoice(invoice);
+  if (!stripeSubId) return; // one-time invoices (non-subscription) aren't ours here
+
+  // Link to program_subscriptions when we've seen the sub. Kept nullable so
+  // an out-of-order webhook (invoice.paid before checkout.session.completed)
+  // still records the money.
+  const { data: sub } = await supabaseAdmin
+    .from("program_subscriptions")
+    .select("id")
+    .eq("stripe_subscription_id", stripeSubId)
+    .maybeSingle();
+
+  const paidAtEpoch =
+    invoice.status_transitions?.paid_at ??
+    invoice.created ??
+    Math.floor(Date.now() / 1000);
+
+  const line = invoice.lines?.data?.[0] as
+    | {
+        period?: { start?: number; end?: number };
+      }
+    | undefined;
+
+  const record = {
+    program_subscription_id: sub?.id ?? null,
+    stripe_invoice_id: invoice.id,
+    stripe_subscription_id: stripeSubId,
+    stripe_customer_id:
+      typeof invoice.customer === "string"
+        ? invoice.customer
+        : (invoice.customer?.id ?? ""),
+    amount_paid_cents: amount,
+    currency: (invoice.currency ?? "usd").toLowerCase(),
+    period_start: toIsoNullable(line?.period?.start),
+    period_end: toIsoNullable(line?.period?.end),
+    paid_at: new Date(paidAtEpoch * 1000).toISOString(),
+    hosted_invoice_url: invoice.hosted_invoice_url ?? null,
+    invoice_pdf_url: invoice.invoice_pdf ?? null,
+  };
+
+  // Upsert on stripe_invoice_id so Stripe retries (or an out-of-order
+  // paid → paid.succeeded pair) never double-count.
+  const { error: writeErr } = await supabaseAdmin
+    .from("subscription_invoices")
+    .upsert(record, { onConflict: "stripe_invoice_id" });
+
+  if (writeErr) {
+    console.error(
+      "[subscription-webhook] subscription_invoices upsert failed for",
+      invoice.id,
+      writeErr.message,
+    );
+    throw new Error(`subscription_invoices upsert: ${writeErr.message}`);
   }
 }
 

@@ -40,6 +40,7 @@ export default async function AdminDashboardPage() {
     sessionsResult,
     noShowsResult,
     purchasesResult,
+    subscriptionInvoicesResult,
     upcomingResult,
     atRiskResult,
     newCoachAppsResult,
@@ -71,6 +72,13 @@ export default async function AdminDashboardPage() {
       .eq("status", "completed")
       .gte("paid_at", monthStart)
       .lte("paid_at", monthEnd),
+    // Recurring coaching subscriptions — the core revenue line. Populated
+    // by the Stripe subscription webhook on invoice.payment_succeeded.
+    supabase
+      .from("subscription_invoices")
+      .select("amount_paid_cents")
+      .gte("paid_at", monthStart)
+      .lte("paid_at", monthEnd),
     supabase
       .from("bookings")
       .select("id, start_at, status, student_user_id, tutor_user_id")
@@ -100,8 +108,14 @@ export default async function AdminDashboardPage() {
     getCohortNudges(),
   ]);
 
-  const monthlyRevenue =
+  const oneTimeRevenue =
     purchasesResult.data?.reduce((sum, p) => sum + p.amount_cents, 0) || 0;
+  const recurringRevenue =
+    subscriptionInvoicesResult.data?.reduce(
+      (sum, r) => sum + r.amount_paid_cents,
+      0,
+    ) || 0;
+  const monthlyRevenue = oneTimeRevenue + recurringRevenue;
 
   // BATCH 2: Dependent queries (need IDs from batch 1) — in parallel
   const userIds = [
