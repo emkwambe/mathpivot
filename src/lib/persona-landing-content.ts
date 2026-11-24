@@ -81,7 +81,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     },
     recommendedProgram: {
       name: "Foundation Coaching",
-      price: "$349/mo",
+      price: "$379/mo",
       frequency: "2 coaching meetings/week",
       reason:
         "Foundation is the standard fit for grades 5–10 homeschool families. Includes named coach, mastery tracking, and compliance exports.",
@@ -102,7 +102,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     personaKey: "competition_math",
     title: "MathPivot for Competition Math — AMC, MATHCOUNTS, and Beyond",
     metaDescription:
-      "Advanced math coaching for AMC, MATHCOUNTS, and AIME. Small cohorts (5-6 students), dedicated coach, and Mathathlon competition prep — not AoPS self-study or 20-student RSM classes.",
+      "Advanced math coaching for AMC, MATHCOUNTS, and AIME. Small cohorts (5–6 students), dedicated coach, and Mathathlon competition prep — not AoPS self-study or 20-student RSM classes.",
     hero: {
       eyebrow: "For Competition Math Families",
       headline: "Your child doesn't need help.",
@@ -146,8 +146,8 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     },
     recommendedProgram: {
       name: "MathPivot Advanced",
-      price: "$799/mo",
-      frequency: "2–3 coaching meetings/week + additional opportunities",
+      price: "$649/mo",
+      frequency: "3 coaching meetings/week + monthly one-to-one",
       reason:
         "Advanced is the primary fit for competition-focused families. Includes advanced projects, competition prep, career exploration, and parent strategy reviews.",
       href: "/pricing",
@@ -167,7 +167,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     personaKey: "travel_ball_family",
     title: "MathPivot for Travel Ball Families — The Travel Ball of Math",
     metaDescription:
-      "Same development model, better ROI. Named coach, structured seasons, competition, and measurable growth — for math, not sports. From $349/mo.",
+      "Same development model, better ROI. Named coach, structured seasons, competition, and measurable growth — for math, not sports. From $379/mo.",
     hero: {
       eyebrow: "For Travel Ball Families",
       headline: "The travel ball model",
@@ -341,7 +341,7 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     },
     recommendedProgram: {
       name: "Foundation Coaching",
-      price: "$349/mo",
+      price: "$379/mo",
       frequency: "2 coaching meetings/week",
       reason:
         "Foundation rebuilds confidence and closes learning gaps. Perfect for students transitioning back to grade-level performance.",
@@ -406,14 +406,14 @@ export const PERSONA_LANDING: Record<string, PersonaLandingContent> = {
     },
     recommendedProgram: {
       name: "Foundation Coaching",
-      price: "$349/mo",
+      price: "$379/mo",
       frequency: "2 coaching meetings/week",
       reason:
         "Foundation is our most popular program for proactive families. Upgrade to Acceleration ($549/mo) when your child is ready to push ahead.",
       href: "/pricing",
     },
     socialProof:
-      "Suburban families investing $1,300–$3,000/year on supplementary education — MathPivot Foundation at $349/mo delivers structured coaching that generic tutoring can't.",
+      "Suburban families investing $1,300–$3,000/year on supplementary education — MathPivot Foundation at $379/mo delivers structured coaching that generic tutoring can't.",
     cta: {
       primary: "Take the Free Diagnostic",
       primaryHref: "/diagnostic",

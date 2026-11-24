@@ -62,9 +62,9 @@ export default function SignupPage() {
           </p>
           <div className="mt-10 grid grid-cols-3 gap-4">
             {[
-              { value: "$349", label: "Foundation" },
+              { value: "$379", label: "Foundation" },
               { value: "$549", label: "Acceleration" },
-              { value: "$799", label: "Advanced" },
+              { value: "$649", label: "Advanced" },
             ].map((tier) => (
               <div
                 key={tier.label}

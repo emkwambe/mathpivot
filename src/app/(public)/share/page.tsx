@@ -61,7 +61,7 @@ Join the waitlist → mathpivot.com/summer`,
     platform: "Teacher / Coach Networks",
     text: `Math teachers: ever wanted to build a coaching practice?
 
-MathPivot is looking for strong math teachers to become certified math coaches. Named student portfolio (5-6 students), structured curriculum, all tools provided.
+MathPivot is looking for strong math teachers to become certified math coaches. Named student portfolio (5–6 students), structured curriculum, all tools provided.
 
 You could earn up to $5,000/month coaching math.
 

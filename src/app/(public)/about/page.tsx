@@ -143,7 +143,7 @@ export default function AboutPage() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
-              { value: "179+", label: "Curriculum concepts mapped" },
+              { value: "3", label: "Program tracks" },
               { value: "60 min", label: "Structured session format" },
               { value: "12", label: "Career pathways connected" },
               { value: "6-step", label: "Onboarding protocol" },

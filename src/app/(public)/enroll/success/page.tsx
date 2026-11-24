@@ -132,7 +132,7 @@ export default async function EnrollSuccessPage({
                 </p>
                 <p className="text-sm text-slate-600 mt-1 leading-relaxed">
                   You&apos;ll receive a scheduling link to book the first
-                  session and join a micro-cohort of 5-6 students.
+                  session and join a micro-cohort of 5–6 students.
                 </p>
               </div>
             </li>

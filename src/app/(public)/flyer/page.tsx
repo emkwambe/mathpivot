@@ -112,7 +112,7 @@ export default function FlyerPage() {
               <div className="border border-slate-200 rounded-xl p-5">
                 <p className="font-bold text-slate-900">Foundation</p>
                 <p className="text-2xl font-bold text-blue-700 mt-1">
-                  $349
+                  $379
                   <span className="text-sm text-slate-400 font-normal">
                     /mo
                   </span>
@@ -148,13 +148,13 @@ export default function FlyerPage() {
               <div className="border border-slate-200 rounded-xl p-5">
                 <p className="font-bold text-slate-900">Advanced</p>
                 <p className="text-2xl font-bold text-blue-700 mt-1">
-                  $799
+                  $649
                   <span className="text-sm text-slate-400 font-normal">
                     /mo
                   </span>
                 </p>
                 <p className="text-xs text-slate-500 mt-2">
-                  2–3 meetings + opportunities
+                  3 meetings + monthly one-to-one
                 </p>
                 <p className="text-xs text-slate-500">Grades 6–12</p>
                 <p className="text-xs text-slate-600 mt-2">

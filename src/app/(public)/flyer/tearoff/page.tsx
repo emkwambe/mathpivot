@@ -99,7 +99,7 @@ export default function TearOffFlyer() {
             <div className="h-8 w-px bg-slate-200" />
             <div>
               <p className="font-bold text-slate-900">Year-Round Coaching</p>
-              <p className="text-xs">$349–$799/mo · Grades 5–12</p>
+              <p className="text-xs">$379–$649/mo · Grades 5–12</p>
             </div>
             <div className="h-8 w-px bg-slate-200" />
             <div>

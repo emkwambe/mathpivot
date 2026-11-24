@@ -544,7 +544,7 @@ export default function LandingPage() {
               {
                 step: "03",
                 title: "Master the Curriculum",
-                desc: "179 atomic concepts with measurable mastery levels. You see exactly what they know.",
+                desc: "A defined secondary-math skill model under active calibration, with measurable mastery levels. You see exactly what they know.",
                 color: "bg-amber-600",
               },
               {
@@ -599,7 +599,7 @@ export default function LandingPage() {
                 title: "Concept Mastery",
                 who: "Students underperforming, lacking confidence, or with prior-grade gaps",
                 outcome:
-                  "179 atomic concepts tracked from Not Started to Mastered. Fill the specific gaps that keep your child stuck each quarter. Every session ends with a logged mastery outcome — no more guessing what stuck.",
+                  "Skills tracked from Not Started to Mastered against a defined secondary-math skill model under active calibration. Fill the specific gaps that keep your child stuck each quarter. Every session ends with a logged mastery outcome — no more guessing what stuck.",
                 bestFor: "Foundation",
                 bestForColor: "bg-blue-100 text-blue-800",
                 accent: "text-blue-600",
@@ -841,7 +841,7 @@ export default function LandingPage() {
                 {
                   icon: Target,
                   title: "Mastery, not hours",
-                  desc: "179 atomic concepts per course, each tracked from 'Not Started' to 'Mastered'. You see exactly what your child knows.",
+                  desc: "A defined secondary-math skill model under active calibration, with each skill tracked from 'Not Started' to 'Mastered'. You see exactly what your child knows.",
                 },
                 {
                   icon: Trophy,
