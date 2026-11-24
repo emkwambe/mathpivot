@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { COHORT_SIZE_LABEL } from "@/lib/stripe/programs";
 
 const ASSETS = [
   {
@@ -52,9 +53,9 @@ No cost. No commitment. Results in minutes.
     platform: "Nextdoor / Community",
     text: `Does your child need math support this summer? MathPivot is running 8-11 day summer math clinics targeting the most heavily tested EOG and EOC topics.
 
-Small groups (5-6 students), named math coach, and clinic fees are 100% credited if you enroll in year-round coaching.
+Small groups (${COHORT_SIZE_LABEL}), named math coach, and clinic graduates receive an enrollment credit toward year-round coaching.
 
-Spots are limited → mathpivot.com/summer`,
+Join the waitlist → mathpivot.com/summer`,
   },
   {
     platform: "Teacher / Coach Networks",

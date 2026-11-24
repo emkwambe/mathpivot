@@ -3,6 +3,13 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { captureLeadAction } from "@/app/actions/leads";
+import { COHORT_SIZE_LABEL } from "@/lib/stripe/programs";
+import {
+  NEXT_SEASON_NOTICE,
+  SUMMER_CLINICS,
+  clinicDateLabel,
+  waveStartLabel,
+} from "@/lib/summer-season";
 import {
   ArrowRight,
   CheckCircle2,
@@ -11,69 +18,15 @@ import {
   Sparkles,
   ShieldCheck,
   TrendingUp,
-  AlertTriangle,
+  Users,
 } from "lucide-react";
 
-const programs = [
-  {
-    name: "Propel Math 7",
-    slug: "propel-7",
-    price: "$249",
-    days: "8 days",
-    audience: "Rising 7th Graders",
-    focus: "Ratios & Proportional Relationships",
-    outcome: "Build confidence and readiness for Grade 7 mathematics.",
-    creditExample:
-      "Receive a $75 enrollment credit if you continue into Foundation Coaching.",
-    wave: 1,
-    dates: "July 6 – July 15",
-  },
-  {
-    name: "Ignite Math 1",
-    slug: "ignite-math1",
-    price: "$449",
-    days: "10 days",
-    audience: "Rising 9th Graders",
-    focus: "Number Sense, Algebra, and Functions",
-    outcome: "Target the standards that drive Algebra 1 and EOC success.",
-    creditExample:
-      "Receive a $100 enrollment credit if you continue into Foundation Coaching.",
-    featured: true,
-    wave: 1,
-    dates: "July 6 – July 17",
-  },
-  {
-    name: "Advantage Math 8",
-    slug: "advantage-8",
-    price: "$349",
-    days: "9 days",
-    audience: "Rising 8th Graders",
-    focus: "Functions & Relations",
-    outcome:
-      "Strengthen the concepts that drive success in Grade 8 mathematics.",
-    creditExample:
-      "Receive a $100 enrollment credit if you continue into Acceleration Coaching.",
-    wave: 2,
-    dates: "July 20 – July 30",
-  },
-  {
-    name: "Ascent Pre-Calc",
-    slug: "ascent-precalc",
-    price: "$549",
-    days: "11 days",
-    audience: "Rising 11th Graders",
-    focus: "Advanced Functions, Trigonometry, and Pre-Calculus",
-    outcome:
-      "Prepare for advanced high school mathematics and future STEM coursework.",
-    creditExample:
-      "Receive a $150 enrollment credit if you continue into MathPivot Advanced.",
-    wave: 2,
-    dates: "July 20 – August 1",
-  },
-];
+const programs = SUMMER_CLINICS;
 
 export default function SummerProgramsPage() {
   const [state, formAction, isPending] = useActionState(captureLeadAction, {});
+  const wave1Start = waveStartLabel(1);
+  const wave2Start = waveStartLabel(2);
 
   return (
     <div className="min-h-screen bg-white">
@@ -127,7 +80,7 @@ export default function SummerProgramsPage() {
             <div className="pt-4">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-orange-50 border border-orange-200 px-4 py-2 text-sm text-orange-700 font-medium">
                 <Sparkles className="h-4 w-4 text-orange-500" />
-                Summer 2026 Math Clinics
+                Summer Math Clinics
               </div>
 
               <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-[3.5rem] leading-[1.1] text-slate-800">
@@ -144,15 +97,22 @@ export default function SummerProgramsPage() {
               <div className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-4 py-2.5">
                 <Clock className="h-4 w-4 text-blue-700 flex-shrink-0" />
                 <span className="text-sm text-blue-800">
-                  <strong>Wave 1 starts July 6</strong> · Wave 2 starts July 20
+                  {wave1Start || wave2Start ? (
+                    <>
+                      {wave1Start && <strong>Wave 1: {wave1Start}</strong>}
+                      {wave1Start && wave2Start && " · "}
+                      {wave2Start && <>Wave 2: {wave2Start}</>}
+                    </>
+                  ) : (
+                    <>{NEXT_SEASON_NOTICE}. Join the waitlist to hear first.</>
+                  )}
                 </span>
               </div>
 
-              <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-orange-50 border border-orange-200 px-4 py-2.5">
-                <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
-                <span className="text-sm text-orange-800">
-                  <strong>Spots closing soon.</strong> Limited to 5–6 students
-                  per cohort.
+              <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200 px-4 py-2.5">
+                <Users className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                <span className="text-sm text-slate-700">
+                  Small cohorts of {COHORT_SIZE_LABEL}.
                 </span>
               </div>
 
@@ -324,7 +284,7 @@ export default function SummerProgramsPage() {
                       </button>
 
                       <p className="text-[11px] text-slate-400 text-center">
-                        No payment required. First-come, first-served.
+                        No payment required.
                       </p>
                     </form>
                   )}
@@ -385,7 +345,9 @@ export default function SummerProgramsPage() {
 
                 <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
                   <Clock className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                  <span className="font-medium">{program.dates}</span>
+                  <span className="font-medium">
+                    {clinicDateLabel(program) ?? NEXT_SEASON_NOTICE}
+                  </span>
                   <span className="text-slate-400">· {program.days}</span>
                 </div>
 
@@ -459,7 +421,8 @@ export default function SummerProgramsPage() {
             Ready to prepare your child for the next school year?
           </h2>
           <p className="mt-4 text-slate-500">
-            Spots are limited. Join the waitlist today — no payment required.
+            Join the waitlist — no payment required. We&apos;ll share the next
+            season&apos;s dates as soon as they&apos;re set.
           </p>
           <a
             href="#waitlist"

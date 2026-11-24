@@ -94,7 +94,7 @@ export default function TearOffFlyer() {
           <div className="flex items-center justify-between text-sm text-slate-600 mb-6">
             <div>
               <p className="font-bold text-slate-900">Summer Clinics</p>
-              <p className="text-xs">$249–$549 · July 2026</p>
+              <p className="text-xs">$249–$549 · Join the waitlist</p>
             </div>
             <div className="h-8 w-px bg-slate-200" />
             <div>
