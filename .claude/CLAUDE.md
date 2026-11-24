@@ -12,8 +12,8 @@ MathPivot is a mathematics coaching academy that develops confidence, mastery, a
 
 ## Business Model
 
-- **Coaching programs:** Foundation ($349/mo, 2 guided sessions/week), Acceleration ($549/mo, 3 guided sessions/week), Advanced ($799/mo, 2-3 guided sessions/week + pathway-specific opportunities). Advanced replaced the earlier "Elite" name — the value "elite" is a deprecated legacy tier retained only for historic Sprint 9 test-mode rows.
-- **Summer clinics:** Propel Math 7 ($249, $75 credit), Advantage Math 8 ($399, $100 credit), Ignite Math 1 ($349, $100 credit), Ascent Pre-Calc ($449, $150 credit)
+- **Coaching programs:** Foundation ($379/mo, 2 guided sessions/week), Acceleration ($549/mo, 3 guided sessions/week), Advanced ($649/mo, 3 guided sessions/week + monthly one-to-one). Prices and cadence live in `src/lib/stripe/programs.ts`; that file wins over this summary. Advanced replaced the earlier "Elite" name — the value "elite" is a deprecated legacy tier retained only for historic Sprint 9 test-mode rows.
+- **Summer clinics:** Propel Math 7 ($249, $75 credit), Advantage Math 8 ($349, $100 credit), Ignite Math 1 ($449, $100 credit), Ascent Pre-Calc ($549, $150 credit). Catalog and season dates live in `src/lib/summer-season.ts`.
 - **Future:** Coach certification ($1,500-2,500), platform licensing ($199/mo + 15% royalty)
 - **Cohorts:** 5 target / 6 max per cohort, max 3 cohorts per coach, same-program default
 - **Sessions:** 60 minutes + 10-min grace max. Mon-Thu 5:30-7:45 PM, Sat 10:00-12:15 PM
