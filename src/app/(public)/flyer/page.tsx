@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { NEXT_SEASON_NOTICE, waveStartLabel } from "@/lib/summer-season";
 
 export default function FlyerPage() {
+  const wave1Start = waveStartLabel(1);
+  const wave2Start = waveStartLabel(2);
   return (
     <div className="min-h-screen bg-slate-100 p-8 print:p-0 print:bg-white">
       {/* Print Controls */}
@@ -50,10 +53,17 @@ export default function FlyerPage() {
             </div>
             <div className="text-right">
               <p className="text-xs text-orange-500 font-bold uppercase tracking-widest">
-                Summer 2026
+                Summer Clinics
               </p>
               <p className="text-xs text-slate-500">
-                Wave 1: July 6 · Wave 2: July 20
+                {wave1Start || wave2Start
+                  ? [
+                      wave1Start && `Wave 1: ${wave1Start}`,
+                      wave2Start && `Wave 2: ${wave2Start}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")
+                  : NEXT_SEASON_NOTICE}
               </p>
             </div>
           </div>
@@ -102,7 +112,7 @@ export default function FlyerPage() {
               <div className="border border-slate-200 rounded-xl p-5">
                 <p className="font-bold text-slate-900">Foundation</p>
                 <p className="text-2xl font-bold text-blue-700 mt-1">
-                  $349
+                  $379
                   <span className="text-sm text-slate-400 font-normal">
                     /mo
                   </span>
@@ -138,13 +148,13 @@ export default function FlyerPage() {
               <div className="border border-slate-200 rounded-xl p-5">
                 <p className="font-bold text-slate-900">Advanced</p>
                 <p className="text-2xl font-bold text-blue-700 mt-1">
-                  $799
+                  $649
                   <span className="text-sm text-slate-400 font-normal">
                     /mo
                   </span>
                 </p>
                 <p className="text-xs text-slate-500 mt-2">
-                  2–3 meetings + opportunities
+                  3 meetings + monthly one-to-one
                 </p>
                 <p className="text-xs text-slate-500">Grades 6–12</p>
                 <p className="text-xs text-slate-600 mt-2">
@@ -157,7 +167,7 @@ export default function FlyerPage() {
           {/* Summer Clinics */}
           <div className="bg-slate-50 rounded-2xl p-6 mb-10 border border-slate-100">
             <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-3">
-              Summer 2026 Math Clinics
+              Summer Math Clinics
             </p>
             <div className="grid grid-cols-4 gap-3">
               {[

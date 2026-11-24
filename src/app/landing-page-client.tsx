@@ -20,7 +20,12 @@ import {
   GraduationCap,
   Scale,
 } from "lucide-react";
-import { PROGRAMS, VALID_TIERS } from "@/lib/stripe/programs";
+import {
+  COHORT_SIZE_MAX,
+  COHORT_SIZE_TARGET,
+  PROGRAMS,
+  VALID_TIERS,
+} from "@/lib/stripe/programs";
 
 // Tier color class map — landing page uses different Tailwind variants than
 // /pricing (light backgrounds, bolder accents) so the map lives here rather
@@ -453,10 +458,13 @@ export default function LandingPage() {
 
           <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto">
             {[
-              { value: "179", label: "Curriculum Concepts" },
               { value: "3", label: "Program Tracks" },
-              { value: "15:1", label: "Max Coach Ratio" },
-              { value: "60%", label: "Coach Revenue Share" },
+              {
+                value: `${COHORT_SIZE_TARGET}–${COHORT_SIZE_MAX}`,
+                label: "Students per Cohort",
+              },
+              { value: "60 min", label: "Coaching Sessions" },
+              { value: "Free", label: "Placement Diagnostic" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-2xl sm:text-3xl font-bold text-slate-900">
@@ -544,7 +552,7 @@ export default function LandingPage() {
               {
                 step: "03",
                 title: "Master the Curriculum",
-                desc: "179 atomic concepts with measurable mastery levels. You see exactly what they know.",
+                desc: "A defined secondary-math skill model under active calibration, with measurable mastery levels. You see exactly what they know.",
                 color: "bg-amber-600",
               },
               {
@@ -599,7 +607,7 @@ export default function LandingPage() {
                 title: "Concept Mastery",
                 who: "Students underperforming, lacking confidence, or with prior-grade gaps",
                 outcome:
-                  "179 atomic concepts tracked from Not Started to Mastered. Fill the specific gaps that keep your child stuck each quarter. Every session ends with a logged mastery outcome — no more guessing what stuck.",
+                  "Skills tracked from Not Started to Mastered against a defined secondary-math skill model under active calibration. Fill the specific gaps that keep your child stuck each quarter. Every session ends with a logged mastery outcome — no more guessing what stuck.",
                 bestFor: "Foundation",
                 bestForColor: "bg-blue-100 text-blue-800",
                 accent: "text-blue-600",
@@ -841,7 +849,7 @@ export default function LandingPage() {
                 {
                   icon: Target,
                   title: "Mastery, not hours",
-                  desc: "179 atomic concepts per course, each tracked from 'Not Started' to 'Mastered'. You see exactly what your child knows.",
+                  desc: "A defined secondary-math skill model under active calibration, with each skill tracked from 'Not Started' to 'Mastered'. You see exactly what your child knows.",
                 },
                 {
                   icon: Trophy,
@@ -1085,6 +1093,12 @@ export default function LandingPage() {
               </Link>
               <Link href="/pricing" className="hover:text-white">
                 Pricing
+              </Link>
+              <Link href="/privacy" className="hover:text-white">
+                Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-white">
+                Terms
               </Link>
               <Link href="/login" className="hover:text-white">
                 Sign In

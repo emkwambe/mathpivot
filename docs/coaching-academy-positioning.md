@@ -123,7 +123,7 @@ This cohort design is a strategic differentiator and should be highlighted throu
 
 **Coaching Frequency:** 2 coaching meetings per week
 
-**Monthly Investment:** $349
+**Monthly Investment:** $379
 
 ---
 
@@ -149,7 +149,7 @@ This cohort design is a strategic differentiator and should be highlighted throu
 
 ---
 
-### Elite
+### Advanced
 
 **Purpose:** Develop exceptional mathematical talent and future STEM readiness.
 
@@ -167,9 +167,9 @@ This cohort design is a strategic differentiator and should be highlighted throu
 * College readiness
 * STEM pathway exploration
 
-**Coaching Frequency:** 2-3 coaching meetings per week
+**Coaching Frequency:** 3 coaching meetings per week + a monthly one-to-one
 
-**Additional Elite Benefits:**
+**Additional Advanced Benefits:**
 * Advanced projects
 * Competition preparation
 * Career exploration modules
@@ -177,9 +177,9 @@ This cohort design is a strategic differentiator and should be highlighted throu
 * Personalized academic planning
 * Priority coach access
 
-**Monthly Investment:** $799
+**Monthly Investment:** $649
 
-**Important:** Elite is not defined by additional hours. Elite is defined by additional opportunities, guidance, challenge, and personalized development.
+**Important:** Advanced is not defined by additional hours. Advanced is defined by additional opportunities, guidance, challenge, and personalized development.
 
 ---
 
@@ -271,9 +271,9 @@ Summer clinics are standalone educational products, not lead magnets. Credits ar
 | Clinic | Price | Coaching Credit |
 |---|---|---|
 | Propel Math 7 | $249 | $75 toward Foundation |
-| Advantage Math 8 | $399 | $100 toward Acceleration |
-| Ignite Math 1 | $349 | $100 toward Foundation |
-| Ascent Pre-Calc | $449 | $150 toward Elite |
+| Advantage Math 8 | $349 | $100 toward Acceleration |
+| Ignite Math 1 | $449 | $100 toward Foundation |
+| Ascent Pre-Calc | $549 | $150 toward Advanced |
 
 ---
 

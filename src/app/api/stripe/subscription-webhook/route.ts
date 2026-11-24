@@ -6,7 +6,15 @@ import {
   constructSubscriptionWebhookEvent,
   isStripeConfigured,
 } from "@/lib/stripe";
-import { isValidTier, PROGRAMS, type ProgramTier } from "@/lib/stripe/programs";
+import {
+  COHORT_SIZE_LABEL,
+  isValidBillingPlan,
+  isValidTier,
+  planSummary,
+  PROGRAMS,
+  type BillingPlan,
+  type ProgramTier,
+} from "@/lib/stripe/programs";
 import { supabaseAdmin, isAdminConfigured } from "@/lib/supabase/admin";
 import {
   claimWebhookEvent,
@@ -250,11 +258,16 @@ async function handleSubscriptionCheckoutCompleted(
   // trigger a Stripe retry of the whole handler).
   if (parentEmail) {
     try {
+      const planRaw = session.metadata?.billing_plan;
+      const billingPlan: BillingPlan = isValidBillingPlan(planRaw)
+        ? planRaw
+        : "monthly";
       const subject = `Welcome to MathPivot — set up your ${tier[0].toUpperCase() + tier.slice(1)} Coaching account`;
       const html = welcomeEmailHtml({
         parentName: parentName ?? "there",
         studentName: studentName ?? "your student",
         tier,
+        plan: billingPlan,
         magicLink: provisioned.magicLink ?? `${originFromWebhookHint()}/login`,
       });
       await sendEmail({
@@ -538,14 +551,17 @@ function welcomeEmailHtml(args: {
   parentName: string;
   studentName: string;
   tier: ProgramTier;
+  plan: BillingPlan;
   magicLink: string;
 }): string {
-  // Derived from PROGRAMS so this email always names a tier the product
-  // actually sells. The ternary this replaces had branches for only
-  // foundation and acceleration, so advanced fell through to "Elite
-  // Coaching" -- the first thing an Advanced parent read after a $799
-  // charge named a tier that appears nowhere on the site.
+  // Tier name, price and cadence all come from PROGRAMS so this email always
+  // matches what the pricing page sells and what Stripe charged.
   const tierName = PROGRAMS[args.tier].displayName;
+  const summary = planSummary(args.tier, args.plan);
+  const billingNote =
+    args.plan === "quarterly"
+      ? "Your quarterly billing has started."
+      : "Your monthly billing has started.";
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;color:#334155;background:#fff;">
       <div style="background:#1D4ED8;padding:28px 24px;text-align:center;border-radius:12px 12px 0 0;">
@@ -559,6 +575,9 @@ function welcomeEmailHtml(args: {
           Welcome to MathPivot. Your enrollment in <strong>${tierName}</strong> for
           ${args.studentName} is confirmed. We're excited to get started.
         </p>
+        <p style="font-size:14px;color:#1e293b;margin:12px 0 0;padding:10px 14px;background:#eff6ff;border-radius:8px;">
+          <strong>Your plan:</strong> ${summary}
+        </p>
         <div style="margin:24px 0;text-align:center;">
           <a href="${args.magicLink}" style="display:inline-block;background:#1D4ED8;color:#fff;font-weight:bold;padding:14px 32px;border-radius:10px;text-decoration:none;font-size:15px;">
             Set Up Your Parent Account
@@ -569,10 +588,10 @@ function welcomeEmailHtml(args: {
         <ol style="font-size:14px;color:#475569;padding-left:20px;margin:0;line-height:1.7;">
           <li>Our team reviews ${args.studentName}'s intake and matches a dedicated math coach.</li>
           <li>You'll receive a scheduling link within 1 business day to book the first coaching meeting.</li>
-          <li>${args.studentName} joins a micro-cohort (5-6 students target) with a shared coach.</li>
+          <li>${args.studentName} joins a micro-cohort (${COHORT_SIZE_LABEL}) with a shared coach.</li>
         </ol>
         <p style="font-size:13px;color:#64748b;margin:24px 0 0;">
-          Billing note: Your monthly billing has started. Manage or cancel anytime from your parent dashboard.
+          Billing note: ${billingNote} Manage or cancel anytime from your parent dashboard.
         </p>
       </div>
       <div style="background:#f8fafc;padding:16px 24px;border-radius:0 0 12px 12px;text-align:center;">

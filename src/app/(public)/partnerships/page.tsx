@@ -70,7 +70,7 @@ const WHAT_WE_OFFER = [
       "Real-time dashboards show cohort mastery progression, attendance, and coach performance metrics.",
   },
   {
-    title: "Small-cohort learning (5-6 students)",
+    title: "Small-cohort learning (5–6 students)",
     description:
       "Research-optimal group size delivers stronger outcomes than 1:1 tutoring or large-group classes.",
   },

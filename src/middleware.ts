@@ -24,6 +24,8 @@ const PUBLIC_ROUTES = [
   "/enroll",
   "/coach-apply",
   "/coaches",
+  "/privacy",
+  "/terms",
 ];
 
 const ROLE_PREFIXES: Record<string, string> = {
@@ -50,11 +52,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Landing page, pricing, get-started — let authenticated users through too
+  // Landing page, pricing, get-started, legal pages — let authenticated users through too
   if (
     pathname === "/" ||
     pathname === "/get-started" ||
-    pathname === "/pricing"
+    pathname === "/pricing" ||
+    pathname === "/privacy" ||
+    pathname === "/terms"
   ) {
     return supabaseResponse;
   }

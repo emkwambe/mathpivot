@@ -13,7 +13,7 @@ const DESCRIPTIONS: Record<string, string> = {
   homeschool:
     "Expert math coaching for the one subject you can't teach past pre-algebra.",
   competition:
-    "Elite prep for AMC, MATHCOUNTS, AIME. Small cohorts, dedicated coach.",
+    "Advanced preparation for AMC, MATHCOUNTS, AIME. Small cohorts, dedicated coach.",
   "travel-ball":
     "The travel ball model applied to math — structure, coach, and season.",
   schools:

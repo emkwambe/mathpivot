@@ -1,13 +1,13 @@
 import type { Persona } from "@/lib/persona";
 
 export const PERSONA_MONTHLY_REVENUE: Record<Persona, number> = {
-  proactive_suburban: 349,
+  proactive_suburban: 379,
   travel_ball_family: 549,
-  homeschool_family: 349,
-  falling_behind: 349,
-  competition_math: 799,
+  homeschool_family: 379,
+  falling_behind: 379,
+  competition_math: 649,
   school_partner: 2000,
-  unclassified: 349,
+  unclassified: 379,
 };
 
 export const PERSONA_RETENTION_MONTHS: Record<Persona, number> = {

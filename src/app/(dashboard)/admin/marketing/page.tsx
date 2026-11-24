@@ -422,21 +422,21 @@ export default async function AdminMarketingPage() {
         </p>
         <div className="grid sm:grid-cols-2 gap-2 text-xs text-slate-600">
           <p>
-            <strong>Proactive Suburban:</strong> Foundation ($349/mo) × 18mo =
-            $6.3k
+            <strong>Proactive Suburban:</strong> Foundation ($379/mo) × 18mo =
+            $6.8k
           </p>
           <p>
             <strong>Travel Ball:</strong> Acceleration ($549/mo) × 24mo = $13.2k
           </p>
           <p>
-            <strong>Homeschool:</strong> Foundation ($349/mo) × 30mo = $10.5k
+            <strong>Homeschool:</strong> Foundation ($379/mo) × 30mo = $11.4k
           </p>
           <p>
-            <strong>Falling Behind:</strong> Foundation ($349/mo) × 12mo = $4.2k
+            <strong>Falling Behind:</strong> Foundation ($379/mo) × 12mo = $4.5k
           </p>
           <p>
-            <strong>Competition Math:</strong> Advanced ($799/mo) × 24mo =
-            $19.2k
+            <strong>Competition Math:</strong> Advanced ($649/mo) × 24mo =
+            $15.6k
           </p>
           <p>
             <strong>School Partner:</strong> Custom ($2k/mo) × 12mo = $24k

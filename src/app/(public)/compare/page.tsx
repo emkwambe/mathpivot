@@ -22,7 +22,7 @@ interface Row {
 const COMPARISON: Row[] = [
   {
     label: "Monthly cost",
-    mathpivot: { value: "$349–$799", note: "Program-based" },
+    mathpivot: { value: "$379–$649", note: "Program-based" },
     kumon: "$140–$200",
     mathnasium: "$250–$400",
     aops: "$240–$500/course",
@@ -434,7 +434,7 @@ export default function ComparePage() {
                 <span>
                   <strong>You want the cheapest option.</strong> Kumon at
                   $140–$200/mo is genuinely lower cost. MathPivot Foundation
-                  starts at $349/mo because we&apos;re a coaching system, not
+                  starts at $379/mo because we&apos;re a coaching system, not
                   worksheet drill.
                 </span>
               </li>

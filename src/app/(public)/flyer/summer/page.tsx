@@ -1,5 +1,24 @@
 "use client";
 
+import { COHORT_SIZE_LABEL } from "@/lib/stripe/programs";
+import {
+  NEXT_SEASON_NOTICE,
+  SUMMER_CLINICS,
+  clinicDateLabel,
+  waveStartLabel,
+  type SummerClinic,
+} from "@/lib/summer-season";
+
+function datesFor(slug: string): string {
+  const clinic = SUMMER_CLINICS.find((c) => c.slug === slug) as SummerClinic;
+  return clinicDateLabel(clinic) ?? NEXT_SEASON_NOTICE;
+}
+
+function waveHeading(wave: 1 | 2): string {
+  const start = waveStartLabel(wave);
+  return start ? `WAVE ${wave} — ${start}` : `WAVE ${wave}`;
+}
+
 export default function SummerHandout() {
   return (
     <div className="min-h-screen bg-slate-100 p-8 print:p-0 print:bg-white">
@@ -33,10 +52,10 @@ export default function SummerHandout() {
               </div>
             </div>
             <div className="bg-orange-50 border border-orange-200 rounded-lg px-4 py-2">
-              <p className="text-orange-600 font-bold text-sm">Summer 2026</p>
-              <p className="text-[10px] text-orange-500">
-                Spots Limited — Register Now
+              <p className="text-orange-600 font-bold text-sm">
+                Summer Clinics
               </p>
+              <p className="text-[10px] text-orange-500">Join the waitlist</p>
             </div>
           </div>
 
@@ -56,7 +75,7 @@ export default function SummerHandout() {
             {/* Wave 1 */}
             <div className="border-2 border-blue-700 rounded-2xl overflow-hidden">
               <div className="bg-blue-700 text-white px-5 py-3 text-center">
-                <p className="font-bold text-sm">WAVE 1 — Starts July 6</p>
+                <p className="font-bold text-sm">{waveHeading(1)}</p>
               </div>
               <div className="p-5 space-y-4">
                 <div className="border border-slate-200 rounded-xl p-4">
@@ -66,7 +85,9 @@ export default function SummerHandout() {
                   </p>
                   <div className="flex items-end justify-between mt-2">
                     <div>
-                      <p className="text-xs text-slate-500">July 6 – July 15</p>
+                      <p className="text-xs text-slate-500">
+                        {datesFor("propel-7")}
+                      </p>
                       <p className="text-xs text-slate-500">8 days</p>
                     </div>
                     <p className="text-xl font-bold text-blue-700">$249</p>
@@ -89,7 +110,9 @@ export default function SummerHandout() {
                   </p>
                   <div className="flex items-end justify-between mt-2">
                     <div>
-                      <p className="text-xs text-slate-500">July 6 – July 17</p>
+                      <p className="text-xs text-slate-500">
+                        {datesFor("ignite-math1")}
+                      </p>
                       <p className="text-xs text-slate-500">10 days</p>
                     </div>
                     <p className="text-xl font-bold text-blue-700">$449</p>
@@ -107,7 +130,7 @@ export default function SummerHandout() {
             {/* Wave 2 */}
             <div className="border-2 border-slate-300 rounded-2xl overflow-hidden">
               <div className="bg-slate-700 text-white px-5 py-3 text-center">
-                <p className="font-bold text-sm">WAVE 2 — Starts July 20</p>
+                <p className="font-bold text-sm">{waveHeading(2)}</p>
               </div>
               <div className="p-5 space-y-4">
                 <div className="border border-slate-200 rounded-xl p-4">
@@ -118,7 +141,7 @@ export default function SummerHandout() {
                   <div className="flex items-end justify-between mt-2">
                     <div>
                       <p className="text-xs text-slate-500">
-                        July 20 – July 30
+                        {datesFor("advantage-8")}
                       </p>
                       <p className="text-xs text-slate-500">9 days</p>
                     </div>
@@ -140,7 +163,7 @@ export default function SummerHandout() {
                   <div className="flex items-end justify-between mt-2">
                     <div>
                       <p className="text-xs text-slate-500">
-                        July 20 – August 1
+                        {datesFor("ascent-precalc")}
                       </p>
                       <p className="text-xs text-slate-500">11 days</p>
                     </div>
@@ -197,7 +220,7 @@ export default function SummerHandout() {
               Micro-Cohort Learning
             </p>
             <p className="text-2xl font-bold">
-              Limited to 5–6 students per cohort
+              Limited to {COHORT_SIZE_LABEL} per cohort
             </p>
             <p className="text-blue-200 text-sm mt-1">
               More personalization. More participation. Better outcomes.

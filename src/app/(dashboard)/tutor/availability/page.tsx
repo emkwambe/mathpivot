@@ -8,6 +8,7 @@ import {
   Button,
 } from "@/components/ui";
 import { formatDate } from "@/lib/utils";
+import { MAX_COHORTS_PER_COACH } from "@/lib/stripe/programs";
 import { revalidatePath } from "next/cache";
 
 // Coaching modality: cohorts run in fixed windows so coaches slot into the
@@ -55,8 +56,6 @@ const DISPLAY_ORDER: { dayIndex: number; label: string }[] = [
   { dayIndex: 6, label: "Saturday" },
 ];
 
-const MAX_COHORTS_PER_COACH = 3;
-
 // Slot equality key so we can compare stored rows against the fixed grid.
 function slotKey(dayIndex: number, start: string): string {
   return `${dayIndex}|${start.slice(0, 8)}`;
@@ -85,7 +84,7 @@ async function toggleSlotAction(formData: FormData) {
       .eq("tutor_user_id", user.id);
   } else {
     // Enforce cohort ceiling: never let a coach open more than 3 slots
-    // total (matches MAX_COHORTS_PER_COACH from CLAUDE.md).
+    // total (MAX_COHORTS_PER_COACH from src/lib/stripe/programs.ts).
     const { count } = await supabase
       .from("availability_rules")
       .select("id", { count: "exact", head: true })

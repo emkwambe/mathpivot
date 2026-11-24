@@ -6,7 +6,7 @@ import { BOOKING_URL } from "@/lib/booking";
 export const metadata: Metadata = {
   title: "Programs — MathPivot",
   description:
-    "MathPivot mathematical coaching programs — Foundation ($349/mo), Acceleration ($549/mo), Advanced ($799/mo). Individualized mastery pathway inside intentionally small cohorts of typically 5 students, never more than 6.",
+    "MathPivot mathematical coaching programs — Foundation ($379/mo), Acceleration ($549/mo), Advanced ($649/mo). Individualized mastery pathway inside intentionally small cohorts of typically 5 students, never more than 6.",
 };
 
 const colorMap: Record<

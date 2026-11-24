@@ -25,6 +25,13 @@ export interface ProgramConfig {
   primaryOutcome: string;
 }
 
+// Cohort shape (MP-M1 D1). Every consumer imports these instead of
+// hard-coding cohort numbers in copy or capacity checks.
+export const COHORT_SIZE_TARGET = 5;
+export const COHORT_SIZE_MAX = 6;
+export const MAX_COHORTS_PER_COACH = 3;
+export const COHORT_SIZE_LABEL = `${COHORT_SIZE_TARGET}–${COHORT_SIZE_MAX} students`;
+
 // Ladder chosen to keep per-hour rate under $55 across every tier, with the
 // quarterly plan discounted 10%. Foundation = 2 sessions/wk (8 hrs/mo) at
 // $379 = $47.38/hr. Acceleration = 3 sessions/wk (12 hrs/mo) at $549 =
@@ -43,7 +50,7 @@ export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
       priceEffectiveMonthly: 341.1,
       savingsPercent: 10,
     },
-    cadence: "Two 60-minute sessions per week",
+    cadence: "2 sessions/week",
     capability: "Ground",
     tagline:
       "For students whose progress is being limited by unfinished learning, weak prerequisite skills, or declining confidence.",
@@ -77,7 +84,7 @@ export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
       priceEffectiveMonthly: 494.1,
       savingsPercent: 10,
     },
-    cadence: "Three 60-minute sessions per week",
+    cadence: "3 sessions/week",
     capability: "Align",
     tagline:
       "For students who understand much of their current course but need consistency, stronger assessment performance, and support staying ahead of emerging gaps.",
@@ -112,7 +119,7 @@ export const PROGRAMS: Record<ProgramTier, ProgramConfig> = {
       priceEffectiveMonthly: 584.1,
       savingsPercent: 10,
     },
-    cadence: "Three 60-minute sessions per week + monthly one-to-one",
+    cadence: "3 sessions/week + monthly one-to-one",
     capability: "Propel",
     tagline:
       "For motivated students ready to extend mathematical ability beyond ordinary course support — rigorous problem-solving, advanced-course preparation, and long-term direction.",
@@ -181,6 +188,32 @@ export function priceIdForTier(
     case "advanced":
       return process.env.STRIPE_PRICE_ID_ADVANCED;
   }
+}
+
+function formatUsd(amount: number): string {
+  return amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * One-line plan summary for family-facing copy such as the welcome email:
+ * "MathPivot Foundation — $379/month · 2 sessions/week". Quarterly plans
+ * show the upfront quarterly charge instead of the monthly price.
+ */
+export function planSummary(
+  tier: ProgramTier,
+  plan: BillingPlan = "monthly",
+): string {
+  const program = PROGRAMS[tier];
+  const price =
+    plan === "quarterly"
+      ? `${formatUsd(program.quarterly.priceUpfront)}/quarter`
+      : `${formatUsd(program.priceMonthly)}/month`;
+  return `${program.displayName} — ${price} · ${program.cadence}`;
 }
 
 // Legacy tier value retained ONLY as historic marker for Sprint 9 test-mode

@@ -3,6 +3,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { MAX_COHORTS_PER_COACH } from "@/lib/stripe/programs";
 
 export interface ScheduleSlot {
   schedule_id: string;
@@ -88,10 +89,10 @@ export async function createSchedule(input: {
   );
   distinctPrograms.add(input.programSlug);
 
-  if (distinctPrograms.size > 3) {
+  if (distinctPrograms.size > MAX_COHORTS_PER_COACH) {
     return {
       success: false,
-      error: "Coach cannot exceed 3 different programs",
+      error: `Coach cannot exceed ${MAX_COHORTS_PER_COACH} different programs`,
     };
   }
 
@@ -108,8 +109,11 @@ export async function createSchedule(input: {
   }
 
   const totalCohorts = (existingSchedules || []).length;
-  if (totalCohorts >= 3) {
-    return { success: false, error: "Coach already has 3 cohorts (maximum)" };
+  if (totalCohorts >= MAX_COHORTS_PER_COACH) {
+    return {
+      success: false,
+      error: `Coach already has ${MAX_COHORTS_PER_COACH} cohorts (maximum)`,
+    };
   }
 
   const { error } = await supabase.from("coaching_schedules").insert({
