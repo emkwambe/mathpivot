@@ -190,6 +190,32 @@ export function priceIdForTier(
   }
 }
 
+function formatUsd(amount: number): string {
+  return amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * One-line plan summary for family-facing copy such as the welcome email:
+ * "MathPivot Foundation — $379/month · 2 sessions/week". Quarterly plans
+ * show the upfront quarterly charge instead of the monthly price.
+ */
+export function planSummary(
+  tier: ProgramTier,
+  plan: BillingPlan = "monthly",
+): string {
+  const program = PROGRAMS[tier];
+  const price =
+    plan === "quarterly"
+      ? `${formatUsd(program.quarterly.priceUpfront)}/quarter`
+      : `${formatUsd(program.priceMonthly)}/month`;
+  return `${program.displayName} — ${price} · ${program.cadence}`;
+}
+
 // Legacy tier value retained ONLY as historic marker for Sprint 9 test-mode
 // rows created before the Elite → Advanced rename. Application MUST NOT
 // create new subscriptions with this value; VALID_TIERS excludes it, so
