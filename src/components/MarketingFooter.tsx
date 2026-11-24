@@ -32,6 +32,12 @@ export function MarketingFooter() {
           <Link href="/get-started" className="hover:text-slate-900">
             Get Started
           </Link>
+          <Link href="/privacy" className="hover:text-slate-900">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:text-slate-900">
+            Terms
+          </Link>
         </nav>
       </div>
       <div className="border-t border-slate-100">

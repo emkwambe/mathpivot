@@ -20,7 +20,12 @@ import {
   GraduationCap,
   Scale,
 } from "lucide-react";
-import { PROGRAMS, VALID_TIERS } from "@/lib/stripe/programs";
+import {
+  COHORT_SIZE_MAX,
+  COHORT_SIZE_TARGET,
+  PROGRAMS,
+  VALID_TIERS,
+} from "@/lib/stripe/programs";
 
 // Tier color class map — landing page uses different Tailwind variants than
 // /pricing (light backgrounds, bolder accents) so the map lives here rather
@@ -453,10 +458,13 @@ export default function LandingPage() {
 
           <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl mx-auto">
             {[
-              { value: "179", label: "Curriculum Concepts" },
               { value: "3", label: "Program Tracks" },
-              { value: "15:1", label: "Max Coach Ratio" },
-              { value: "60%", label: "Coach Revenue Share" },
+              {
+                value: `${COHORT_SIZE_TARGET}–${COHORT_SIZE_MAX}`,
+                label: "Students per Cohort",
+              },
+              { value: "60 min", label: "Coaching Sessions" },
+              { value: "Free", label: "Placement Diagnostic" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-2xl sm:text-3xl font-bold text-slate-900">
@@ -1085,6 +1093,12 @@ export default function LandingPage() {
               </Link>
               <Link href="/pricing" className="hover:text-white">
                 Pricing
+              </Link>
+              <Link href="/privacy" className="hover:text-white">
+                Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-white">
+                Terms
               </Link>
               <Link href="/login" className="hover:text-white">
                 Sign In

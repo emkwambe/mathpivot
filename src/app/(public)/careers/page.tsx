@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Become a MathPivot Coach",
   description:
-    "Join MathPivot as a math coach. Named coach relationships, structured curriculum, 60% revenue share, and the tools to run your coaching practice professionally.",
+    "Join MathPivot as a math coach. Named coach relationships, structured curriculum, and the tools to run your coaching practice professionally.",
 };
 
 export default function CareersPage() {
@@ -61,8 +61,8 @@ export default function CareersPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: "60% Revenue Share",
-                desc: "Earn $26-30 per session. No gig economy rates — you're paid what you're worth. Transparent monthly payouts.",
+                title: "Up to ~$7,000/month at full capacity",
+                desc: "No gig economy rates — you're paid what you're worth. Transparent monthly payouts.",
                 accent: "text-green-600",
                 bg: "bg-green-50",
               },
@@ -155,43 +155,11 @@ export default function CareersPage() {
           <h2 className="text-2xl font-bold text-center mb-12">
             Coaching economics
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              {
-                label: "Foundation Coach",
-                sessions: "8 sessions/mo per student",
-                rate: "~$26/session",
-                example: "5 students = $1,040/mo",
-              },
-              {
-                label: "Acceleration Coach",
-                sessions: "12 sessions/mo per student",
-                rate: "~$27/session",
-                example: "4 students = $1,296/mo",
-              },
-              {
-                label: "Elite Coach",
-                sessions: "16 sessions/mo per student",
-                rate: "~$30/session",
-                example: "3 students = $1,440/mo",
-              },
-            ].map((tier) => (
-              <div
-                key={tier.label}
-                className="bg-slate-800 rounded-xl p-5 border border-slate-700"
-              >
-                <h3 className="font-bold text-white mb-3">{tier.label}</h3>
-                <p className="text-sm text-slate-400">{tier.sessions}</p>
-                <p className="text-xl font-bold text-green-400 mt-2">
-                  {tier.rate}
-                </p>
-                <p className="text-xs text-slate-500 mt-2">{tier.example}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-sm text-slate-500 mt-6">
-            Coaches with mixed portfolios across all three tracks can earn
-            $2,000-4,000+/month part-time.
+          <p className="text-center text-3xl font-bold text-green-400">
+            Up to ~$7,000/month at full capacity.
+          </p>
+          <p className="text-center text-sm text-slate-400 mt-4">
+            Compensation details are shared during the application process.
           </p>
         </div>
       </section>
